@@ -5,13 +5,17 @@
  */
 package gdc2bed.parser;
 
+import java.util.HashSet;
+
 /**
  *
  * @author fabio
  */
 public abstract class BioParser {
     
-    public String defaultFormat = "bed";
+    public HashSet<String> acceptedInputFileFormats = new HashSet<>();
+    
+    private String defaultFormat = "bed";
     public String getFormat() {
         return defaultFormat;
     }
@@ -19,10 +23,22 @@ public abstract class BioParser {
         defaultFormat = format;
     }
     
-    public abstract boolean convert(String program, String disease, String dataType, String inPath, String outPath);
+    /*
+    * convert codes:
+    * 0 -> conversion successfully executed
+    * 1 -> no files in inPath
+    */
+    public abstract int convert(String program, String disease, String dataType, String inPath, String outPath);
     
     public abstract String[] getHeader();
     
     public abstract String[] getAttributesType();
+    
+    public abstract void initAcceptedInputFileFormats();
+    
+    public HashSet<String> getAcceptedInputFileFormats() {
+        if (acceptedInputFileFormats.isEmpty()) initAcceptedInputFileFormats();
+        return this.acceptedInputFileFormats;
+    }
     
 }

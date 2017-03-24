@@ -5,8 +5,6 @@
  */
 package gdc2bed;
 
-import gdc2bed.action.Action;
-import gdc2bed.action.DownloadDataAction;
 import gdc2bed.util.FormatUtils;
 import gdc2bed.util.GDCData;
 import java.io.IOException;
@@ -14,12 +12,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import javax.swing.JFileChooser;
 import javax.swing.JTextPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultCaret;
 import javax.swing.text.StyledDocument;
 
 /**
@@ -855,9 +849,9 @@ public class GUI extends javax.swing.JFrame {
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setAcceptAllFileFilterUsed(false);
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            String outFolder = chooser.getSelectedFile().getAbsolutePath()+"/";
-            Settings.setOutputConvertedFolder(outFolder);
-            jTextField2.setText(outFolder);
+            String inFolder = chooser.getSelectedFile().getAbsolutePath()+"/";
+            Settings.setInputGDCFolder(inFolder);
+            jTextField2.setText(inFolder);
 
             try {
                 String selectedDataType = jComboBox7.getSelectedItem().toString();
@@ -924,9 +918,9 @@ public class GUI extends javax.swing.JFrame {
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setAcceptAllFileFilterUsed(false);
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            String inFolder = chooser.getSelectedFile().getAbsolutePath()+"/";
-            Settings.setInputGDCFolder(inFolder);
-            jTextField3.setText(inFolder);
+            String outFolder = chooser.getSelectedFile().getAbsolutePath()+"/";
+            Settings.setOutputConvertedFolder(outFolder);
+            jTextField3.setText(outFolder);
 
             try {
                 String selectedDataType = jComboBox7.getSelectedItem().toString();

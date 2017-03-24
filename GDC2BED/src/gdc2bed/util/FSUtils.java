@@ -6,6 +6,7 @@
 package gdc2bed.util;
 
 import java.io.File;
+import java.util.HashSet;
 
 /**
  *
@@ -21,6 +22,24 @@ public class FSUtils {
             }
         }
         file.delete();
+    }
+    
+    public static String getFileExtension(File file) {
+        String fileName = file.getName().toLowerCase().trim();
+        String[] fileNameSplit = fileName.split("\\.");
+        return "."+fileNameSplit[fileNameSplit.length-1];
+    }
+
+    public static int acceptedFilesInFolder(String inPath, HashSet<String> acceptedInputFileFormats) {
+        File[] files = (new File(inPath)).listFiles();
+        int acceptedFileCount = 0;
+        for (File f: files) {
+            if (f.isFile()) {
+                if (acceptedInputFileFormats.contains(getFileExtension(f)))
+                    acceptedFileCount++;
+            }
+        }
+        return acceptedFileCount;
     }
     
 }

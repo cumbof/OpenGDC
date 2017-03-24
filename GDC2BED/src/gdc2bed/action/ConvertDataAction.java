@@ -30,16 +30,20 @@ public class ConvertDataAction extends Action {
         System.err.println("Converting GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Format: " + format + "\n" + "Input Folder Path: " + input_path + "\n" + "Output Folder Path: " + output_path + "\n");
         GUI.appendLog("Converting GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Format: " + format + "\n" + "Input Folder Path: " + input_path + "\n" + "Output Folder Path: " + output_path + "\n");
         
-        BioParser parser = null;
+        BioParser parser;
         switch (dataType.toLowerCase()) {
             case "masked somatic mutation":
                 parser = new MaskedSomaticMutation();
                 break;
+            default:
+                parser = null;
+                break;
         }
-        parser.setFormat(format);
-        parser.convert(program, disease, dataType, input_path, output_path);
+        parser.setFormat(format.toLowerCase());
+        int exit_code = parser.convert(program, disease, dataType, input_path, output_path);
         
-        GUI.appendLog("\n" + "done" + "\n\n" + "#####################" + "\n\n");
+        System.err.println("\n" + "done with exit code " + exit_code + "\n\n" + "#####################" + "\n\n");
+        GUI.appendLog("\n" + "done with exit code " + exit_code + "\n\n" + "#####################" + "\n\n");
     }
     
 }

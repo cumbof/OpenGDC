@@ -11,39 +11,32 @@ package gdc2bed;
  */
 public class Settings {
     
+    // debug flag
     private static final boolean DEBUG = true;
     
+    
+    // ****************** tmp dir ******************
     private static final String TMP_DIR = "./tmp/";
-    
-    // download tab
-    private static String outputGDCfolder = "";
-    
-    //convert tab
-    private static String outputConvertedfolder = "";
-    private static String inputGDCfolder = "";
-    
-    private static final String GDC_DATA_PORTAL_URL = "https://gdc.cancer.gov/";
-    private static final String GDC2BED_PAGE_URL = "http://bioinf.iasi.cnr.it/gdc2bed/";
-    
-    public static String getGDCDataPortalURL() {
-        return GDC_DATA_PORTAL_URL;
-    }
-    public static String getGDC2BEDPageURL() {
-        return GDC2BED_PAGE_URL;
-    }
-    
     public static String getTmpDir() {
         if (DEBUG) return "/Users/fabio/Downloads/test_gdc_download/tmp/";
         return TMP_DIR;
     }
+    // *********************************************
     
+    
+    // ############### download tab ################
+    private static String outputGDCfolder = "";
     public static String getOutputGDCFolder() {
         return outputGDCfolder;
     }
     public static void setOutputGDCFolder(String path) {
         outputGDCfolder = path;
     }
+    // #############################################
     
+    
+    // --------------- convert tab -----------------
+    private static String outputConvertedfolder = "";
     public static String getOutputConvertedFolder() {
         return outputConvertedfolder;
     }
@@ -51,11 +44,25 @@ public class Settings {
         outputConvertedfolder = path;
     }
     
+    private static String inputGDCfolder = "";
     public static String getInputGDCFolder() {
         return inputGDCfolder;
     }
     public static void setInputGDCFolder(String path) {
         inputGDCfolder = path;
     }
+    // ---------------------------------------------
     
+    
+    // @@@@@@@@@@@@@@@@@@@@ url @@@@@@@@@@@@@@@@@@@@
+    private static final String GDC_DATA_PORTAL_URL = "https://gdc.cancer.gov/";
+    public static String getGDCDataPortalURL() {
+        return GDC_DATA_PORTAL_URL;
+    }
+    
+    private static final String GDC2BED_PAGE_URL = "http://bioinf.iasi.cnr.it/gdc2bed/";
+    public static String getGDC2BEDPageURL() {
+        return GDC2BED_PAGE_URL;
+    }
+    // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 }
