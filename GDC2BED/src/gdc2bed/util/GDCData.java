@@ -15,9 +15,10 @@ import java.util.HashSet;
  */
 public class GDCData {
     
-    private static final HashMap<String, HashMap<String, HashSet<String>>> program2tumor2datatype = new HashMap<>();
+    private static HashMap<String, HashMap<String, HashSet<String>>> program2tumor2datatype = new HashMap<>();
     
     private static void initBigGDCDataMap() {
+        program2tumor2datatype = new HashMap<>();
         program2tumor2datatype.put("TARGET", new HashMap<>());
         program2tumor2datatype.put("TCGA", new HashMap<>());
         

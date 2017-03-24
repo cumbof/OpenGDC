@@ -33,8 +33,8 @@ public class DownloadDataAction extends Action {
         boolean autoremove = Boolean.valueOf(args[5]);
         String gdc_path = Settings.getOutputGDCFolder();
         
-        System.err.println(disease + "\t" + dataType + "\t" + autoextract + "\t" + gdc_path);
-        GUI.appendLog("Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Output Folder Path: " + gdc_path + "\n");
+        System.err.println("Downloading GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Output Folder Path: " + gdc_path + "\n" + "Auto-extract: " + autoextract + "\n" + "Auto-remove: " + autoremove + "\n");
+        GUI.appendLog("Downloading GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Output Folder Path: " + gdc_path + "\n" + "Auto-extract: " + autoextract + "\n" + "Auto-remove: " + autoremove + "\n");
         
         GDCQuery.query(disease, dataType);
         HashMap<String, HashMap<String, String>> dataMap = GDCQuery.extractInfo(GDCQuery.getLastQueryFilePath());

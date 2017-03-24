@@ -12,8 +12,15 @@ package gdc2bed;
 public class Settings {
     
     private static final boolean DEBUG = true;
+    
     private static final String TMP_DIR = "./tmp/";
+    
+    // download tab
     private static String outputGDCfolder = "";
+    
+    //convert tab
+    private static String outputConvertedfolder = "";
+    private static String inputGDCfolder = "";
     
     private static final String GDC_DATA_PORTAL_URL = "https://gdc.cancer.gov/";
     private static final String GDC2BED_PAGE_URL = "http://bioinf.iasi.cnr.it/gdc2bed/";
@@ -35,6 +42,20 @@ public class Settings {
     }
     public static void setOutputGDCFolder(String path) {
         outputGDCfolder = path;
+    }
+    
+    public static String getOutputConvertedFolder() {
+        return outputConvertedfolder;
+    }
+    public static void setOutputConvertedFolder(String path) {
+        outputConvertedfolder = path;
+    }
+    
+    public static String getInputGDCFolder() {
+        return inputGDCfolder;
+    }
+    public static void setInputGDCFolder(String path) {
+        inputGDCfolder = path;
     }
     
 }

@@ -38,7 +38,7 @@ public class Controller {
     private void init() {
         command2action = new HashMap<>();
         command2action.put("download", "gdc2bed.action.DownloadDataAction");
-        command2action.put("convert", "gdc2bed.action.GDC2BEDDataAction");
+        command2action.put("convert", "gdc2bed.action.ConvertDataAction");
     }
 
 }
