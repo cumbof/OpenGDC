@@ -386,7 +386,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        jLabel12.setText("Select a destination folder for the data type that you want to download");
+        jLabel12.setText("Select the source and destination folder for the data type that you want to convert");
 
         jTextField2.setEditable(false);
         jTextField2.setEnabled(false);

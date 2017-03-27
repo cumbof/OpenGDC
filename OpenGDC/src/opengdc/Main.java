@@ -21,7 +21,6 @@ public class Main {
      */
     public static void main(String[] args) {
         
-        
         HashMap<String, HashMap<String, HashSet<String>>> gdcDataMap = GDCData.getBigGDCDataMap();
         for (String program: gdcDataMap.keySet()) {
             if (program.toLowerCase().trim().equals("tcga")) {
@@ -71,9 +70,7 @@ public class Main {
                 }
             }
         }
-        
-        
-        
+                
     }
     
 }

@@ -172,7 +172,8 @@ public class GDCQuery {
 
     public static void downloadFile(String uuid, String outFolderPath, String fileName) {
         try {
-            String url = BASE_DOWNLOAD_URL + uuid + "?related_files=true";
+            //String url = BASE_DOWNLOAD_URL + uuid + "?related_files=true";
+            String url = BASE_DOWNLOAD_URL + uuid;
             //System.err.println(url);
             System.err.println(uuid + "\t" + fileName);
             GUI.appendLog(uuid + "\t" + fileName + "\n");
