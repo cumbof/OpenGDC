@@ -7,7 +7,6 @@ package opengdc.parser;
 
 import opengdc.GUI;
 import opengdc.util.FSUtils;
-import opengdc.util.OutputFormat;
 import opengdc.reader.MaskedSomaticMutationReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,6 +16,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import opengdc.util.FormatUtils;
 
 /**
  *
@@ -51,7 +51,7 @@ public class MaskedSomaticMutation extends BioParser {
                         if (!uuidData.isEmpty()) {
                             try {
                                 if (!filesPathConverted.contains(outPath + uuid + "." + this.getFormat()))
-                                    Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (OutputFormat.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                                    Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
                             
                                 for (int entry: uuidData.keySet()) {
                                     ArrayList<String> values = new ArrayList<>();
@@ -73,7 +73,7 @@ public class MaskedSomaticMutation extends BioParser {
                                     values.add(uuidData.get(entry).get("match_norm_seq_allele2"));
                                     values.add(uuidData.get(entry).get("tumor_sample_uuid"));
                                     values.add(uuidData.get(entry).get("matched_norm_sample_uuid"));
-                                    Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (OutputFormat.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                    Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 }
                             }
                             catch (Exception e) {
@@ -89,7 +89,7 @@ public class MaskedSomaticMutation extends BioParser {
         if (!filesPathConverted.isEmpty()) {
             for (String path: filesPathConverted) {
                 try {
-                    Files.write((new File(path)).toPath(), (OutputFormat.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                    Files.write((new File(path)).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                 }
                 catch (Exception e) {
                     e.printStackTrace();

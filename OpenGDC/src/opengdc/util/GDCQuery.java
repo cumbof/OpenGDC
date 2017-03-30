@@ -23,7 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -172,7 +171,7 @@ public class GDCQuery {
 
     public static void downloadFile(String uuid, String outFolderPath, String fileName) {
         try {
-            //String url = BASE_DOWNLOAD_URL + uuid + "?related_files=true";
+            //String url = BASE_DOWNLOAD_URL + uuid + "?related_files=true"; // why it does not always work?
             String url = BASE_DOWNLOAD_URL + uuid;
             //System.err.println(url);
             System.err.println(uuid + "\t" + fileName);

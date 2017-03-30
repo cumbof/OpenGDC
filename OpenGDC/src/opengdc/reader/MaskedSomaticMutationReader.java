@@ -62,6 +62,7 @@ public class MaskedSomaticMutationReader {
             in.close();
             fstream.close();
         } catch (Exception e) {
+            e.printStackTrace();
         }
         
         return uuids;
