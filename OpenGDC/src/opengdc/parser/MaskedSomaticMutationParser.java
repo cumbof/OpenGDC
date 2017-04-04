@@ -9,8 +9,6 @@ import opengdc.GUI;
 import opengdc.util.FSUtils;
 import opengdc.reader.MaskedSomaticMutationReader;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -22,7 +20,7 @@ import opengdc.util.FormatUtils;
  *
  * @author fabio
  */
-public class MaskedSomaticMutation extends BioParser {
+public class MaskedSomaticMutationParser extends BioParser {
 
     @Override
     public int convert(String program, String disease, String dataType, String inPath, String outPath) {
@@ -41,7 +39,7 @@ public class MaskedSomaticMutation extends BioParser {
                 String extension = FSUtils.getFileExtension(f);
                 if (getAcceptedInputFileFormats().contains(extension)) {
                     System.err.println("Processing " + f.getName());
-                    GUI.appendLog("Processing " + f.getName());
+                    GUI.appendLog("Processing " + f.getName() + "\n");
                     
                     HashSet<String> uuids = MaskedSomaticMutationReader.getUUIDsFromMaf(f.getAbsolutePath());
                     for (String uuid: uuids) {
@@ -50,8 +48,10 @@ public class MaskedSomaticMutation extends BioParser {
                         
                         if (!uuidData.isEmpty()) {
                             try {
-                                if (!filesPathConverted.contains(outPath + uuid + "." + this.getFormat()))
+                                if (!filesPathConverted.contains(outPath + uuid + "." + this.getFormat())) {
                                     Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                                    filesPathConverted.add(outPath + uuid + "." + this.getFormat());
+                                }
                             
                                 for (int entry: uuidData.keySet()) {
                                     ArrayList<String> values = new ArrayList<>();
@@ -87,6 +87,7 @@ public class MaskedSomaticMutation extends BioParser {
         }
         
         if (!filesPathConverted.isEmpty()) {
+            // close documents
             for (String path: filesPathConverted) {
                 try {
                     Files.write((new File(path)).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
@@ -94,6 +95,15 @@ public class MaskedSomaticMutation extends BioParser {
                 catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+            // write header.schema
+            try {
+                System.err.println("\n" + "Generating header.schema");
+                GUI.appendLog("\n" + "Generating header.schema" + "\n");
+                Files.write((new File(outPath + "header.schema")).toPath(), (FormatUtils.generateDataSchema(this.getHeader(), this.getAttributesType())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
             }
         }
         

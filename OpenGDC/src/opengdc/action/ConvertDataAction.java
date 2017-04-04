@@ -8,7 +8,8 @@ package opengdc.action;
 import opengdc.GUI;
 import opengdc.Settings;
 import opengdc.parser.BioParser;
-import opengdc.parser.MaskedSomaticMutation;
+import opengdc.parser.MaskedSomaticMutationParser;
+import opengdc.parser.MetadataParser;
 
 /**
  *
@@ -32,8 +33,14 @@ public class ConvertDataAction extends Action {
         
         BioParser parser;
         switch (dataType.toLowerCase()) {
+            case "clinical supplement":
+                parser = new MetadataParser();
+                break;
+            case "biospecimen supplement":
+                parser = new MetadataParser();
+                break;
             case "masked somatic mutation":
-                parser = new MaskedSomaticMutation();
+                parser = new MaskedSomaticMutationParser();
                 break;
             default:
                 parser = null;

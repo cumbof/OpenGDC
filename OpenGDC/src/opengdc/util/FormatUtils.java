@@ -175,4 +175,17 @@ public class FormatUtils {
         return "";
     }
     
+    /*****************************************************************/
+    
+    public static String generateDataSchema(String[] header, String[] types) {
+        String schema = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
+                        "<schema xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n" +
+                        "\t<fields>\n";
+        for (int i=0; i<header.length; i++)
+            schema += "\t\t<field type=\""+types[i]+"\">"+header[i]+"</field>\n";
+        schema += "\t</fields>\n"+
+                  "</schema>";
+        return schema;
+    }
+    
 }

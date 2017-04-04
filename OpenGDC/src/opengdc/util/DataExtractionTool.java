@@ -32,6 +32,18 @@ public class DataExtractionTool {
     public static HashSet<String> getUncompressedFoldersPathList() {
         return uncompressed_folders_path;
     }
+    
+    public static boolean uncompressData(File file, File destDir, boolean removeSource) {
+        if (file.getName().toLowerCase().endsWith(".tar.gz") || file.getName().toLowerCase().endsWith(".tar"))
+            return uncompressTarGz(file, destDir, removeSource);
+        else if (file.getName().toLowerCase().endsWith(".gz")) {
+            String destAbsolutePath = file.getAbsolutePath();
+            String uncompressedAbsolutePath = destAbsolutePath.substring(0, destAbsolutePath.length()-3);
+            File uncompressedFile = new File(uncompressedAbsolutePath);
+            return uncompressGz(file, uncompressedFile, removeSource);
+        }
+        return false;
+    }
 
     public static boolean uncompressTarGz(File tarFile, File destDir, boolean removeSource) {
         experiments_path = new HashSet<>();
@@ -42,11 +54,11 @@ public class DataExtractionTool {
             destDir.mkdirs();
             TarArchiveInputStream tarIn = null;
 
-            if (tarFile.getName().toLowerCase().endsWith(".gz"))
+            if (tarFile.getName().toLowerCase().endsWith(".tar.gz"))
                 tarIn = new TarArchiveInputStream(new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(tarFile))));
-            else
+            else if (tarFile.getName().toLowerCase().endsWith(".tar"))
                 tarIn = new TarArchiveInputStream(new BufferedInputStream(new FileInputStream(tarFile)));
-            
+                
             TarArchiveEntry tarEntry = tarIn.getNextTarEntry();
             // tarIn is a TarArchiveInputStream
             while (tarEntry != null) {// create a file with the same name as the tarEntry
@@ -61,8 +73,6 @@ public class DataExtractionTool {
                     destPath.createNewFile();
                     //byte [] btoRead = new byte[(int)tarEntry.getSize()];
                     byte[] btoRead = new byte[1024];
-		            //FileInputStream fin 
-                    //  = new FileInputStream(destPath.getCanonicalPath());
                     BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(destPath));
                     int len = 0;
 
@@ -77,9 +87,7 @@ public class DataExtractionTool {
                         String destAbsolutePath = destPath.getAbsolutePath();
                         String uncompressedAbsolutePath = destAbsolutePath.substring(0, destAbsolutePath.length()-3);
                         File uncompressedFile = new File(uncompressedAbsolutePath);
-                        boolean uncompressed = uncompressGz(destPath, uncompressedFile, removeSource);
-                        if (uncompressed)
-                            experiments_path.add(uncompressedFile.getAbsolutePath());
+                        uncompressGz(destPath, uncompressedFile, removeSource);
                     }
                 }
                 tarEntry = tarIn.getNextTarEntry();
@@ -95,7 +103,7 @@ public class DataExtractionTool {
             
             return uncompressed;
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
             return false;
         }
     }
@@ -105,19 +113,14 @@ public class DataExtractionTool {
             FileInputStream fis = new FileInputStream(gzFile);
             GZIPInputStream gis = new GZIPInputStream(fis);
             
-            //GzipCompressorInputStream gis = new GzipCompressorInputStream(new BufferedInputStream(new FileInputStream(gzFile)));
-            
-            //ByteArrayInputStream bais = new ByteArrayInputStream(IOUtils.toByteArray(fis));
-            //GZIPInputStream gis = new GZIPInputStream(bais);
-            
             FileOutputStream fos = new FileOutputStream(destFile);
             byte[] buffer = new byte[1024];
             int len;
             while ((len = gis.read(buffer)) != -1)
                 fos.write(buffer, 0, len);
             fos.close();
+            
             gis.close();
-            //bais.close();
             fis.close();
             
             boolean uncompressed = false;
@@ -125,11 +128,12 @@ public class DataExtractionTool {
                 uncompressed = true;
                 if (removeSource)
                     gzFile.delete();
+                experiments_path.add(destFile.getAbsolutePath());
             }
             
             return uncompressed;
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
             return false;
         }
     }

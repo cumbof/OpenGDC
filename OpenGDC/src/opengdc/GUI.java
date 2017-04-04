@@ -12,6 +12,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFileChooser;
 import javax.swing.JTextPane;
 import javax.swing.text.StyledDocument;
@@ -410,13 +411,6 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
-        ArrayList<String> formats_list = new ArrayList<String>(FormatUtils.getFormatsList());
-        Collections.sort(formats_list);
-        String[] formats_arr = new String[formats_list.size()+1];
-        formats_arr[0] = "";
-        for (int i=1; i<formats_arr.length; i++)
-        formats_arr[i] = formats_list.get(i-1);
-        jComboBox8.setModel(new javax.swing.DefaultComboBoxModel(formats_arr));
         jComboBox8.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBox8ActionPerformed(evt);
@@ -827,11 +821,29 @@ public class GUI extends javax.swing.JFrame {
     private void jComboBox7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox7ActionPerformed
         try {
             String selectedDataType = jComboBox7.getSelectedItem().toString();
-            String selectedFormat = jComboBox8.getSelectedItem().toString();
-            if (!Settings.getOutputConvertedFolder().trim().equals("") && !Settings.getInputGDCFolder().trim().equals("") && !selectedDataType.trim().equals("") && !selectedFormat.trim().equals(""))
-                jButton8.setEnabled(true);
-            else
-                jButton8.setEnabled(false);
+            if (!selectedDataType.trim().equals("")) {
+                if (selectedDataType.toLowerCase().trim().equals("biospecimen supplement") || selectedDataType.toLowerCase().trim().equals("clinical supplement")) {
+                    String[] formats_arr = new String[2];
+                    formats_arr[0] = "";
+                    formats_arr[1] = "META";
+                    jComboBox8.setModel(new DefaultComboBoxModel(formats_arr));
+                }
+                else {
+                    ArrayList<String> formats_list = new ArrayList<>(FormatUtils.getFormatsList());
+                    Collections.sort(formats_list);
+                    String[] formats_arr = new String[formats_list.size()+1];
+                    formats_arr[0] = "";
+                    for (int i=1; i<formats_arr.length; i++)
+                        formats_arr[i] = formats_list.get(i-1);
+                    jComboBox8.setModel(new DefaultComboBoxModel(formats_arr));
+                }
+
+                String selectedFormat = jComboBox8.getSelectedItem().toString();
+                if (!Settings.getOutputConvertedFolder().trim().equals("") && !Settings.getInputGDCFolder().trim().equals("") && !selectedDataType.trim().equals("") && !selectedFormat.trim().equals(""))
+                    jButton8.setEnabled(true);
+                else
+                    jButton8.setEnabled(false);
+            }
         }
         catch (Exception e) {
             jButton8.setEnabled(false);

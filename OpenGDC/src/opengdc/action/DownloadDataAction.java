@@ -81,7 +81,8 @@ public class DownloadDataAction extends Action {
                     File destDir = new File(destDirPath);
                     
                     // extract data
-                    boolean uncompressed = DataExtractionTool.uncompressTarGz(data_file, destDir, false);
+                    boolean uncompressed = DataExtractionTool.uncompressData(data_file, destDir, false);
+                    //System.out.println("uncompressed: " + uncompressed);
                     uncompressed_folders_path.addAll(DataExtractionTool.getUncompressedFoldersPathList());
                     experiments_path.addAll(DataExtractionTool.getExperimentsPathList());
                     
@@ -93,7 +94,7 @@ public class DownloadDataAction extends Action {
                             Files.move(expFile.toPath(), newExpFile.toPath(), REPLACE_EXISTING);
                         }
                         catch (Exception e) {
-                            e.printStackTrace();
+                            //e.printStackTrace();
                         }
                     }
                     
@@ -111,6 +112,7 @@ public class DownloadDataAction extends Action {
             }
         }
         
+        System.err.println("\n" + "done" + "\n\n" + "#####################" + "\n\n");
         GUI.appendLog("\n" + "done" + "\n\n" + "#####################" + "\n\n");
     }
     
