@@ -36,6 +36,8 @@ public class MetadataParser extends BioParser {
         
         File[] files = (new File(inPath)).listFiles();
         for (File f: files) {
+            // remove all elements in aliquotNodes from previous iterations
+            aliquotNodes = new ArrayList<>();
             if (f.isFile()) {
                 String extension = FSUtils.getFileExtension(f);
                 if (getAcceptedInputFileFormats().contains(extension)) {
