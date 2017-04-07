@@ -43,39 +43,18 @@ public class DownloadDataAction extends Action {
         // TODO activate progress bar
         // TODO show stack in Log tab
         
-        /* DOWNLOAD ALL FILE */
-        //GDCQuery.downloadFiles((new HashSet<>(dataMap.keySet())), gdc_path);
-        
-        /* DOWNLOAD FILE BY FILE */
-        /*for (String uuid: dataMap.keySet())
-            GDCQuery.downloadFile(uuid, gdc_path, dataMap.get(uuid).get("file_name"));*/
-        
-        /* AUTOEXTRACT PACKAGES */
-        /*if (autoextract) {
-            for (String uuid: dataMap.keySet()) {
-                File data_file = new File(gdc_path + dataMap.get(uuid).get("file_name"));
-                if (data_file.exists()) {
-                    if (data_file.getName().toLowerCase().endsWith(".tar.gz")) {
-                        DataExtractionTool.uncompressTarGz(data_file, new File(gdc_path), false);
-                    }
-                    else if (data_file.getName().toLowerCase().endsWith(".gz")) {
-                        String gzFileName = dataMap.get(uuid).get("file_name");
-                        String fileName = gzFileName.substring(0, gzFileName.length()-3);
-                        DataExtractionTool.uncompressGz(data_file, new File(gdc_path + fileName), false);
-                    }
-                }
-            }
-        }*/
-        
-        
         /* DOWNLOAD (AND EXTRACT (AND REMOVE)) FILE BY FILE */
         for (String uuid: dataMap.keySet()) {
             // download data
-            GDCQuery.downloadFile(uuid, gdc_path, dataMap.get(uuid).get("file_name"));
+            String fileName = uuid + "_" + dataMap.get(uuid).get("file_name");
+            for (String s: dataMap.get(uuid).keySet())
+                System.err.println(s + "\t" + dataMap.get(uuid).get(s));
+            
+            GDCQuery.downloadFile(uuid, gdc_path, fileName, false);
             if (autoextract) {
                 HashSet<String> uncompressed_folders_path = new HashSet<>();
                 HashSet<String> experiments_path = new HashSet<>();
-                File data_file = new File(gdc_path + dataMap.get(uuid).get("file_name"));
+                File data_file = new File(gdc_path + fileName);
                 if (data_file.exists()) {
                     String destDirPath = gdc_path + "/" + data_file.getName() + "_/";
                     File destDir = new File(destDirPath);

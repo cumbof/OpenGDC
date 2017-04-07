@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -135,44 +136,11 @@ public class GDCQuery {
         return data;
     }
     
-    /** TO TEST **/
-    /*public static void downloadFiles(HashSet<String> UUIDs, String outFolderPath) {
+    public static void downloadFile(String uuid, String outFolderPath, String fileName, boolean requestRelated) {
         try {
-            System.err.println("UUIDs size: " + UUIDs.size());
-            String UUID_list = "";
-            for (String UUID: UUIDs)
-                UUID_list += "\""+UUID+"\",";
-            UUID_list = UUID_list.substring(0, UUID_list.length()-1);
-            System.err.println(UUID_list);
-            
-            String json_str = "{" +
-                                  "\"ids\":[" +
-                                      UUID_list +
-                                  "]" +
-                              "}";
-            
-            String conn_str = BASE_DOWNLOAD_URL + URLEncoder.encode(json_str, "UTF-8");         
-            
-            Date now = new Date();
-            SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
-            String query_file_name = "gdc_"+ft.format(now)+".tar.gz";
-            
-            URL website = new URL(conn_str);
-            ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-            FileOutputStream fos = new FileOutputStream(outFolderPath + query_file_name);
-            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-            fos.close();
-            rbc.close();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
-
-    public static void downloadFile(String uuid, String outFolderPath, String fileName) {
-        try {
-            //String url = BASE_DOWNLOAD_URL + uuid + "?related_files=true"; // why it does not always work?
             String url = BASE_DOWNLOAD_URL + uuid;
+            if (requestRelated)
+                url += "?related_files=true"; // why it does not always work?
             //System.err.println(url);
             System.err.println(uuid + "\t" + fileName);
             GUI.appendLog(uuid + "\t" + fileName + "\n");

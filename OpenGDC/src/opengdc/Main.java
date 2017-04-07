@@ -20,19 +20,7 @@ public class Main {
     
     private static void initSkipDiseases() {
         skip_diseases = new HashSet<>();
-        skip_diseases.add("TCGA-CHOL");
-        skip_diseases.add("TCGA-COAD");
-        skip_diseases.add("TCGA-DLBC");
-        skip_diseases.add("TCGA-ESCA");
-        skip_diseases.add("TCGA-KICH");
-        skip_diseases.add("TCGA-KIRC");
-        skip_diseases.add("TCGA-OV");
-        skip_diseases.add("TCGA-PAAD");
-        skip_diseases.add("TCGA-READ");
-        skip_diseases.add("TCGA-SARC");
-        skip_diseases.add("TCGA-SKCM");
-        skip_diseases.add("TCGA-STAD");
-        skip_diseases.add("TCGA-THYM");
+        //skip_diseases.add("");
     }
 
     /**
