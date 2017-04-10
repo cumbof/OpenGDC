@@ -53,7 +53,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                     try {
                         Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
                         
-                        InputStream fstream = new FileInputStream(Settings.getMirbaseHsaPath());
+                        InputStream fstream = new FileInputStream(f.getAbsolutePath());
                         DataInputStream in = new DataInputStream(fstream);
                         BufferedReader br = new BufferedReader(new InputStreamReader(in));
                         String line;

@@ -10,6 +10,7 @@ import opengdc.Settings;
 import opengdc.parser.BioParser;
 import opengdc.parser.MaskedSomaticMutationParser;
 import opengdc.parser.MetadataParser;
+import opengdc.parser.MiRNAExpressionQuantificationParser;
 
 /**
  *
@@ -41,6 +42,24 @@ public class ConvertDataAction extends Action {
                 break;
             case "masked somatic mutation":
                 parser = new MaskedSomaticMutationParser();
+                break;
+            case "mirna expression quantification":
+                parser = new MiRNAExpressionQuantificationParser();
+                break;
+            case "gene expression quantification":
+                parser = null;
+                break;
+            case "copy number segment":
+                parser = null;
+                break;
+            case "masked copy number segment":
+                parser = null;
+                break;
+            case "methylation beta value":
+                parser = null;
+                break;
+            case "isoform expression quantification":
+                parser = null;
                 break;
             default:
                 parser = null;
