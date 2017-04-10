@@ -8,8 +8,12 @@ package opengdc.action;
 import opengdc.GUI;
 import opengdc.Settings;
 import opengdc.parser.BioParser;
+import opengdc.parser.CopyNumberSegmentParser;
+import opengdc.parser.GeneExpressionQuantificationParser;
+import opengdc.parser.IsoformExpressionQuantificationParser;
 import opengdc.parser.MaskedSomaticMutationParser;
 import opengdc.parser.MetadataParser;
+import opengdc.parser.MethylationBetaValueParser;
 import opengdc.parser.MiRNAExpressionQuantificationParser;
 
 /**
@@ -47,19 +51,19 @@ public class ConvertDataAction extends Action {
                 parser = new MiRNAExpressionQuantificationParser();
                 break;
             case "gene expression quantification":
-                parser = null;
+                parser = new GeneExpressionQuantificationParser();
                 break;
             case "copy number segment":
-                parser = null;
+                parser = new CopyNumberSegmentParser();
                 break;
             case "masked copy number segment":
-                parser = null;
+                parser = new CopyNumberSegmentParser();
                 break;
             case "methylation beta value":
-                parser = null;
+                parser = new MethylationBetaValueParser();
                 break;
             case "isoform expression quantification":
-                parser = null;
+                parser = new IsoformExpressionQuantificationParser();
                 break;
             default:
                 parser = null;
