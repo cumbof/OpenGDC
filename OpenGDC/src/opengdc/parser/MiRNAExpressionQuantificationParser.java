@@ -69,25 +69,26 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                                 String cross_mapped = line_split[3];
                                 
                                 HashMap<String, String> coordinates = null;
-                                if (mirnaid2coordinates.containsKey(mirna_id))
+                                if (mirnaid2coordinates.containsKey(mirna_id)) {
                                     coordinates = mirnaid2coordinates.get(mirna_id);
                                 
-                                String chr = coordinates.get("CHR");
-                                String start = coordinates.get("START");
-                                String end = coordinates.get("END");
-                                String strand = coordinates.get("STRAND");
-                                
-                                ArrayList<String> values = new ArrayList<>();
-                                values.add(chr);
-                                values.add(start);
-                                values.add(end);
-                                values.add(strand);
-                                values.add(mirna_id);
-                                values.add(read_count);
-                                values.add(reads_per_million_mirna_mapped);
-                                values.add(cross_mapped);
-                                
-                                Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                    String chr = coordinates.get("CHR");
+                                    String start = coordinates.get("START");
+                                    String end = coordinates.get("END");
+                                    String strand = coordinates.get("STRAND");
+
+                                    ArrayList<String> values = new ArrayList<>();
+                                    values.add(chr);
+                                    values.add(start);
+                                    values.add(end);
+                                    values.add(strand);
+                                    values.add(mirna_id);
+                                    values.add(read_count);
+                                    values.add(reads_per_million_mirna_mapped);
+                                    values.add(cross_mapped);
+
+                                    Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                }
                             }
                         }
                         br.close();
