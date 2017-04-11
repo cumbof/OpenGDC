@@ -43,15 +43,17 @@ public class MIRBase {
                             info.put("CHR", arr[0]);
 
                             String[] id_split = arr[arr.length-1].split(";");
-                            String original_symbol = "null";
+                            String original_symbol = "";
                             for (String var: id_split) {
-                                if (var.toLowerCase().startsWith("name"))
+                                if (var.toLowerCase().startsWith("name")) {
                                     original_symbol = var.split("=")[1];
-                                break;
+                                    break;
+                                }
                             }
-                            info.put("MIRBASE_SYMBOL", original_symbol);
-
-                            mirnaid2coordinates.put(original_symbol, info);
+                            if (!original_symbol.equals("")) {
+                                info.put("MIRBASE_SYMBOL", original_symbol);
+	                        mirnaid2coordinates.put(original_symbol, info);
+                            }
                         }
                     } catch (Exception e) {}
                 }
