@@ -5,6 +5,20 @@
  */
 package opengdc.parser;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.HashSet;
+import opengdc.GUI;
+import opengdc.util.FSUtils;
+import opengdc.util.FormatUtils;
+
 /**
  *
  * @author fabio
@@ -13,22 +27,127 @@ public class IsoformExpressionQuantificationParser extends BioParser {
 
     @Override
     public int convert(String program, String disease, String dataType, String inPath, String outPath) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int acceptedFiles = FSUtils.acceptedFilesInFolder(inPath, getAcceptedInputFileFormats());
+        System.err.println("Data Amount: " + acceptedFiles + " files" + "\n\n");
+        GUI.appendLog("Data Amount: " + acceptedFiles + " files" + "\n\n");
+        
+        if (acceptedFiles == 0)
+            return 1;
+        
+        HashSet<String> filesPathConverted = new HashSet<>();
+                
+        File[] files = (new File(inPath)).listFiles();
+        for (File f: files) {
+            if (f.isFile()) {
+                String extension = FSUtils.getFileExtension(f);
+                if (getAcceptedInputFileFormats().contains(extension)) {
+                    System.err.println("Processing " + f.getName());
+                    GUI.appendLog("Processing " + f.getName() + "\n");
+                    
+                    String uuid = f.getName().split("_")[0];
+                    try {
+                        Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                        
+                        InputStream fstream = new FileInputStream(f.getAbsolutePath());
+                        DataInputStream in = new DataInputStream(fstream);
+                        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                        String line;
+                        boolean firstLine = true;
+                        while ((line = br.readLine()) != null) {
+                            if (firstLine)
+                                firstLine = false; // just skip the first line (header)
+                            else {
+                                String[] line_split = line.split("\t");
+                                String isoform_coordinates = line_split[1];
+                                String[] coordinates_split = isoform_coordinates.split(":");
+                                String chr = coordinates_split[1];
+                                String start = coordinates_split[2];
+                                String end = coordinates_split[3];
+                                String strand = coordinates_split[4];
+                                
+                                String mirna_id = line_split[0];
+                                String read_count = line_split[2];
+                                String reads_per_million_mirna_mapped = line_split[3];
+                                String cross_mapped = line_split[4];
+                                String mirna_region = line_split[5];
+
+                                ArrayList<String> values = new ArrayList<>();
+                                values.add(chr);
+                                values.add(start);
+                                values.add(end);
+                                values.add(strand);
+                                values.add(mirna_id);
+                                values.add(read_count);
+                                values.add(reads_per_million_mirna_mapped);
+                                values.add(cross_mapped);
+                                values.add(mirna_region);
+
+                                Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                            }
+                        }
+                        br.close();
+                        in.close();
+                        fstream.close();
+                        
+                        Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                        filesPathConverted.add(outPath + uuid + "." + this.getFormat());
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        
+        if (!filesPathConverted.isEmpty()) {
+            // write header.schema
+            try {
+                System.err.println("\n" + "Generating header.schema");
+                GUI.appendLog("\n" + "Generating header.schema" + "\n");
+                Files.write((new File(outPath + "header.schema")).toPath(), (FormatUtils.generateDataSchema(this.getHeader(), this.getAttributesType())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return 0;
     }
 
     @Override
     public String[] getHeader() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String[] header = new String[9];
+        header[0] = "chr";
+        header[1] = "start";
+        header[2] = "stop";
+        header[3] = "strand";
+        header[4] = "mirna_id";
+        header[5] = "read_count";
+        header[6] = "reads_per_million_mirna_mapped";
+        header[7] = "cross_mapped";
+        header[8] = "mirna_region";
+        return header;
     }
 
     @Override
     public String[] getAttributesType() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String[] attr_type = new String[9];
+        attr_type[0] = "STRING";
+        attr_type[1] = "LONG";
+        attr_type[2] = "LONG";
+        attr_type[3] = "CHAR";
+        attr_type[4] = "STRING";
+        attr_type[5] = "LONG";
+        attr_type[6] = "FLOAT";
+        attr_type[7] = "STRING";
+        attr_type[8] = "STRING";
+        return attr_type;
     }
 
     @Override
     public void initAcceptedInputFileFormats() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.acceptedInputFileFormats = new HashSet<>();
+        this.acceptedInputFileFormats.add(".txt");
     }
     
 }

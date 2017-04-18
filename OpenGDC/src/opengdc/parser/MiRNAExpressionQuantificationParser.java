@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
-import opengdc.Settings;
 import opengdc.integration.MIRBase;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
