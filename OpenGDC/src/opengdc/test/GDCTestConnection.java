@@ -17,7 +17,7 @@ import java.net.URLEncoder;
  */
 public class GDCTestConnection {
     
-    //private static final int size_limit = Integer.MAX_VALUE;
+    //private static final int SIZE_LIMIT = Integer.MAX_VALUE;
     private static final int SIZE_LIMIT = 5;
     private static final String PROJECT_ID = "TCGA-BRCA";
     private static final String DATA_TYPE = "Gene Expression Quantification";
