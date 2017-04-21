@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -35,9 +36,12 @@ import org.json.JSONTokener;
 public class GDCQuery {
     
     private static final int SIZE_LIMIT = Integer.MAX_VALUE;
+    //private static final String FIELDS = "\"file_id,file_name,cases.submitter_id,cases.case_id,data_category,data_type,cases.samples.tumor_descriptor,cases.samples.tissue_type,cases.samples.sample_type,cases.samples.submitter_id,cases.samples.sample_id,cases.samples.portions.analytes.aliquots.aliquot_id,cases.samples.portions.analytes.aliquots.submitter_id\"";
+    //private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=1&size="+SIZE_LIMIT+"&pretty=true&fields="+FIELDS+"&filters=";
     private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=1&size="+SIZE_LIMIT+"&pretty=true&filters=";
     private static final String BASE_DOWNLOAD_URL = "https://gdc-api.nci.nih.gov/data/";
     private static String last_query_file_path = "NA";
+    private static String aliquot = "";
     
     public static String getLastQueryFilePath() {
         return last_query_file_path;
@@ -89,8 +93,10 @@ public class GDCQuery {
             FileOutputStream fos = new FileOutputStream(Settings.getTmpDir() + query_file_name);
             PrintStream out = new PrintStream(fos);
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            for (String line; (line = reader.readLine()) != null;)
+            for (String line; (line = reader.readLine()) != null;) {
+                //System.err.println(line);
                 out.println(line);
+            }
             reader.close();
             out.close();
             fos.close();
@@ -102,7 +108,25 @@ public class GDCQuery {
         }
     }
     
+    public static void searchForAliquotUUID(Object obj) {
+        if (obj instanceof HashMap) {
+            HashMap<String, Object> hashmap = (HashMap<String, Object>)obj;
+            for (String k: hashmap.keySet()) {
+                if (k.toLowerCase().trim().equals("aliquot_id"))
+                    aliquot = (String)hashmap.get(k);
+                else
+                    searchForAliquotUUID(hashmap.get(k));
+            }
+        }
+        else if (obj instanceof List) {
+            ArrayList<Object> list = (ArrayList<Object>)obj;
+            for (Object o: list)
+                searchForAliquotUUID(o);
+        }
+    }
+    
     public static HashMap<String, HashMap<String, String>> extractInfo(String last_query_file_tmp_path) {
+        //aliquot = "";
         HashMap<String, HashMap<String, String>> data = new HashMap<>();
         try {
             File jsonFile = new File(last_query_file_tmp_path);
@@ -115,7 +139,9 @@ public class GDCQuery {
             HashMap<String, Object> data_node = (HashMap<String, Object>)data_node_obj;
             ArrayList<Object> hits_node = (ArrayList<Object>)data_node.get("hits");
             //System.err.println("NODES: " + hits_node.size());
+            //int key_count = 0;
             for (Object map_obj: hits_node) {
+                //aliquot = "";
                 HashMap<String, Object> map = (HashMap<String, Object>)map_obj;
                 String key = "";
                 HashMap<String, String> values = new HashMap<>();
@@ -127,6 +153,15 @@ public class GDCQuery {
                             values.put(k, (String)map.get(k));
                     }
                 }
+                /*if (key.equals("")) {
+                    searchForAliquotUUID(map_obj);
+                    key = key_count + "_" + aliquot;
+                    if (key.equals(""))
+                        key = String.valueOf(key_count);
+                    key_count++;
+                }*/
+                /*if (data.containsKey(key))
+                    System.err.println("exp already exists");*/
                 data.put(key, values);
             }
         }
@@ -157,11 +192,75 @@ public class GDCQuery {
         }
     }
     
-    /*public static void main(String[] args) {
-        String uuid = "8751a889-cb3e-4487-ba6f-ac91651666e7";
+    public static String retrieveAliquotFromFileUUID(String file_uuid) {
+        try {
+            String fields = "\"file_id,file_name,cases.submitter_id,cases.case_id,data_category,data_type,cases.samples.tumor_descriptor,cases.samples.tissue_type,cases.samples.sample_type,cases.samples.submitter_id,cases.samples.sample_id,cases.samples.portions.analytes.aliquots.aliquot_id,cases.samples.portions.analytes.aliquots.submitter_id\"";
+            String conn_str = "https://gdc-api.nci.nih.gov/files?from=1&size="+SIZE_LIMIT+"&pretty=true&fields="+fields+"&format=JSON&filters=";
+            String json_str = "{" +
+                                    "\"op\":\"in\"," +
+                                    "\"content\":{" +
+                                        "\"field\":\"files.file_id\"," +
+                                        "\"value\":[" +
+                                            "\""+file_uuid+"\"" +
+                                        "]" +
+                                    "}" +
+                                "}";
+
+            conn_str += URLEncoder.encode(json_str, "UTF-8");
+            System.err.println(conn_str);
+            HttpURLConnection conn = (HttpURLConnection) (new URL(conn_str)).openConnection();
+            conn.connect();
+
+            Date now = new Date();
+            SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
+            
+            String query_file_name = "query_"+ft.format(now)+".json";
+            FileOutputStream fos = new FileOutputStream(Settings.getTmpDir() + query_file_name);
+            PrintStream out = new PrintStream(fos);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            for (String line; (line = reader.readLine()) != null;)
+                out.println(line);
+            reader.close();
+            out.close();
+            fos.close();
+            
+            aliquot = "";
+            File jsonFile = new File(Settings.getTmpDir() + query_file_name);
+            URI uri = jsonFile.toURI();
+            JSONTokener tokener = new JSONTokener(uri.toURL().openStream());
+            JSONObject root = new JSONObject(tokener);
+            HashMap<String, Object> json_data = new HashMap<>(JSONUtils.jsonToMap(root));
+            Object data_node_obj = json_data.get("data");
+            searchForAliquotUUID(data_node_obj);
+            
+            conn.disconnect();
+            return aliquot;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public static void main(String[] args) {
+        /*String file_uuid = "0b50ee5b-3130-4401-84b1-630596632a12";
+        System.err.println(retrieveAliquotFromFileUUID(file_uuid));*/
+        
+        /*String disease = "TCGA-ACC";
+        String dataType = "Gene Expression Quantification";
+        query(disease, dataType);
+        HashMap<String, HashMap<String, String>> info = extractInfo(last_query_file_path);
+        for (String k: info.keySet()) {
+            System.err.println(k);
+            for (String v: info.get(k).keySet())
+                System.err.println("\t"+v+"\t"+info.get(k).get(v));
+        }
+        System.err.println("\nsize: "+info.size());*/
+        
+        /*String uuid = "8751a889-cb3e-4487-ba6f-ac91651666e7";
         String outFolderPath = "/Users/fabio/Downloads/test_gdc_download/data/";
         String fileName = "TCGA.BRCA.muse.8751a889-cb3e-4487-ba6f-ac91651666e7.somatic.maf.gz";
-        downloadFile(uuid, outFolderPath, fileName);
-    }*/
+        downloadFile(uuid, outFolderPath, fileName, false);*/
+    }
     
 }
