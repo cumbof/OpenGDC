@@ -27,7 +27,11 @@ public class RetrieveMetadataFromFileUUID {
     
     public static void main(String[] args) {
         try {
+<<<<<<< HEAD
             String conn_str = "https://gdc-api.nci.nih.gov/files?from=1&size="+SIZE_LIMIT+"&pretty=true&fields="+FIELDS+"&format=TSV&filters=";
+=======
+            String conn_str = "https://gdc-api.nci.nih.gov/files?from=1&pretty=true&";
+>>>>>>> origin/master
             String json_str = "{" +
                                     "\"op\":\"in\"," +
                                     "\"content\":{" +
@@ -36,11 +40,22 @@ public class RetrieveMetadataFromFileUUID {
                                             FILES_UUID +
                                         "]" +
                                     "}" +
+<<<<<<< HEAD
                                 "}";
             
             conn_str += URLEncoder.encode(json_str, "UTF-8");
+=======
+                                "},"+
+                                "\"format\":\"JSON\"," +
+                                "\"fields\":\"file_id,file_name,cases.submitter_id,cases.case_id,data_category,data_type,cases.samples.tumor_descriptor,cases.samples.tissue_type,cases.samples.sample_type,cases.samples.submitter_id,cases.samples.sample_id,cases.samples.portions.analytes.aliquots.aliquot_id,cases.samples.portions.analytes.aliquots.submitter_id\"," +
+                                "\"size\":\""+SIZE_LIMIT+"\"" +
+                            "}";
+
+            conn_str = conn_str + URLEncoder.encode(json_str, "UTF-8");
+>>>>>>> origin/master
             System.err.println(conn_str);
             HttpURLConnection conn = (HttpURLConnection) (new URL(conn_str)).openConnection();
+<<<<<<< HEAD
 
             /*conn.setDoOutput(true);
             conn.setDoInput(true);
@@ -54,6 +69,10 @@ public class RetrieveMetadataFromFileUUID {
             pw.write(URLEncoder.encode(json_str, "UTF-8"));
             pw.close();*/
                         
+=======
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+>>>>>>> origin/master
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             for (String line; (line = reader.readLine()) != null;)
                 System.out.println(line);
