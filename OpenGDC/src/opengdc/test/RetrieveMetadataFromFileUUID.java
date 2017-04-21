@@ -26,7 +26,7 @@ public class RetrieveMetadataFromFileUUID {
     
     public static void main(String[] args) {
         try {
-            String conn_str = "https://gdc-api.nci.nih.gov/files?from=1&size="+SIZE_LIMIT+"&pretty=true&filters=";
+            String conn_str = "https://gdc-api.nci.nih.gov/files?from=1&pretty=true&";
             String json_str = "{" +
                                 "\"filters\":{" +
                                     "\"op\":\"in\"," +
@@ -41,13 +41,13 @@ public class RetrieveMetadataFromFileUUID {
                                 "\"fields\":\"file_id,file_name,cases.submitter_id,cases.case_id,data_category,data_type,cases.samples.tumor_descriptor,cases.samples.tissue_type,cases.samples.sample_type,cases.samples.submitter_id,cases.samples.sample_id,cases.samples.portions.analytes.aliquots.aliquot_id,cases.samples.portions.analytes.aliquots.submitter_id\"," +
                                 "\"size\":\""+SIZE_LIMIT+"\"" +
                             "}";
-            
+
             conn_str = conn_str + URLEncoder.encode(json_str, "UTF-8");
             System.err.println(conn_str);
             
             HttpURLConnection conn = (HttpURLConnection) (new URL(conn_str)).openConnection();
+            conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
-            
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             for (String line; (line = reader.readLine()) != null;)
                     System.out.println(line);
