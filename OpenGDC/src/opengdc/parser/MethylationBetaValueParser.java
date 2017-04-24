@@ -18,6 +18,7 @@ import java.util.HashSet;
 import opengdc.GUI;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
+import opengdc.util.GDCQuery;
 
 /**
  *
@@ -44,59 +45,66 @@ public class MethylationBetaValueParser extends BioParser {
                     System.err.println("Processing " + f.getName());
                     GUI.appendLog("Processing " + f.getName() + "\n");
                     
-                    String uuid = f.getName().split("_")[0];
-                    try {
-                        Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
-                        
-                        InputStream fstream = new FileInputStream(f.getAbsolutePath());
-                        DataInputStream in = new DataInputStream(fstream);
-                        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                        String line;
-                        boolean firstLine = true;
-                        while ((line = br.readLine()) != null) {
-                            if (firstLine)
-                                firstLine = false; // just skip the first line (header)
-                            else {
-                                String[] line_split = line.split("\t");
-                                String chr = line_split[2];
-                                String start = line_split[3];
-                                String end = line_split[4];
-                                String strand = "*"; //retrieve strande from NCBI
-                                String composite_element_ref = line_split[0];
-                                String beta_value = line_split[1];
-                                String gene_symbol = line_split[5];
-                                String gene_type = line_split[6];
-                                String transcript_id = line_split[7];
-                                String position_to_tss = line_split[8];
-                                String cgi_coordinate = line_split[9];
-                                String feature_type = line_split[10];
+                    String file_uuid = f.getName().split("_")[0];
+                    String aliquot_uuid = GDCQuery.retrieveAliquotFromFileUUID(file_uuid);
+                    if (!aliquot_uuid.trim().equals("")) {
+                        try {
+                            Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
 
-                                ArrayList<String> values = new ArrayList<>();
-                                values.add(chr);
-                                values.add(start);
-                                values.add(end);
-                                values.add(strand);
-                                values.add(composite_element_ref);
-                                values.add(beta_value);
-                                values.add(gene_symbol);
-                                values.add(gene_type);
-                                values.add(transcript_id);
-                                values.add(position_to_tss);
-                                values.add(cgi_coordinate);
-                                values.add(feature_type);
+                            InputStream fstream = new FileInputStream(f.getAbsolutePath());
+                            DataInputStream in = new DataInputStream(fstream);
+                            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                            String line;
+                            boolean firstLine = true;
+                            while ((line = br.readLine()) != null) {
+                                if (firstLine)
+                                    firstLine = false; // just skip the first line (header)
+                                else {
+                                    String[] line_split = line.split("\t");
+                                    String chr = line_split[2];
+                                    String start = line_split[3];
+                                    String end = line_split[4];
+                                    String strand = "*"; //retrieve strande from NCBI
+                                    String composite_element_ref = line_split[0];
+                                    String beta_value = line_split[1];
+                                    String gene_symbol = line_split[5];
+                                    String gene_type = line_split[6];
+                                    String transcript_id = line_split[7];
+                                    String position_to_tss = line_split[8];
+                                    String cgi_coordinate = line_split[9];
+                                    String feature_type = line_split[10];
 
-                                Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                    ArrayList<String> values = new ArrayList<>();
+                                    values.add(chr);
+                                    values.add(start);
+                                    values.add(end);
+                                    values.add(strand);
+                                    values.add(composite_element_ref);
+                                    values.add(beta_value);
+                                    values.add(gene_symbol);
+                                    values.add(gene_type);
+                                    values.add(transcript_id);
+                                    values.add(position_to_tss);
+                                    values.add(cgi_coordinate);
+                                    values.add(feature_type);
+
+                                    Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                }
                             }
+                            br.close();
+                            in.close();
+                            fstream.close();
+
+                            Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                            filesPathConverted.add(outPath + file_uuid + "." + this.getFormat());
                         }
-                        br.close();
-                        in.close();
-                        fstream.close();
-                        
-                        Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
-                        filesPathConverted.add(outPath + uuid + "." + this.getFormat());
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                    catch (Exception e) {
-                        e.printStackTrace();
+                    else {
+                        System.err.println("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
+                        GUI.appendLog("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
                     }
                 }
             }

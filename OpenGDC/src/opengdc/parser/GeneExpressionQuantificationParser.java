@@ -15,6 +15,7 @@ import opengdc.GUI;
 import opengdc.reader.GeneExpressionQuantificationReader;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
+import opengdc.util.GDCQuery;
 
 /**
  *
@@ -32,64 +33,84 @@ public class GeneExpressionQuantificationParser extends BioParser {
             return 1;
         
         HashSet<String> filesPathConverted = new HashSet<>();
-                
+        
+        // retrive all aliquot IDs
+        HashMap<String, String> fileUUID2aliquotUUID = new HashMap<>();
         File[] files = (new File(inPath)).listFiles();
+        for (File f: files) {
+            if (f.isFile()) {
+                String extension = FSUtils.getFileExtension(f);
+                if (getAcceptedInputFileFormats().contains(extension)) {
+                    String file_uuid = f.getName().split("_")[0];
+                    String aliquot_uuid = GDCQuery.retrieveAliquotFromFileUUID(file_uuid);
+                    fileUUID2aliquotUUID.put(file_uuid, aliquot_uuid);
+                }
+            }
+        }
+        
         for (File f: files) {
             if (f.isFile()) {
                 String extension = FSUtils.getFileExtension(f);
                 // start with 'counts' file and manually retrieve the related 'FPKM' and 'FPKM-UQ' files
                 if (getAcceptedInputFileFormats().contains(extension) && extension.toLowerCase().trim().equals("counts")) {
                     // TODO: we need a common name for 'counts', 'FPKM' and 'FPKM-UQ' files for the same aliquot
-                    String uuid = f.getName().split("_")[0];
-                    // TODO: retrieve the related 'FPKM' and 'FPKM-UQ' files
-                    File fpkm_file = new File("");
-                    File fpkmuq_file = new File("");
-                    
-                    System.err.println("Processing " + uuid + " (counts, FPKM, FPKM-UQ)");
-                    GUI.appendLog("Processing " + uuid + " (counts, FPKM, FPKM-UQ)" + "\n");
+                    String file_uuid = f.getName().split("_")[0];
+                    String aliquot_uuid = fileUUID2aliquotUUID.get(file_uuid);
+                    if (!aliquot_uuid.trim().equals("")) {
+                        // retrieve 'FPKM' and 'FPKM-UQ' files with the same aliquot_uuid (related to the 'counts' file)
+                        File fpkm_file = getRelatedFile(files, aliquot_uuid, fileUUID2aliquotUUID, "fpkm.txt");
+                        File fpkmuq_file = getRelatedFile(files, aliquot_uuid, fileUUID2aliquotUUID, "fpkm.txt");
 
-                    HashMap<String, String> ensembl2count = GeneExpressionQuantificationReader.getEnsembl2Value(f);
-                    HashMap<String, String> ensembl2fpkm = GeneExpressionQuantificationReader.getEnsembl2Value(fpkm_file);
-                    HashMap<String, String> ensembl2fpkmuq = GeneExpressionQuantificationReader.getEnsembl2Value(fpkmuq_file);
-                    
-                    HashSet<String> ensembls = new HashSet<>();
-                    ensembls.addAll(ensembl2count.keySet());
-                    ensembls.addAll(ensembl2fpkm.keySet());
-                    ensembls.addAll(ensembl2fpkmuq.keySet());
-                    
-                    if (!ensembls.isEmpty()) {
-                        try {
-                            Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
-                            for (String ensembl_id: ensembls) {
-                                /** convert ensembl_id to gene symbol and retrieve chromosome, start and end position, and strand **/
-                                String chr = "";
-                                String start = "";
-                                String end = "";
-                                String strand = "";
-                                String gene_symbol = "";
-                                /***************************************************************************************************/
-                                String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
-                                String fpkm_uq = (ensembl2fpkmuq.containsKey(ensembl_id)) ? ensembl2fpkmuq.get(ensembl_id) : "NA";
-                                String fpkm = (ensembl2fpkm.containsKey(ensembl_id)) ? ensembl2fpkm.get(ensembl_id) : "NA";
+                        System.err.println("Processing " + aliquot_uuid + " (counts, FPKM, FPKM-UQ)");
+                        GUI.appendLog("Processing " + aliquot_uuid + " (counts, FPKM, FPKM-UQ)" + "\n");
 
-                                ArrayList<String> values = new ArrayList<>();
-                                values.add(chr);
-                                values.add(start);
-                                values.add(end);
-                                values.add(strand);
-                                values.add(ensembl_id);
-                                values.add(gene_symbol);
-                                values.add(htseq_count);
-                                values.add(fpkm_uq);
-                                values.add(fpkm);
-                                Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                        HashMap<String, String> ensembl2count = GeneExpressionQuantificationReader.getEnsembl2Value(f);
+                        HashMap<String, String> ensembl2fpkm = GeneExpressionQuantificationReader.getEnsembl2Value(fpkm_file);
+                        HashMap<String, String> ensembl2fpkmuq = GeneExpressionQuantificationReader.getEnsembl2Value(fpkmuq_file);
+
+                        HashSet<String> ensembls = new HashSet<>();
+                        ensembls.addAll(ensembl2count.keySet());
+                        ensembls.addAll(ensembl2fpkm.keySet());
+                        ensembls.addAll(ensembl2fpkmuq.keySet());
+
+                        if (!ensembls.isEmpty()) {
+                            try {
+                                Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                                for (String ensembl_id: ensembls) {
+                                    /** convert ensembl_id to gene symbol and retrieve chromosome, start and end position, and strand **/
+                                    String chr = "";
+                                    String start = "";
+                                    String end = "";
+                                    String strand = "";
+                                    String gene_symbol = "";
+                                    /***************************************************************************************************/
+                                    String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
+                                    String fpkm_uq = (ensembl2fpkmuq.containsKey(ensembl_id)) ? ensembl2fpkmuq.get(ensembl_id) : "NA";
+                                    String fpkm = (ensembl2fpkm.containsKey(ensembl_id)) ? ensembl2fpkm.get(ensembl_id) : "NA";
+
+                                    ArrayList<String> values = new ArrayList<>();
+                                    values.add(chr);
+                                    values.add(start);
+                                    values.add(end);
+                                    values.add(strand);
+                                    values.add(ensembl_id);
+                                    values.add(gene_symbol);
+                                    values.add(htseq_count);
+                                    values.add(fpkm_uq);
+                                    values.add(fpkm);
+                                    Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                }
+                                Files.write((new File(outPath +  aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                filesPathConverted.add(outPath + file_uuid + "." + this.getFormat());
                             }
-                            Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
-                            filesPathConverted.add(outPath + uuid + "." + this.getFormat());
+                            catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
-                        catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                    }
+                    else {
+                        System.err.println("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
+                        GUI.appendLog("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
                     }
                 }
             }
@@ -145,6 +166,21 @@ public class GeneExpressionQuantificationParser extends BioParser {
         this.acceptedInputFileFormats = new HashSet<>();
         this.acceptedInputFileFormats.add(".txt");
         this.acceptedInputFileFormats.add(".counts");
+    }
+
+    private File getRelatedFile(File[] files, String reference_aliquot_uuid, HashMap<String, String> fileUUID2aliquotUUID, String suffix) {
+        for (File f: files) {
+            if (f.isFile()) {
+                if (f.getName().toLowerCase().trim().endsWith(suffix)) {
+                    String file_uuid = f.getName().split("_")[0];
+                    String aliquot_uuid = fileUUID2aliquotUUID.get(file_uuid);
+                    
+                    if (aliquot_uuid.equals(reference_aliquot_uuid))
+                        return f;
+                }
+            }
+        }
+        return null;
     }
     
 }

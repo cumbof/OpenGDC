@@ -41,16 +41,16 @@ public class MaskedSomaticMutationParser extends BioParser {
                     System.err.println("Processing " + f.getName());
                     GUI.appendLog("Processing " + f.getName() + "\n");
                     
-                    HashSet<String> uuids = MaskedSomaticMutationReader.getUUIDsFromMaf(f.getAbsolutePath());
-                    for (String uuid: uuids) {
-                        HashMap<Integer, HashMap<String, String>> uuidData = MaskedSomaticMutationReader.getUUIDDataFromMaf(f.getAbsolutePath(), uuid);
+                    HashSet<String> aliquot_uuids = MaskedSomaticMutationReader.getUUIDsFromMaf(f.getAbsolutePath());
+                    for (String aliquot_uuid: aliquot_uuids) {
+                        HashMap<Integer, HashMap<String, String>> uuidData = MaskedSomaticMutationReader.getUUIDDataFromMaf(f.getAbsolutePath(), aliquot_uuid);
                         //System.err.println("data: "+uuidData.size());
                         
                         if (!uuidData.isEmpty()) {
                             try {
-                                if (!filesPathConverted.contains(outPath + uuid + "." + this.getFormat())) {
-                                    Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
-                                    filesPathConverted.add(outPath + uuid + "." + this.getFormat());
+                                if (!filesPathConverted.contains(outPath + aliquot_uuid + "." + this.getFormat())) {
+                                    Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                                    filesPathConverted.add(outPath + aliquot_uuid + "." + this.getFormat());
                                 }
                             
                                 for (int entry: uuidData.keySet()) {
@@ -73,7 +73,7 @@ public class MaskedSomaticMutationParser extends BioParser {
                                     values.add(uuidData.get(entry).get("match_norm_seq_allele2"));
                                     values.add(uuidData.get(entry).get("tumor_sample_uuid"));
                                     values.add(uuidData.get(entry).get("matched_norm_sample_uuid"));
-                                    Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                    Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 }
                             }
                             catch (Exception e) {

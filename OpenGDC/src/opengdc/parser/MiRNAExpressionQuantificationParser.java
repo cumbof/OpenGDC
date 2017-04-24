@@ -20,6 +20,7 @@ import opengdc.GUI;
 import opengdc.integration.MIRBase;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
+import opengdc.util.GDCQuery;
 
 /**
  *
@@ -48,57 +49,64 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                     System.err.println("Processing " + f.getName());
                     GUI.appendLog("Processing " + f.getName() + "\n");
                     
-                    String uuid = f.getName().split("_")[0];
-                    try {
-                        Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
-                        
-                        InputStream fstream = new FileInputStream(f.getAbsolutePath());
-                        DataInputStream in = new DataInputStream(fstream);
-                        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                        String line;
-                        boolean firstLine = true;
-                        while ((line = br.readLine()) != null) {
-                            if (firstLine)
-                                firstLine = false; // just skip the first line (header)
-                            else {
-                                String[] line_split = line.split("\t");
-                                String mirna_id = line_split[0];
-                                String read_count = line_split[1];
-                                String reads_per_million_mirna_mapped = line_split[2];
-                                String cross_mapped = line_split[3];
-                                
-                                HashMap<String, String> coordinates = null;
-                                if (mirnaid2coordinates.containsKey(mirna_id)) {
-                                    coordinates = mirnaid2coordinates.get(mirna_id);
-                                
-                                    String chr = coordinates.get("CHR");
-                                    String start = coordinates.get("START");
-                                    String end = coordinates.get("END");
-                                    String strand = coordinates.get("STRAND");
+                    String file_uuid = f.getName().split("_")[0];
+                    String aliquot_uuid = GDCQuery.retrieveAliquotFromFileUUID(file_uuid);
+                    if (!aliquot_uuid.trim().equals("")) {
+                        try {
+                            Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
 
-                                    ArrayList<String> values = new ArrayList<>();
-                                    values.add(chr);
-                                    values.add(start);
-                                    values.add(end);
-                                    values.add(strand);
-                                    values.add(mirna_id);
-                                    values.add(read_count);
-                                    values.add(reads_per_million_mirna_mapped);
-                                    values.add(cross_mapped);
+                            InputStream fstream = new FileInputStream(f.getAbsolutePath());
+                            DataInputStream in = new DataInputStream(fstream);
+                            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                            String line;
+                            boolean firstLine = true;
+                            while ((line = br.readLine()) != null) {
+                                if (firstLine)
+                                    firstLine = false; // just skip the first line (header)
+                                else {
+                                    String[] line_split = line.split("\t");
+                                    String mirna_id = line_split[0];
+                                    String read_count = line_split[1];
+                                    String reads_per_million_mirna_mapped = line_split[2];
+                                    String cross_mapped = line_split[3];
 
-                                    Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                    HashMap<String, String> coordinates = null;
+                                    if (mirnaid2coordinates.containsKey(mirna_id)) {
+                                        coordinates = mirnaid2coordinates.get(mirna_id);
+
+                                        String chr = coordinates.get("CHR");
+                                        String start = coordinates.get("START");
+                                        String end = coordinates.get("END");
+                                        String strand = coordinates.get("STRAND");
+
+                                        ArrayList<String> values = new ArrayList<>();
+                                        values.add(chr);
+                                        values.add(start);
+                                        values.add(end);
+                                        values.add(strand);
+                                        values.add(mirna_id);
+                                        values.add(read_count);
+                                        values.add(reads_per_million_mirna_mapped);
+                                        values.add(cross_mapped);
+
+                                        Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                    }
                                 }
                             }
+                            br.close();
+                            in.close();
+                            fstream.close();
+
+                            Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                            filesPathConverted.add(outPath + file_uuid + "." + this.getFormat());
                         }
-                        br.close();
-                        in.close();
-                        fstream.close();
-                        
-                        Files.write((new File(outPath + uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
-                        filesPathConverted.add(outPath + uuid + "." + this.getFormat());
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                    catch (Exception e) {
-                        e.printStackTrace();
+                    else {
+                        System.err.println("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
+                        GUI.appendLog("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
                     }
                 }
             }
