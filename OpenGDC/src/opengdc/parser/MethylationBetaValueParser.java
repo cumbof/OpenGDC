@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -16,6 +17,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashSet;
 import opengdc.GUI;
+import opengdc.resources.GeneNames;
+import opengdc.resources.NCBI;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
 import opengdc.util.GDCQuery;
@@ -26,145 +29,201 @@ import opengdc.util.GDCQuery;
  */
 public class MethylationBetaValueParser extends BioParser {
 
-    @Override
-    public int convert(String program, String disease, String dataType, String inPath, String outPath) {
-        int acceptedFiles = FSUtils.acceptedFilesInFolder(inPath, getAcceptedInputFileFormats());
-        System.err.println("Data Amount: " + acceptedFiles + " files" + "\n\n");
-        GUI.appendLog("Data Amount: " + acceptedFiles + " files" + "\n\n");
-        
-        if (acceptedFiles == 0)
-            return 1;
-        
-        HashSet<String> filesPathConverted = new HashSet<>();
-        
-        File[] files = (new File(inPath)).listFiles();
-        for (File f: files) {
-            if (f.isFile()) {
-                String extension = FSUtils.getFileExtension(f);
-                if (getAcceptedInputFileFormats().contains(extension)) {
-                    System.err.println("Processing " + f.getName());
-                    GUI.appendLog("Processing " + f.getName() + "\n");
-                    
-                    String file_uuid = f.getName().split("_")[0];
-                    String aliquot_uuid = GDCQuery.retrieveAliquotFromFileUUID(file_uuid);
-                    if (!aliquot_uuid.trim().equals("")) {
-                        try {
-                            Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+	@Override
+	public int convert(String program, String disease, String dataType, String inPath, String outPath) {
+		int acceptedFiles = FSUtils.acceptedFilesInFolder(inPath, getAcceptedInputFileFormats());
+		System.err.println("Data Amount: " + acceptedFiles + " files" + "\n\n");
+		GUI.appendLog("Data Amount: " + acceptedFiles + " files" + "\n\n");
 
-                            InputStream fstream = new FileInputStream(f.getAbsolutePath());
-                            DataInputStream in = new DataInputStream(fstream);
-                            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                            String line;
-                            boolean firstLine = true;
-                            while ((line = br.readLine()) != null) {
-                                if (firstLine)
-                                    firstLine = false; // just skip the first line (header)
-                                else {
-                                    String[] line_split = line.split("\t");
-                                    String chr = line_split[2];
-                                    String start = line_split[3];
-                                    String end = line_split[4];
-                                    String strand = "*"; //retrieve strande from NCBI
-                                    String composite_element_ref = line_split[0];
-                                    String beta_value = line_split[1];
-                                    String gene_symbol = line_split[5];
-                                    String gene_type = line_split[6];
-                                    String transcript_id = line_split[7];
-                                    String position_to_tss = line_split[8];
-                                    String cgi_coordinate = line_split[9];
-                                    String feature_type = line_split[10];
+		if (acceptedFiles == 0)
+			return 1;
 
-                                    ArrayList<String> values = new ArrayList<>();
-                                    values.add(chr);
-                                    values.add(start);
-                                    values.add(end);
-                                    values.add(strand);
-                                    values.add(composite_element_ref);
-                                    values.add(beta_value);
-                                    values.add(gene_symbol);
-                                    values.add(gene_type);
-                                    values.add(transcript_id);
-                                    values.add(position_to_tss);
-                                    values.add(cgi_coordinate);
-                                    values.add(feature_type);
+		HashSet<String> filesPathConverted = new HashSet<>();
 
-                                    Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
-                                }
-                            }
-                            br.close();
-                            in.close();
-                            fstream.close();
+		File[] files = (new File(inPath)).listFiles();
+		for (File f: files) {
+			if (f.isFile()) {
+				String extension = FSUtils.getFileExtension(f);
+				if (getAcceptedInputFileFormats().contains(extension)) {
+					System.err.println("Processing " + f.getName());
+					GUI.appendLog("Processing " + f.getName() + "\n");
 
-                            Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
-                            filesPathConverted.add(outPath + file_uuid + "." + this.getFormat());
-                        }
-                        catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    else {
-                        System.err.println("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
-                        GUI.appendLog("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
-                    }
-                }
-            }
-        }
-        
-        if (!filesPathConverted.isEmpty()) {
-            // write header.schema
-            try {
-                System.err.println("\n" + "Generating header.schema");
-                GUI.appendLog("\n" + "Generating header.schema" + "\n");
-                Files.write((new File(outPath + "header.schema")).toPath(), (FormatUtils.generateDataSchema(this.getHeader(), this.getAttributesType())).getBytes("UTF-8"), StandardOpenOption.CREATE);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        
-        return 0;
-    }
+					String file_uuid = f.getName().split("_")[0];
+					String aliquot_uuid = GDCQuery.retrieveAliquotFromFileUUID(file_uuid);
+					if (!aliquot_uuid.trim().equals("")) {
+						try {
+							Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
 
-    @Override
-    public String[] getHeader() {
-        String[] header = new String[12];
-        header[0] = "chr";
-        header[1] = "start";
-        header[2] = "stop";
-        header[3] = "strand";
-        header[4] = "composite_element_ref";
-        header[5] = "beta_value";
-        header[6] = "gene_symbol";
-        header[7] = "gene_type";
-        header[8] = "transcript_id";
-        header[9] = "position_to_tss";
-        header[10] = "cgi_coordinate";
-        header[11] = "feature_type";
-        return header;
-    }
+							InputStream fstream = new FileInputStream(f.getAbsolutePath());
+							DataInputStream in = new DataInputStream(fstream);
+							BufferedReader br = new BufferedReader(new InputStreamReader(in));
+							String line;
+							boolean firstLine = true;
+							while ((line = br.readLine()) != null) {
+								if (firstLine)
+									firstLine = false; // just skip the first line (header)
+								else {
+									String[] line_split = line.split("\t");
+									String chr = line_split[2];
+									String start = line_split[3];
+									String end = line_split[4];
+									String gene_symbol = line_split[5];
+									if(gene_symbol.contains(";")){
 
-    @Override
-    public String[] getAttributesType() {
-        String[] attr_type = new String[12];
-        attr_type[0] = "STRING";
-        attr_type[1] = "LONG";
-        attr_type[2] = "LONG";
-        attr_type[3] = "CHAR";
-        attr_type[4] = "STRING";
-        attr_type[5] = "FLOAT";
-        attr_type[6] = "STRING";
-        attr_type[7] = "STRING";
-        attr_type[8] = "STRING";
-        attr_type[9] = "STRING";
-        attr_type[10] = "STRING";
-        attr_type[11] = "STRING";
-        return attr_type;
-    }
+										gene_symbol = gene_symbol.split(";")[0];
+									}
+									String strand = getStrand(gene_symbol,start, end,chr);;// "*"; //retrieve strand from NCBI
+									String entrez_id = getEntrez(gene_symbol);
+									String composite_element_ref = line_split[0];
+									String beta_value = line_split[1];
+									String gene_type = line_split[6];
+									String transcript_id = line_split[7];
+									String position_to_tss = line_split[8];
+									String cgi_coordinate = line_split[9];
+									String feature_type = line_split[10];
 
-    @Override
-    public void initAcceptedInputFileFormats() {
-        this.acceptedInputFileFormats = new HashSet<>();
-        this.acceptedInputFileFormats.add(".txt");
-    }
-    
+									ArrayList<String> values = new ArrayList<>();
+									values.add(chr);
+									values.add(start);
+									values.add(end);
+									values.add(strand);
+									values.add(composite_element_ref);
+									values.add(beta_value);
+									values.add(gene_symbol);
+									values.add(entrez_id);
+									values.add(gene_type);
+									values.add(transcript_id);
+									values.add(position_to_tss);
+									values.add(cgi_coordinate);
+									values.add(feature_type);
+
+									Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+								}
+							}
+							br.close();
+							in.close();
+							fstream.close();
+
+							Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+							filesPathConverted.add(outPath + file_uuid + "." + this.getFormat());
+						}
+						catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					else {
+						System.err.println("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
+						GUI.appendLog("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
+					}
+				}
+			}
+		}
+
+		if (!filesPathConverted.isEmpty()) {
+			// write header.schema
+			try {
+				System.err.println("\n" + "Generating header.schema");
+				GUI.appendLog("\n" + "Generating header.schema" + "\n");
+				Files.write((new File(outPath + "header.schema")).toPath(), (FormatUtils.generateDataSchema(this.getHeader(), this.getAttributesType())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		return 0;
+	}
+
+
+
+	public static String getStrand(String gene_symbol, String start, String end,String chr){
+		String strand = null;
+		String entrez_id = null;
+		String archive = NCBI.getNcbiArchive()+"/"+"data.txt";
+		if(!gene_symbol.equals(".") && gene_symbol!=null){
+			
+			try {
+				if (NCBI.getNcbiArchive()!=null) {
+
+					strand = NCBI.getNCBIinfo("STRAND", gene_symbol,start,end);
+				}else {
+					NCBI.setNcbiArchive("ncbi_archieve") ;
+					File archivio = new File(NCBI.getNcbiArchive()+"/"+"data.txt");
+					archivio.createNewFile();
+
+				}
+				if(strand==null){
+
+					entrez_id = getEntrez(gene_symbol);
+					if(	!entrez_id.equals("") && entrez_id!=null){
+						strand = NCBI.simpleRetrieveStrand(entrez_id);
+					}
+					NCBI.updateNCBIinfo(archive, gene_symbol,start,end,chr,entrez_id,strand);
+				}
+
+				if(strand==null){
+					strand = "*";
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		return strand;
+	}
+
+
+
+	private static String getEntrez(String gene_symbol) throws IOException {
+		String entrez_id;
+		entrez_id = GeneNames.retriveEntrez_idFromGene_symbol(gene_symbol);
+		return entrez_id;
+	}
+
+
+	@Override
+	public String[] getHeader() {
+		String[] header = new String[13];
+		header[0] = "chr";
+		header[1] = "start";
+		header[2] = "stop";
+		header[3] = "strand";
+		header[4] = "composite_element_ref";
+		header[5] = "beta_value";
+		header[6] = "gene_symbol";
+		header[7] = "entrez_id";
+		header[8] = "gene_type";
+		header[9] = "transcript_id";
+		header[10] = "position_to_tss";
+		header[11] = "cgi_coordinate";
+		header[12] = "feature_type";
+		return header;
+	}
+
+	@Override
+	public String[] getAttributesType() {
+		String[] attr_type = new String[13];
+		attr_type[0] = "STRING";
+		attr_type[1] = "LONG";
+		attr_type[2] = "LONG";
+		attr_type[3] = "CHAR";
+		attr_type[4] = "STRING";
+		attr_type[5] = "FLOAT";
+		attr_type[6] = "STRING";
+		attr_type[7] = "STRING";
+		attr_type[8] = "STRING";
+		attr_type[9] = "STRING";
+		attr_type[10] = "STRING";
+		attr_type[11] = "STRING";
+		attr_type[12] = "STRING";
+		return attr_type;
+	}
+
+	@Override
+	public void initAcceptedInputFileFormats() {
+		this.acceptedInputFileFormats = new HashSet<>();
+		this.acceptedInputFileFormats.add(".txt");
+	}
+
 }

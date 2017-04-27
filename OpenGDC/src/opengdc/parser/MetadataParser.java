@@ -77,7 +77,7 @@ public class MetadataParser extends BioParser {
                             if (!aliquot_uuid.equals("")) {
                                 // values = list of node attributes and attributes of parents (from node to root)
                                 HashMap<String, String> aliquotMeta = aliquot.getAttributes();
-                                HashMap<String, String> parentMeta = extractParentMetadata(aliquot.getParent(), new HashMap<>());
+                                HashMap<String, String> parentMeta = extractParentMetadata(aliquot.getParent(), new HashMap<String, String>());
                                 aliquotMeta.putAll(parentMeta);
                                 aliquot2attributes.put(aliquot_uuid, aliquotMeta);
                             }

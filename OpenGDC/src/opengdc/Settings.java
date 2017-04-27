@@ -18,7 +18,7 @@ public class Settings {
     // ****************** tmp dir ******************
     private static final String TMP_DIR = "./appdata/tmp/";
     public static String getTmpDir() {
-        if (DEBUG) return "/Users/fabio/Downloads/test_gdc_download/tmp/";
+        if (DEBUG) return "/Users/eleonora/Downloads/test_gdc_download/tmp/";
         return TMP_DIR;
     }
     // *********************************************
@@ -69,7 +69,7 @@ public class Settings {
     
     private static final String MIRBASE_HSA_GFF3 = "./appdata/mirbase/hsa.gff3";
     public static String getMirbaseHsaPath() {
-        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/mirbase/hsa.gff3";
+        if (DEBUG) return "/Users/eleonora/NetBeansProjects/OpenGDC/package/appdata/mirbase/hsa.gff3";
         return MIRBASE_HSA_GFF3;
     }
     
