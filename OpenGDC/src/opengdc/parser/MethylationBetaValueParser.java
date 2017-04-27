@@ -147,7 +147,7 @@ public class MethylationBetaValueParser extends BioParser {
 
 					strand = NCBI.getNCBIinfo("STRAND", gene_symbol,start,end);
 				}else {
-					NCBI.setNcbiArchive("ncbi_archieve") ;
+					NCBI.setNcbiArchive("package/appdata/ncbi_archieve") ;
 					File archivio = new File(NCBI.getNcbiArchive()+"/"+"data.txt");
 					archivio.createNewFile();
 
