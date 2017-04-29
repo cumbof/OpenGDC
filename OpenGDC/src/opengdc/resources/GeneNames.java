@@ -20,7 +20,6 @@ public class GeneNames {
 		String hugoFetchQuery = "http://rest.genenames.org/fetch/symbol/" + geneSymbol;
        File hugoXml_tmp = File.createTempFile("hugo_tmp", "tmp");
         QueryParser.downloadDataFromUrl(hugoFetchQuery, hugoXml_tmp.getAbsolutePath(), 0);
-        System.out.println(hugoFetchQuery);
         String entrez = XMLReader.getEntrezFromHugo(hugoXml_tmp.getAbsolutePath());
 		return entrez;
 	}

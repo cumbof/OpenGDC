@@ -55,9 +55,10 @@ public class QueryParser {
     public static boolean downloadDataFromUrl(String url, String out_path, int count) {
         try {
             //System.err.println("URL: "+url);
-            URL tcga_url = new URL(url);
-            ReadableByteChannel rbc = Channels.newChannel(tcga_url.openStream());
+            URL gdc_url = new URL(url);
+            ReadableByteChannel rbc = Channels.newChannel(gdc_url.openStream());
             FileOutputStream fos = new FileOutputStream(out_path);
+            System.out.println(url);
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             fos.close();
             rbc.close();

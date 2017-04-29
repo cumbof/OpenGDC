@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
 import opengdc.resources.GeneNames;
@@ -72,8 +73,20 @@ public class MethylationBetaValueParser extends BioParser {
 
 										gene_symbol = gene_symbol.split(";")[0];
 									}
-									String strand = getStrand(gene_symbol,start, end,chr);;// "*"; //retrieve strand from NCBI
 									String entrez_id = getEntrez(gene_symbol);
+									String strand = "";
+									if(entrez_id!=null && !entrez_id.equals("")){
+
+										strand = getStrand(gene_symbol,entrez_id,start, end,chr); //retrieve strand from NCBI
+									}
+									if(strand.equals(""))
+										strand = "*";
+									if(entrez_id==null || entrez_id.equals("")) {	
+										NCBI ncbi = NCBI.getInstance(); //inizializza il file data.txt e la mappa con tutte le info che ci sono dentro il file (se non è vuoto)
+										String archivePath = ncbi.getNcbiArchive()+"data.txt";
+										entrez_id= null;
+										ncbi.updateNCBIinfo(archivePath, gene_symbol,start,end,chr,entrez_id,strand);
+										}
 									String composite_element_ref = line_split[0];
 									String beta_value = line_split[1];
 									String gene_type = line_split[6];
@@ -136,39 +149,36 @@ public class MethylationBetaValueParser extends BioParser {
 
 
 
-	public static String getStrand(String gene_symbol, String start, String end,String chr){
+	public static String getStrand(String gene_symbol, String entrez_id, String start, String end,String chr){
 		String strand = null;
-		String entrez_id = null;
-		String archive = NCBI.getNcbiArchive()+"/"+"data.txt";
-		if(!gene_symbol.equals(".") && gene_symbol!=null){
-			
-			try {
-				if (NCBI.getNcbiArchive()!=null) {
 
-					strand = NCBI.getNCBIinfo("STRAND", gene_symbol,start,end);
-				}else {
-					NCBI.setNcbiArchive("package/appdata/ncbi_archieve") ;
-					File archivio = new File(NCBI.getNcbiArchive()+"/"+"data.txt");
-					archivio.createNewFile();
 
+		NCBI ncbi = NCBI.getInstance(); //inizializza il file data.txt e la mappa con tutte le info che ci sono dentro il file (se non è vuoto)
+		String archivePath = ncbi.getNcbiArchive()+"data.txt";
+		try {
+			//cerca nel file data.txt lo strand
+			strand = ncbi.getNCBIinfo("STRAND", entrez_id,start,end);
+
+			//se non trovo lo strand in data.txt allora richiamo ncbi fetch
+			if(strand==null){
+
+				//entrez_id = getEntrez(gene_symbol);
+				if(	!entrez_id.equals("") && entrez_id!=null){
+					strand = ncbi.simpleRetrieveStrand(entrez_id);
 				}
-				if(strand==null){
-
-					entrez_id = getEntrez(gene_symbol);
-					if(	!entrez_id.equals("") && entrez_id!=null){
-						strand = NCBI.simpleRetrieveStrand(entrez_id);
-					}
-					NCBI.updateNCBIinfo(archive, gene_symbol,start,end,chr,entrez_id,strand);
-				}
-
-				if(strand==null){
+				if(strand==null || strand.equals("")){
 					strand = "*";
 				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ncbi.updateNCBIinfo(archivePath, gene_symbol,start,end,chr,entrez_id,strand);
+
+
+
 			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		//}
 
 		return strand;
 	}
@@ -176,8 +186,22 @@ public class MethylationBetaValueParser extends BioParser {
 
 
 	private static String getEntrez(String gene_symbol) throws IOException {
-		String entrez_id;
-		entrez_id = GeneNames.retriveEntrez_idFromGene_symbol(gene_symbol);
+		String entrez_id = null;
+		NCBI ncbi = NCBI.getInstance();
+		for(HashMap<String,String> val: ncbi.getInfoMap().values()){
+
+			if(gene_symbol.equals(val.get("SYMBOL"))){
+				entrez_id=val.get("ENTREZ");
+				break;
+
+			}
+		}
+		if(entrez_id==null){
+			if(!gene_symbol.equals(".") && gene_symbol!=null && !gene_symbol.equals("")){
+				entrez_id = GeneNames.retriveEntrez_idFromGene_symbol(gene_symbol);
+			}
+		}
+
 		return entrez_id;
 	}
 
