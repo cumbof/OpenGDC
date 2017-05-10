@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
+import opengdc.integration.GeneNames;
 import opengdc.integration.MIRBase;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
@@ -78,6 +79,12 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                                         String start = coordinates.get("START");
                                         String end = coordinates.get("END");
                                         String strand = coordinates.get("STRAND");
+                                        String entrez = "NA";
+                                        
+                                        // retrieve entrez_id from GeneNames (HUGO)
+                                        String entrez_tmp = GeneNames.getEntrezFromMirnaID(mirna_id);
+                                        if (entrez_tmp != null)
+                                            entrez = entrez_tmp;
 
                                         ArrayList<String> values = new ArrayList<>();
                                         values.add(chr);
@@ -85,6 +92,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                                         values.add(end);
                                         values.add(strand);
                                         values.add(mirna_id);
+                                        values.add(entrez);
                                         values.add(read_count);
                                         values.add(reads_per_million_mirna_mapped);
                                         values.add(cross_mapped);
@@ -129,29 +137,31 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
 
     @Override
     public String[] getHeader() {
-        String[] header = new String[8];
+        String[] header = new String[9];
         header[0] = "chr";
         header[1] = "start";
         header[2] = "stop";
         header[3] = "strand";
         header[4] = "mirna_id";
-        header[5] = "read_count";
-        header[6] = "reads_per_million_mirna_mapped";
-        header[7] = "cross_mapped";
+        header[5] = "entrez_id";
+        header[6] = "read_count";
+        header[7] = "reads_per_million_mirna_mapped";
+        header[8] = "cross_mapped";
         return header;
     }
 
     @Override
     public String[] getAttributesType() {
-        String[] attr_type = new String[8];
+        String[] attr_type = new String[9];
         attr_type[0] = "STRING";
         attr_type[1] = "LONG";
         attr_type[2] = "LONG";
         attr_type[3] = "CHAR";
         attr_type[4] = "STRING";
-        attr_type[5] = "LONG";
-        attr_type[6] = "FLOAT";
-        attr_type[7] = "STRING";
+        attr_type[5] = "STRING";
+        attr_type[6] = "LONG";
+        attr_type[7] = "FLOAT";
+        attr_type[8] = "STRING";
         return attr_type;
     }
 

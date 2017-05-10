@@ -28,7 +28,7 @@ public class MIRBase {
     public static HashMap<String, HashMap<String, String>> getMirnaid2coordinates() {
         if (mirnaid2coordinates.isEmpty()) {
             try {
-                InputStream fstream = new FileInputStream(Settings.getMirbaseHsaPath());
+                InputStream fstream = new FileInputStream(Settings.getMirbaseHsaDataPath());
                 DataInputStream in = new DataInputStream(fstream);
                 BufferedReader br = new BufferedReader(new InputStreamReader(in));
                 String line;

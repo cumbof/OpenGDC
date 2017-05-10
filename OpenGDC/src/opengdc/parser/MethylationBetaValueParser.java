@@ -14,8 +14,11 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
+import opengdc.integration.GeneNames;
+import opengdc.integration.NCBI;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
 import opengdc.util.GDCQuery;
@@ -64,15 +67,29 @@ public class MethylationBetaValueParser extends BioParser {
                                     String chr = line_split[2];
                                     String start = line_split[3];
                                     String end = line_split[4];
-                                    String strand = "*"; //retrieve strande from NCBI
+                                    String strand = "*";
                                     String composite_element_ref = line_split[0];
                                     String beta_value = line_split[1];
                                     String gene_symbol = line_split[5];
+                                    String entrez = "NA";
                                     String gene_type = line_split[6];
                                     String transcript_id = line_split[7];
                                     String position_to_tss = line_split[8];
                                     String cgi_coordinate = line_split[9];
                                     String feature_type = line_split[10];
+                                    
+                                    // trying to retrive the entrez_id starting with the gene_symbol from GeneNames (HUGO)
+                                    String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
+                                    if (entrez_tmp != null) {
+                                        entrez = entrez_tmp;
+                                        // trying to retrieve the strand starting with the entrez from NCBI
+                                        HashMap<String, String> entrez_data = NCBI.getGeneInfo(entrez);
+                                        if (entrez_data != null) {
+                                            String strand_tmp = entrez_data.get("STRAND");
+                                            if (!strand_tmp.trim().equals("") && !strand_tmp.trim().toLowerCase().equals("na") && !strand_tmp.trim().toLowerCase().equals("null"))
+                                                strand = strand_tmp;
+                                        }
+                                    }
 
                                     ArrayList<String> values = new ArrayList<>();
                                     values.add(chr);
@@ -82,6 +99,7 @@ public class MethylationBetaValueParser extends BioParser {
                                     values.add(composite_element_ref);
                                     values.add(beta_value);
                                     values.add(gene_symbol);
+                                    values.add(entrez);
                                     values.add(gene_type);
                                     values.add(transcript_id);
                                     values.add(position_to_tss);
@@ -127,7 +145,7 @@ public class MethylationBetaValueParser extends BioParser {
 
     @Override
     public String[] getHeader() {
-        String[] header = new String[12];
+        String[] header = new String[13];
         header[0] = "chr";
         header[1] = "start";
         header[2] = "stop";
@@ -135,17 +153,18 @@ public class MethylationBetaValueParser extends BioParser {
         header[4] = "composite_element_ref";
         header[5] = "beta_value";
         header[6] = "gene_symbol";
-        header[7] = "gene_type";
-        header[8] = "transcript_id";
-        header[9] = "position_to_tss";
-        header[10] = "cgi_coordinate";
-        header[11] = "feature_type";
+        header[7] = "entrez_id";
+        header[8] = "gene_type";
+        header[9] = "transcript_id";
+        header[10] = "position_to_tss";
+        header[11] = "cgi_coordinate";
+        header[12] = "feature_type";
         return header;
     }
 
     @Override
     public String[] getAttributesType() {
-        String[] attr_type = new String[12];
+        String[] attr_type = new String[13];
         attr_type[0] = "STRING";
         attr_type[1] = "LONG";
         attr_type[2] = "LONG";
@@ -158,6 +177,7 @@ public class MethylationBetaValueParser extends BioParser {
         attr_type[9] = "STRING";
         attr_type[10] = "STRING";
         attr_type[11] = "STRING";
+        attr_type[12] = "STRING";
         return attr_type;
     }
 

@@ -67,10 +67,28 @@ public class Settings {
     // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     
     
-    private static final String MIRBASE_HSA_GFF3 = "./appdata/mirbase/hsa.gff3";
-    public static String getMirbaseHsaPath() {
+    private static final String MIRBASE_HSA_GFF3_DATA = "./appdata/mirbase/hsa.gff3";
+    public static String getMirbaseHsaDataPath() {
         if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/mirbase/hsa.gff3";
-        return MIRBASE_HSA_GFF3;
+        return MIRBASE_HSA_GFF3_DATA;
+    }
+    
+    private static final String NCBI_DATA = "./appdata/ncbi/data.txt";
+    public static String getNCBIDataPath() {
+        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/ncbi/data.txt";
+        return NCBI_DATA;
+    }
+    
+    private static final String GENENAMES_DATA = "./appdata/genenames/hgnc_complete_set.txt";
+    public static String getGENENAMESDataPath() {
+        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/genenames/hgnc_complete_set.txt";
+        return GENENAMES_DATA;
+    }
+    
+    private static final String ENSEMBL_DATA = "./appdata/ensembl/Homo_sapiens.GRCh38.88.chr.gff3";
+    public static String getENSEMBLDataPath() {
+        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/ensembl/Homo_sapiens.GRCh38.88.chr.gff3";
+        return ENSEMBL_DATA;
     }
     
 }

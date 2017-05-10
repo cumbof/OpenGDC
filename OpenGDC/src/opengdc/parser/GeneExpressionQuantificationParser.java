@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
+import opengdc.integration.Ensembl;
 import opengdc.reader.GeneExpressionQuantificationReader;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
@@ -77,28 +78,33 @@ public class GeneExpressionQuantificationParser extends BioParser {
                             try {
                                 Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
                                 for (String ensembl_id: ensembls) {
-                                    /** convert ensembl_id to gene symbol and retrieve chromosome, start and end position, and strand **/
-                                    String chr = "";
-                                    String start = "";
-                                    String end = "";
-                                    String strand = "";
-                                    String gene_symbol = "";
-                                    /***************************************************************************************************/
-                                    String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
-                                    String fpkm_uq = (ensembl2fpkmuq.containsKey(ensembl_id)) ? ensembl2fpkmuq.get(ensembl_id) : "NA";
-                                    String fpkm = (ensembl2fpkm.containsKey(ensembl_id)) ? ensembl2fpkm.get(ensembl_id) : "NA";
+                                    /** convert ensembl_id to symbol and retrieve chromosome, start and end position, strand, and other relevant info **/
+                                    HashMap<String, String> ensembl_data = Ensembl.extractEnsemblInfo(ensembl_id);
+                                    if (!ensembl_data.isEmpty()) {
+                                        String chr = ensembl_data.get("CHR");
+                                        String start = ensembl_data.get("START");
+                                        String end = ensembl_data.get("END");
+                                        String strand = ensembl_data.get("STRAND");
+                                        String symbol = ensembl_data.get("SYMBOL");
+                                        String type = ensembl_data.get("TYPE");
+                                        /***************************************************************************************************/
+                                        String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
+                                        String fpkm_uq = (ensembl2fpkmuq.containsKey(ensembl_id)) ? ensembl2fpkmuq.get(ensembl_id) : "NA";
+                                        String fpkm = (ensembl2fpkm.containsKey(ensembl_id)) ? ensembl2fpkm.get(ensembl_id) : "NA";
 
-                                    ArrayList<String> values = new ArrayList<>();
-                                    values.add(chr);
-                                    values.add(start);
-                                    values.add(end);
-                                    values.add(strand);
-                                    values.add(ensembl_id);
-                                    values.add(gene_symbol);
-                                    values.add(htseq_count);
-                                    values.add(fpkm_uq);
-                                    values.add(fpkm);
-                                    Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                        ArrayList<String> values = new ArrayList<>();
+                                        values.add(chr);
+                                        values.add(start);
+                                        values.add(end);
+                                        values.add(strand);
+                                        values.add(ensembl_id);
+                                        values.add(symbol);
+                                        values.add(type);
+                                        values.add(htseq_count);
+                                        values.add(fpkm_uq);
+                                        values.add(fpkm);
+                                        Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                    }
                                 }
                                 Files.write((new File(outPath +  aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 filesPathConverted.add(outPath + file_uuid + "." + this.getFormat());
@@ -133,31 +139,33 @@ public class GeneExpressionQuantificationParser extends BioParser {
 
     @Override
     public String[] getHeader() {
-        String[] header = new String[9];
+        String[] header = new String[10];
         header[0] = "chr";
         header[1] = "start";
         header[2] = "stop";
         header[3] = "strand";
         header[4] = "ensembl_id";
-        header[5] = "gene_symbol";
-        header[6] = "htseq_count";
-        header[7] = "fpkm_uq";
-        header[8] = "fpkm";
+        header[5] = "symbol";
+        header[6] = "type";
+        header[7] = "htseq_count";
+        header[8] = "fpkm_uq";
+        header[9] = "fpkm";
         return header;
     }
 
     @Override
     public String[] getAttributesType() {
-        String[] attr_type = new String[9];
+        String[] attr_type = new String[10];
         attr_type[0] = "STRING";
         attr_type[1] = "LONG";
         attr_type[2] = "LONG";
         attr_type[3] = "CHAR";
         attr_type[4] = "STRING";
         attr_type[5] = "STRING";
-        attr_type[6] = "LONG";
-        attr_type[7] = "FLOAT";
+        attr_type[6] = "STRING";
+        attr_type[7] = "LONG";
         attr_type[8] = "FLOAT";
+        attr_type[9] = "FLOAT";
         return attr_type;
     }
 
