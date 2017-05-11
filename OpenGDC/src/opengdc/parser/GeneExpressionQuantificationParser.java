@@ -79,7 +79,9 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                 Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
                                 for (String ensembl_id: ensembls) {
                                     /** convert ensembl_id to symbol and retrieve chromosome, start and end position, strand, and other relevant info **/
-                                    HashMap<String, String> ensembl_data = Ensembl.extractEnsemblInfo(ensembl_id);
+                                    // remove ensembl version from id
+                                    String ensembl_id_noversion = ensembl_id.split("\\.")[0];
+                                    HashMap<String, String> ensembl_data = Ensembl.extractEnsemblInfo(ensembl_id_noversion);
                                     if (!ensembl_data.isEmpty()) {
                                         String chr = ensembl_data.get("CHR");
                                         String start = ensembl_data.get("START");

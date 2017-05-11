@@ -30,18 +30,24 @@ public class Ensembl {
             while ((line = br.readLine()) != null) {
                 try {
                     if (!line.startsWith("#")) {
-                        if (line.contains(ensembl_id)) {
-                            String[] arr = line.split("\t");
-                            String extendedInfo = arr[8];
-                            // verify that extendedInfo is related to the correct ensembl_id
-                                result.put("CHR", arr[0]);
-                                result.put("START", arr[3]);
-                                result.put("END", arr[4]);
-                                result.put("STRAND", arr[6]);
-                                result.put("TYPE", arr[2]);
-                                //result.put("SYMBOL", arr[??]);
-                                // other relevant data ??
-                                break;
+                        String[] arr = line.split("\t");
+                        String extendedInfo = arr[8];
+                        if (extendedInfo.contains(ensembl_id)) {
+                            result.put("CHR", arr[0]);
+                            result.put("START", arr[3]);
+                            result.put("END", arr[4]);
+                            result.put("STRAND", arr[6]);
+                            result.put("TYPE", arr[2]);
+                            String symbol = "NA";
+                            String[] extendedInfo_arr = extendedInfo.split(";");
+                            for (String data: extendedInfo_arr) {
+                                if (data.toLowerCase().trim().startsWith("name")) {
+                                    String[] name_split = data.split("=");
+                                    symbol = name_split[name_split.length-1];
+                                }
+                            }
+                            result.put("SYMBOL", symbol);
+                            break;
                         }
                     }
                 } catch (Exception e) {}

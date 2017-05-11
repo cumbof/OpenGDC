@@ -83,8 +83,8 @@ public class MethylationBetaValueParser extends BioParser {
                                     if (entrez_tmp != null) {
                                         entrez = entrez_tmp;
                                         // trying to retrieve the strand starting with the entrez from NCBI
-                                        HashMap<String, String> entrez_data = NCBI.getGeneInfo(entrez);
-                                        if (entrez_data != null) {
+                                        HashMap<String, String> entrez_data = NCBI.getGeneInfo(entrez, gene_symbol);
+                                        if (!entrez_data.isEmpty()) {
                                             String strand_tmp = entrez_data.get("STRAND");
                                             if (!strand_tmp.trim().equals("") && !strand_tmp.trim().toLowerCase().equals("na") && !strand_tmp.trim().toLowerCase().equals("null"))
                                                 strand = strand_tmp;

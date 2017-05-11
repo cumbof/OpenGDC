@@ -79,11 +79,15 @@ public class NCBI {
         return ncbi_data;
     }
     
-    public static HashMap<String, String> getGeneInfo(String entrez) {
+    public static HashMap<String, String> getGeneInfo(String entrez, String symbol) {
         HashMap<String, HashMap<String, String>> data = loadNCBIData(false);
         if (data.containsKey(entrez))
             return data.get(entrez);
-        return null;
+        else {
+            HashMap<String, String> gene_info = retrieveGenomicCoordinates(entrez, symbol);
+            updateNCBIData(gene_info.get("GDC_ENTREZ"), gene_info.get("GDC_SYMBOL"), gene_info.get("NCBI_ENTREZ"), gene_info.get("NCBI_SYMBOL"), gene_info.get("CHR"), gene_info.get("START"), gene_info.get("END"), gene_info.get("STRAND"));
+            return gene_info;
+        }
     }
 
     public static HashMap<String, String> retrieveGenomicCoordinates(String entrez, String gene) {
