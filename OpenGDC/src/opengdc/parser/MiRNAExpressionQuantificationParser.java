@@ -143,7 +143,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
         header[2] = "stop";
         header[3] = "strand";
         header[4] = "mirna_id";
-        header[5] = "entrez_id";
+        header[5] = "entrez_gene_id";
         header[6] = "read_count";
         header[7] = "reads_per_million_mirna_mapped";
         header[8] = "cross_mapped";

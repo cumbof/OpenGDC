@@ -122,13 +122,13 @@ public class MetadataParser extends BioParser {
                     for (String attribute: biospecimenBigMap.get(aliquot_uuid).keySet()) {
                         if (MetadataHandler.getAttributeFromKey(attribute).trim().toLowerCase().equals("shared:bcr_patient_uuid"))
                             patient_uuid = biospecimenBigMap.get(aliquot_uuid).get(attribute);
-                        out.println(MetadataHandler.getAttributeFromKey(attribute) + "\t" + biospecimenBigMap.get(aliquot_uuid).get(attribute));
+                        out.println("biospecimen__"+MetadataHandler.getAttributeFromKey(attribute) + "\t" + biospecimenBigMap.get(aliquot_uuid).get(attribute));
                     }
                     // print clinical info
                     if (!patient_uuid.equals("")) {
                         if (clinicalBigMap.containsKey(patient_uuid)) {
                             for (String attribute: clinicalBigMap.get(patient_uuid).keySet())
-                                out.println(MetadataHandler.getAttributeFromKey(attribute) + "\t" + clinicalBigMap.get(patient_uuid).get(attribute));
+                                out.println("clinical__"+MetadataHandler.getAttributeFromKey(attribute) + "\t" + clinicalBigMap.get(patient_uuid).get(attribute));
                         }
                     }
                     out.close();

@@ -70,7 +70,7 @@ public class MethylationBetaValueParser extends BioParser {
                                     String strand = "*";
                                     String composite_element_ref = line_split[0];
                                     String beta_value = line_split[1];
-                                    String gene_symbol = line_split[5];
+                                    String gene_symbol = line_split[5].split(";")[0];
                                     String entrez = "NA";
                                     String gene_type = line_split[6];
                                     String transcript_id = line_split[7];
@@ -153,7 +153,7 @@ public class MethylationBetaValueParser extends BioParser {
         header[4] = "composite_element_ref";
         header[5] = "beta_value";
         header[6] = "gene_symbol";
-        header[7] = "entrez_id";
+        header[7] = "entrez_gene_id";
         header[8] = "gene_type";
         header[9] = "transcript_id";
         header[10] = "position_to_tss";

@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
 import opengdc.integration.Ensembl;
+import opengdc.integration.GeneNames;
+import opengdc.integration.NCBI;
 import opengdc.reader.GeneExpressionQuantificationReader;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
@@ -53,7 +55,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
             if (f.isFile()) {
                 String extension = FSUtils.getFileExtension(f);
                 // start with 'counts' file and manually retrieve the related 'FPKM' and 'FPKM-UQ' files
-                if (getAcceptedInputFileFormats().contains(extension) && extension.toLowerCase().trim().equals("counts")) {
+                if (getAcceptedInputFileFormats().contains(extension) && extension.toLowerCase().trim().equals(".counts")) {
                     // TODO: we need a common name for 'counts', 'FPKM' and 'FPKM-UQ' files for the same aliquot
                     String file_uuid = f.getName().split("_")[0];
                     String aliquot_uuid = fileUUID2aliquotUUID.get(file_uuid);
@@ -87,8 +89,14 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                         String start = ensembl_data.get("START");
                                         String end = ensembl_data.get("END");
                                         String strand = ensembl_data.get("STRAND");
-                                        String symbol = ensembl_data.get("SYMBOL");
+                                        String gene_symbol = ensembl_data.get("SYMBOL");
                                         String type = ensembl_data.get("TYPE");
+                                        
+                                        // trying to retrive the entrez_id starting with the symbol from GeneNames (HUGO)
+                                        String entrez = "NA";
+                                        String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
+                                        if (entrez_tmp != null)
+                                            entrez = entrez_tmp;
                                         /***************************************************************************************************/
                                         String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
                                         String fpkm_uq = (ensembl2fpkmuq.containsKey(ensembl_id)) ? ensembl2fpkmuq.get(ensembl_id) : "NA";
@@ -100,7 +108,8 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                         values.add(end);
                                         values.add(strand);
                                         values.add(ensembl_id);
-                                        values.add(symbol);
+                                        values.add(entrez);
+                                        values.add(gene_symbol);
                                         values.add(type);
                                         values.add(htseq_count);
                                         values.add(fpkm_uq);
@@ -141,23 +150,24 @@ public class GeneExpressionQuantificationParser extends BioParser {
 
     @Override
     public String[] getHeader() {
-        String[] header = new String[10];
+        String[] header = new String[11];
         header[0] = "chr";
         header[1] = "start";
         header[2] = "stop";
         header[3] = "strand";
         header[4] = "ensembl_id";
-        header[5] = "symbol";
-        header[6] = "type";
-        header[7] = "htseq_count";
-        header[8] = "fpkm_uq";
-        header[9] = "fpkm";
+        header[5] = "entrez_gene_id";
+        header[6] = "gene_symbol";
+        header[7] = "type";
+        header[8] = "htseq_count";
+        header[9] = "fpkm_uq";
+        header[10] = "fpkm";
         return header;
     }
 
     @Override
     public String[] getAttributesType() {
-        String[] attr_type = new String[10];
+        String[] attr_type = new String[11];
         attr_type[0] = "STRING";
         attr_type[1] = "LONG";
         attr_type[2] = "LONG";
@@ -165,9 +175,10 @@ public class GeneExpressionQuantificationParser extends BioParser {
         attr_type[4] = "STRING";
         attr_type[5] = "STRING";
         attr_type[6] = "STRING";
-        attr_type[7] = "LONG";
-        attr_type[8] = "FLOAT";
+        attr_type[7] = "STRING";
+        attr_type[8] = "LONG";
         attr_type[9] = "FLOAT";
+        attr_type[10] = "FLOAT";
         return attr_type;
     }
 
