@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc.util;
 
@@ -242,7 +246,7 @@ public class GDCQuery {
         }
     }
     
-    public static void main(String[] args) {
+    //public static void main(String[] args) {
         /*String file_uuid = "0b50ee5b-3130-4401-84b1-630596632a12";
         System.err.println(retrieveAliquotFromFileUUID(file_uuid));*/
         
@@ -261,6 +265,6 @@ public class GDCQuery {
         String outFolderPath = "/Users/fabio/Downloads/test_gdc_download/data/";
         String fileName = "TCGA.BRCA.muse.8751a889-cb3e-4487-ba6f-ac91651666e7.somatic.maf.gz";
         downloadFile(uuid, outFolderPath, fileName, false);*/
-    }
+    //}
     
 }

@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc.parser;
 
@@ -22,7 +26,7 @@ import opengdc.util.XMLNode;
  */
 public class MetadataParser extends BioParser {
 
-    private final String out_extension = ".meta";
+    private final String out_extension = ".META";
     private ArrayList<XMLNode> aliquotNodes = new ArrayList<>();
     
     @Override

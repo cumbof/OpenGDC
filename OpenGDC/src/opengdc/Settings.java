@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc;
 
@@ -73,9 +77,9 @@ public class Settings {
         return MIRBASE_HSA_GFF3_DATA;
     }
     
-    private static final String NCBI_DATA = "./appdata/ncbi/data.txt";
+    private static final String NCBI_DATA = "./appdata/ncbi/GRCh38_data.txt";
     public static String getNCBIDataPath() {
-        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/ncbi/data.txt";
+        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/ncbi/GRCh38_data.txt";
         return NCBI_DATA;
     }
     
