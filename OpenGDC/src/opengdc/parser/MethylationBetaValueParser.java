@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc.parser;
 
@@ -72,41 +76,44 @@ public class MethylationBetaValueParser extends BioParser {
                                     String beta_value = line_split[1];
                                     String gene_symbol = line_split[5].split(";")[0];
                                     String entrez = "NA";
-                                    String gene_type = line_split[6].split(";")[0];
+                                    String gene_type = line_split[6].split(";")[0];;
                                     String transcript_id = line_split[7];
                                     String position_to_tss = line_split[8];
                                     String cgi_coordinate = line_split[9];
                                     String feature_type = line_split[10];
                                     
-                                    // trying to retrive the entrez_id starting with the gene_symbol from GeneNames (HUGO)
-                                    String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
-                                    if (entrez_tmp != null) {
-                                        entrez = entrez_tmp;
-                                        // trying to retrieve the strand starting with the entrez from NCBI
-                                        HashMap<String, String> entrez_data = NCBI.getGeneInfo(entrez, gene_symbol);
-                                        if (!entrez_data.isEmpty()) {
-                                            String strand_tmp = entrez_data.get("STRAND");
-                                            if (!strand_tmp.trim().equals("") && !strand_tmp.trim().toLowerCase().equals("na") && !strand_tmp.trim().toLowerCase().equals("null"))
-                                                strand = strand_tmp;
+                                    // skip non-valid entry
+                                    if (!chr.equals("*")) {
+                                        // trying to retrive the entrez_id starting with the gene_symbol from GeneNames (HUGO)
+                                        String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
+                                        if (entrez_tmp != null) {
+                                            entrez = entrez_tmp;
+                                            // trying to retrieve the strand starting with the entrez from NCBI
+                                            HashMap<String, String> entrez_data = NCBI.getGeneInfo(entrez, gene_symbol);
+                                            if (!entrez_data.isEmpty()) {
+                                                String strand_tmp = entrez_data.get("STRAND");
+                                                if (!strand_tmp.trim().equals("") && !strand_tmp.trim().toLowerCase().equals("na") && !strand_tmp.trim().toLowerCase().equals("null"))
+                                                    strand = strand_tmp;
+                                            }
                                         }
+
+                                        ArrayList<String> values = new ArrayList<>();
+                                        values.add(chr);
+                                        values.add(start);
+                                        values.add(end);
+                                        values.add(strand);
+                                        values.add(composite_element_ref);
+                                        values.add(beta_value);
+                                        values.add(gene_symbol);
+                                        values.add(entrez);
+                                        values.add(gene_type);
+                                        values.add(transcript_id);
+                                        values.add(position_to_tss);
+                                        values.add(cgi_coordinate);
+                                        values.add(feature_type);
+
+                                        Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                     }
-
-                                    ArrayList<String> values = new ArrayList<>();
-                                    values.add(chr);
-                                    values.add(start);
-                                    values.add(end);
-                                    values.add(strand);
-                                    values.add(composite_element_ref);
-                                    values.add(beta_value);
-                                    values.add(gene_symbol);
-                                    values.add(entrez);
-                                    values.add(gene_type);
-                                    values.add(transcript_id);
-                                    values.add(position_to_tss);
-                                    values.add(cgi_coordinate);
-                                    values.add(feature_type);
-
-                                    Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 }
                             }
                             br.close();
@@ -153,7 +160,7 @@ public class MethylationBetaValueParser extends BioParser {
         header[4] = "composite_element_ref";
         header[5] = "beta_value";
         header[6] = "gene_symbol";
-        header[7] = "entrez_id";
+        header[7] = "entrez_gene_id";
         header[8] = "gene_type";
         header[9] = "transcript_id";
         header[10] = "position_to_tss";

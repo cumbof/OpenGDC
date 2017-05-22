@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc.parser;
 
@@ -9,11 +13,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-
 import opengdc.GUI;
 import opengdc.integration.Ensembl;
 import opengdc.integration.GeneNames;
@@ -54,7 +55,6 @@ public class GeneExpressionQuantificationParser extends BioParser {
         }
         
         for (File f: files) {
-        	List<String> lista = new ArrayList<String>();
             if (f.isFile()) {
                 String extension = FSUtils.getFileExtension(f);
                 // start with 'counts' file and manually retrieve the related 'FPKM' and 'FPKM-UQ' files
@@ -92,29 +92,27 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                         String start = ensembl_data.get("START");
                                         String end = ensembl_data.get("END");
                                         String strand = ensembl_data.get("STRAND");
-                                        String symbol = ensembl_data.get("SYMBOL");
-                                        String entrez_id  = "NA";
+                                        String gene_symbol = ensembl_data.get("SYMBOL");
                                         String type = ensembl_data.get("TYPE");
+                                        
+                                        // trying to retrive the entrez_id starting with the symbol from GeneNames (HUGO)
+                                        String entrez = "NA";
+                                        String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
+                                        if (entrez_tmp != null)
+                                            entrez = entrez_tmp;
                                         /***************************************************************************************************/
                                         String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
                                         String fpkm_uq = (ensembl2fpkmuq.containsKey(ensembl_id)) ? ensembl2fpkmuq.get(ensembl_id) : "NA";
                                         String fpkm = (ensembl2fpkm.containsKey(ensembl_id)) ? ensembl2fpkm.get(ensembl_id) : "NA";
 
-                                        String entrez_tmp = GeneNames.getEntrezFromSymbol(symbol);
-                                        if (entrez_tmp != null) {
-                                        	entrez_id = entrez_tmp;}
-                                        
-                                 
-                                        lista.add(symbol+"_"+ensembl_id+"_"+start+"_"+end);
-                                        
                                         ArrayList<String> values = new ArrayList<>();
                                         values.add(chr);
                                         values.add(start);
                                         values.add(end);
                                         values.add(strand);
                                         values.add(ensembl_id);
-                                        values.add(symbol);
-                                        values.add(entrez_id);
+                                        values.add(entrez);
+                                        values.add(gene_symbol);
                                         values.add(type);
                                         values.add(htseq_count);
                                         values.add(fpkm_uq);
@@ -122,9 +120,6 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                         Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                     }
                                 }
-                                
-                                
-                                
                                 Files.write((new File(outPath +  aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 filesPathConverted.add(outPath + file_uuid + "." + this.getFormat());
                             }
@@ -139,14 +134,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
                     }
                 }
             }
-            Collections.sort(lista);
-        	System.out.println("----------");
-            for(String l: lista){
-            	System.out.println(l);
-            }
         }
-        
-        
         
         if (!filesPathConverted.isEmpty()) {
             // write header.schema
@@ -171,8 +159,8 @@ public class GeneExpressionQuantificationParser extends BioParser {
         header[2] = "stop";
         header[3] = "strand";
         header[4] = "ensembl_id";
-        header[5] = "symbol";
-        header[6] = "entrez_id";
+        header[5] = "entrez_gene_id";
+        header[6] = "gene_symbol";
         header[7] = "type";
         header[8] = "htseq_count";
         header[9] = "fpkm_uq";
