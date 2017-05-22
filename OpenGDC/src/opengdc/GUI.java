@@ -719,9 +719,11 @@ public class GUI extends javax.swing.JFrame {
                 //System.err.println(diseases.size());
                 jComboBox3.removeAllItems();
                 jComboBox3.addItem("");
-                for (String disease: dataTypes) {
-                    jComboBox3.addItem(disease);
+                for (String dataType: dataTypes) {
+                    if (!dataType.trim().toLowerCase().equals("biospecimen supplement") && !dataType.trim().toLowerCase().equals("clinical supplement"))
+                        jComboBox3.addItem(dataType);
                 }
+                jComboBox3.addItem("Clinical and Biospecimen supplements");
             }
             else {
                 jComboBox3.removeAllItems();
@@ -805,9 +807,11 @@ public class GUI extends javax.swing.JFrame {
                 //System.err.println(diseases.size());
                 jComboBox7.removeAllItems();
                 jComboBox7.addItem("");
-                for (String disease: dataTypes) {
-                    jComboBox7.addItem(disease);
+                for (String dataType: dataTypes) {
+                    if (!dataType.trim().toLowerCase().equals("biospecimen supplement") && !dataType.trim().toLowerCase().equals("clinical supplement"))
+                        jComboBox7.addItem(dataType);
                 }
+                jComboBox7.addItem("Clinical and Biospecimen supplements");
             }
             else {
                 jComboBox7.removeAllItems();
@@ -822,7 +826,8 @@ public class GUI extends javax.swing.JFrame {
         try {
             String selectedDataType = jComboBox7.getSelectedItem().toString();
             if (!selectedDataType.trim().equals("")) {
-                if (selectedDataType.toLowerCase().trim().equals("biospecimen supplement") || selectedDataType.toLowerCase().trim().equals("clinical supplement")) {
+                //if (selectedDataType.toLowerCase().trim().equals("biospecimen supplement") || selectedDataType.toLowerCase().trim().equals("clinical supplement")) {
+                if (selectedDataType.toLowerCase().trim().equals("clinical and biospecimen supplements")) {
                     String[] formats_arr = new String[2];
                     formats_arr[0] = "";
                     formats_arr[1] = "META";

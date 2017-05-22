@@ -9,9 +9,14 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+
 import opengdc.GUI;
+import opengdc.integration.Ensembl;
+import opengdc.integration.GeneNames;
 import opengdc.reader.GeneExpressionQuantificationReader;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
@@ -49,17 +54,18 @@ public class GeneExpressionQuantificationParser extends BioParser {
         }
         
         for (File f: files) {
+        	List<String> lista = new ArrayList<String>();
             if (f.isFile()) {
                 String extension = FSUtils.getFileExtension(f);
                 // start with 'counts' file and manually retrieve the related 'FPKM' and 'FPKM-UQ' files
-                if (getAcceptedInputFileFormats().contains(extension) && extension.toLowerCase().trim().equals("counts")) {
+                if (getAcceptedInputFileFormats().contains(extension) && extension.toLowerCase().trim().equals(".counts")) {
                     // TODO: we need a common name for 'counts', 'FPKM' and 'FPKM-UQ' files for the same aliquot
                     String file_uuid = f.getName().split("_")[0];
                     String aliquot_uuid = fileUUID2aliquotUUID.get(file_uuid);
                     if (!aliquot_uuid.trim().equals("")) {
                         // retrieve 'FPKM' and 'FPKM-UQ' files with the same aliquot_uuid (related to the 'counts' file)
                         File fpkm_file = getRelatedFile(files, aliquot_uuid, fileUUID2aliquotUUID, "fpkm.txt");
-                        File fpkmuq_file = getRelatedFile(files, aliquot_uuid, fileUUID2aliquotUUID, "fpkm.txt");
+                        File fpkmuq_file = getRelatedFile(files, aliquot_uuid, fileUUID2aliquotUUID, "fpkm-uq.txt");
 
                         System.err.println("Processing " + aliquot_uuid + " (counts, FPKM, FPKM-UQ)");
                         GUI.appendLog("Processing " + aliquot_uuid + " (counts, FPKM, FPKM-UQ)" + "\n");
@@ -77,29 +83,48 @@ public class GeneExpressionQuantificationParser extends BioParser {
                             try {
                                 Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
                                 for (String ensembl_id: ensembls) {
-                                    /** convert ensembl_id to gene symbol and retrieve chromosome, start and end position, and strand **/
-                                    String chr = "";
-                                    String start = "";
-                                    String end = "";
-                                    String strand = "";
-                                    String gene_symbol = "";
-                                    /***************************************************************************************************/
-                                    String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
-                                    String fpkm_uq = (ensembl2fpkmuq.containsKey(ensembl_id)) ? ensembl2fpkmuq.get(ensembl_id) : "NA";
-                                    String fpkm = (ensembl2fpkm.containsKey(ensembl_id)) ? ensembl2fpkm.get(ensembl_id) : "NA";
+                                    /** convert ensembl_id to symbol and retrieve chromosome, start and end position, strand, and other relevant info **/
+                                    // remove ensembl version from id
+                                    String ensembl_id_noversion = ensembl_id.split("\\.")[0];
+                                    HashMap<String, String> ensembl_data = Ensembl.extractEnsemblInfo(ensembl_id_noversion);
+                                    if (!ensembl_data.isEmpty()) {
+                                        String chr = ensembl_data.get("CHR");
+                                        String start = ensembl_data.get("START");
+                                        String end = ensembl_data.get("END");
+                                        String strand = ensembl_data.get("STRAND");
+                                        String symbol = ensembl_data.get("SYMBOL");
+                                        String entrez_id  = "NA";
+                                        String type = ensembl_data.get("TYPE");
+                                        /***************************************************************************************************/
+                                        String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
+                                        String fpkm_uq = (ensembl2fpkmuq.containsKey(ensembl_id)) ? ensembl2fpkmuq.get(ensembl_id) : "NA";
+                                        String fpkm = (ensembl2fpkm.containsKey(ensembl_id)) ? ensembl2fpkm.get(ensembl_id) : "NA";
 
-                                    ArrayList<String> values = new ArrayList<>();
-                                    values.add(chr);
-                                    values.add(start);
-                                    values.add(end);
-                                    values.add(strand);
-                                    values.add(ensembl_id);
-                                    values.add(gene_symbol);
-                                    values.add(htseq_count);
-                                    values.add(fpkm_uq);
-                                    values.add(fpkm);
-                                    Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                        String entrez_tmp = GeneNames.getEntrezFromSymbol(symbol);
+                                        if (entrez_tmp != null) {
+                                        	entrez_id = entrez_tmp;}
+                                        
+                                 
+                                        lista.add(symbol+"_"+ensembl_id+"_"+start+"_"+end);
+                                        
+                                        ArrayList<String> values = new ArrayList<>();
+                                        values.add(chr);
+                                        values.add(start);
+                                        values.add(end);
+                                        values.add(strand);
+                                        values.add(ensembl_id);
+                                        values.add(symbol);
+                                        values.add(entrez_id);
+                                        values.add(type);
+                                        values.add(htseq_count);
+                                        values.add(fpkm_uq);
+                                        values.add(fpkm);
+                                        Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                    }
                                 }
+                                
+                                
+                                
                                 Files.write((new File(outPath +  aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 filesPathConverted.add(outPath + file_uuid + "." + this.getFormat());
                             }
@@ -114,7 +139,14 @@ public class GeneExpressionQuantificationParser extends BioParser {
                     }
                 }
             }
+            Collections.sort(lista);
+        	System.out.println("----------");
+            for(String l: lista){
+            	System.out.println(l);
+            }
         }
+        
+        
         
         if (!filesPathConverted.isEmpty()) {
             // write header.schema
@@ -133,31 +165,35 @@ public class GeneExpressionQuantificationParser extends BioParser {
 
     @Override
     public String[] getHeader() {
-        String[] header = new String[9];
+        String[] header = new String[11];
         header[0] = "chr";
         header[1] = "start";
         header[2] = "stop";
         header[3] = "strand";
         header[4] = "ensembl_id";
-        header[5] = "gene_symbol";
-        header[6] = "htseq_count";
-        header[7] = "fpkm_uq";
-        header[8] = "fpkm";
+        header[5] = "symbol";
+        header[6] = "entrez_id";
+        header[7] = "type";
+        header[8] = "htseq_count";
+        header[9] = "fpkm_uq";
+        header[10] = "fpkm";
         return header;
     }
 
     @Override
     public String[] getAttributesType() {
-        String[] attr_type = new String[9];
+        String[] attr_type = new String[11];
         attr_type[0] = "STRING";
         attr_type[1] = "LONG";
         attr_type[2] = "LONG";
         attr_type[3] = "CHAR";
         attr_type[4] = "STRING";
         attr_type[5] = "STRING";
-        attr_type[6] = "LONG";
-        attr_type[7] = "FLOAT";
-        attr_type[8] = "FLOAT";
+        attr_type[6] = "STRING";
+        attr_type[7] = "STRING";
+        attr_type[8] = "LONG";
+        attr_type[9] = "FLOAT";
+        attr_type[10] = "FLOAT";
         return attr_type;
     }
 

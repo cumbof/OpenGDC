@@ -36,6 +36,18 @@ public class DownloadDataAction extends Action {
         System.err.println("Downloading GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Output Folder Path: " + gdc_path + "\n" + "Auto-extract: " + autoextract + "\n" + "Auto-remove: " + autoremove + "\n");
         GUI.appendLog("Downloading GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Output Folder Path: " + gdc_path + "\n" + "Auto-extract: " + autoextract + "\n" + "Auto-remove: " + autoremove + "\n");
         
+        if (dataType.trim().toLowerCase().equals("clinical and biospecimen supplements")) {
+            retrieveData(disease, "Clinical Supplement", gdc_path, autoextract, autoremove);
+            retrieveData(disease, "Biospecimen Supplement", gdc_path, autoextract, autoremove);
+        }
+        else
+            retrieveData(disease, dataType, gdc_path, autoextract, autoremove);
+        
+        System.err.println("\n" + "done" + "\n\n" + "#####################" + "\n\n");
+        GUI.appendLog("\n" + "done" + "\n\n" + "#####################" + "\n\n");
+    }
+    
+    private void retrieveData(String disease, String dataType, String gdc_path, boolean autoextract, boolean autoremove) {
         GDCQuery.query(disease, dataType);
         HashMap<String, HashMap<String, String>> dataMap = GDCQuery.extractInfo(GDCQuery.getLastQueryFilePath());
         GUI.appendLog("Data Amount: " + dataMap.size() + " files" + "\n\n");
@@ -90,9 +102,6 @@ public class DownloadDataAction extends Action {
                 }
             }
         }
-        
-        System.err.println("\n" + "done" + "\n\n" + "#####################" + "\n\n");
-        GUI.appendLog("\n" + "done" + "\n\n" + "#####################" + "\n\n");
     }
     
 }

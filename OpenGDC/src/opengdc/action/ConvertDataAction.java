@@ -38,12 +38,15 @@ public class ConvertDataAction extends Action {
         
         BioParser parser;
         switch (dataType.toLowerCase()) {
-            case "clinical supplement":
+            case "clinical and biospecimen supplements":
+                parser = new MetadataParser();
+                break;
+            /*case "clinical supplement":
                 parser = new MetadataParser();
                 break;
             case "biospecimen supplement":
                 parser = new MetadataParser();
-                break;
+                break;*/
             case "masked somatic mutation":
                 parser = new MaskedSomaticMutationParser();
                 break;

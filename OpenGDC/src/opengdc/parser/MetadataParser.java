@@ -34,6 +34,9 @@ public class MetadataParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
+        HashMap<String, HashMap<String, String>> clinicalBigMap = new HashMap<>();
+        HashMap<String, HashMap<String, String>> biospecimenBigMap = new HashMap<>();
+        
         File[] files = (new File(inPath)).listFiles();
         for (File f: files) {
             // remove all elements in aliquotNodes from previous iterations
@@ -45,11 +48,12 @@ public class MetadataParser extends BioParser {
                     GUI.appendLog("Processing " + f.getName() + "\n");
                     
                     HashMap<String, Object> metadata_from_xml = MetadataHandler.getXMLMap(f.getAbsolutePath());
-                    if (dataType.toLowerCase().trim().equals("clinical supplement")) {
+                    //if (dataType.toLowerCase().trim().equals("clinical supplement")) {
+                    if (f.getName().toLowerCase().contains("clinical")) {
                         
                         HashMap<String, String> clinical_metadata_map = MetadataHandler.getDataMap(metadata_from_xml, null);
                         String patient_uuid = MetadataHandler.findKey(clinical_metadata_map, "endsWith", "bcr_patient_uuid");
-                        try {
+                        /*try {
                             FileOutputStream fos = new FileOutputStream(outPath + patient_uuid + out_extension);
                             PrintStream out = new PrintStream(fos);
                             for (String attribute: clinical_metadata_map.keySet())
@@ -59,10 +63,12 @@ public class MetadataParser extends BioParser {
                         }
                         catch (Exception e) {
                             e.printStackTrace();
-                        }
+                        }*/
+                        clinicalBigMap.put(patient_uuid, clinical_metadata_map);
                         
                     }
-                    else if (dataType.toLowerCase().trim().equals("biospecimen supplement")) {
+                    //else if (dataType.toLowerCase().trim().equals("biospecimen supplement")) {
+                    else if (f.getName().toLowerCase().contains("biospecimen")) {
                         // TODO: check if meta files contain all attributes
                         
                         XMLNode root = new XMLNode();
@@ -85,7 +91,7 @@ public class MetadataParser extends BioParser {
                         
                         if (!aliquot2attributes.isEmpty()) {
                             for (String aliquot_uuid: aliquot2attributes.keySet()) {
-                                try {
+                                /*try {
                                     FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid + out_extension);
                                     PrintStream out = new PrintStream(fos);
                                     for (String attribute: aliquot2attributes.get(aliquot_uuid).keySet())
@@ -95,11 +101,41 @@ public class MetadataParser extends BioParser {
                                 }
                                 catch (Exception e) {
                                     e.printStackTrace();
-                                }
+                                }*/
+                                biospecimenBigMap.put(aliquot_uuid, aliquot2attributes.get(aliquot_uuid));
                             }
                         }
                         
                     }
+                }
+            }
+        }
+        
+        // merge clinical and biospecimen info
+        if (!clinicalBigMap.isEmpty() || !biospecimenBigMap.isEmpty()) {
+            for (String aliquot_uuid: biospecimenBigMap.keySet()) {
+                try {
+                    FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid + out_extension);
+                    PrintStream out = new PrintStream(fos);
+                    // print biospecimen info
+                    String patient_uuid = "";
+                    for (String attribute: biospecimenBigMap.get(aliquot_uuid).keySet()) {
+                        if (MetadataHandler.getAttributeFromKey(attribute).trim().toLowerCase().equals("shared:bcr_patient_uuid"))
+                            patient_uuid = biospecimenBigMap.get(aliquot_uuid).get(attribute);
+                        out.println(MetadataHandler.getAttributeFromKey(attribute) + "\t" + biospecimenBigMap.get(aliquot_uuid).get(attribute));
+                    }
+                    // print clinical info
+                    if (!patient_uuid.equals("")) {
+                        if (clinicalBigMap.containsKey(patient_uuid)) {
+                            for (String attribute: clinicalBigMap.get(patient_uuid).keySet())
+                                out.println(MetadataHandler.getAttributeFromKey(attribute) + "\t" + clinicalBigMap.get(patient_uuid).get(attribute));
+                        }
+                    }
+                    out.close();
+                    fos.close();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }

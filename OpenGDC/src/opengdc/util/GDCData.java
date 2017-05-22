@@ -18,7 +18,7 @@ public class GDCData {
     
     private static void initBigGDCDataMap() {
         program2tumor2datatype = new HashMap<>();
-        program2tumor2datatype.put("TARGET", new HashMap<String, HashSet<String>>());
+        program2tumor2datatype.put("TARGET", new  HashMap<String, HashSet<String>>());
         program2tumor2datatype.put("TCGA", new HashMap<String, HashSet<String>>());
         
         /** TARGET **/
