@@ -65,7 +65,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
                     if (!aliquot_uuid.trim().equals("")) {
                         // retrieve 'FPKM' and 'FPKM-UQ' files with the same aliquot_uuid (related to the 'counts' file)
                         File fpkm_file = getRelatedFile(files, aliquot_uuid, fileUUID2aliquotUUID, "fpkm.txt");
-                        File fpkmuq_file = getRelatedFile(files, aliquot_uuid, fileUUID2aliquotUUID, "fpkm.txt");
+                        File fpkmuq_file = getRelatedFile(files, aliquot_uuid, fileUUID2aliquotUUID, "fpkm-uq.txt");
 
                         System.err.println("Processing " + aliquot_uuid + " (counts, FPKM, FPKM-UQ)");
                         GUI.appendLog("Processing " + aliquot_uuid + " (counts, FPKM, FPKM-UQ)" + "\n");

@@ -78,7 +78,7 @@ public class DownloadDataAction extends Action {
                     File destDir = new File(destDirPath);
                     
                     // extract data
-                    boolean uncompressed = DataExtractionTool.uncompressData(data_file, destDir, false);
+                    boolean uncompressed = DataExtractionTool.uncompressData(data_file, destDir, false, true);
                     //System.out.println("uncompressed: " + uncompressed);
                     uncompressed_folders_path.addAll(DataExtractionTool.getUncompressedFoldersPathList());
                     experiments_path.addAll(DataExtractionTool.getExperimentsPathList());

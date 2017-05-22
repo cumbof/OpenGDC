@@ -46,7 +46,7 @@ public class Main {
                             if (dataType.toLowerCase().trim().contains("clinical") || dataType.toLowerCase().trim().contains("biospecimen")) {
                                 System.err.println(program + "\t" + disease + "\t" + dataType);
 
-                                if (CMD.trim().toLowerCase().equals("download")) {
+                                if (CMD.trim().toLowerCase().contains("download")) {
                                     /** DOWNLOAD DATA **/
                                     //String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/";
                                     String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
@@ -66,7 +66,7 @@ public class Main {
                                     Controller controller = new Controller();
                                     controller.execute(arr);
                                 }
-                                if (CMD.trim().toLowerCase().equals("convert")) {
+                                if (CMD.trim().toLowerCase().contains("convert")) {
                                     /** CONVERT DATA **/
                                     //String inDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/";
                                     String inDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";

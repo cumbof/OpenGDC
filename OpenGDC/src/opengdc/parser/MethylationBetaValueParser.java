@@ -76,7 +76,7 @@ public class MethylationBetaValueParser extends BioParser {
                                     String beta_value = line_split[1];
                                     String gene_symbol = line_split[5].split(";")[0];
                                     String entrez = "NA";
-                                    String gene_type = line_split[6];
+                                    String gene_type = line_split[6].split(";")[0];
                                     String transcript_id = line_split[7];
                                     String position_to_tss = line_split[8];
                                     String cgi_coordinate = line_split[9];

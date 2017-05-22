@@ -43,6 +43,10 @@ public class GeneNames {
                             String symbol = arr[1];
                             String entrez = arr[18];
                             symbol2entrez.put(symbol, entrez);
+                            
+                            String[] synonyms = arr[10].replaceAll("\"", "").split("\\|");
+                            for (String syn: synonyms)
+                                symbol2entrez.put(syn, entrez);
                         }
                         else
                             firstLine = false;

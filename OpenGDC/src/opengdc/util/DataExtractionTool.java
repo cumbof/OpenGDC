@@ -35,7 +35,12 @@ public class DataExtractionTool {
         return uncompressed_folders_path;
     }
     
-    public static boolean uncompressData(File file, File destDir, boolean removeSource) {
+    public static boolean uncompressData(File file, File destDir, boolean removeSource, boolean resetPathLists) {
+        if (resetPathLists) {
+            experiments_path = new HashSet<>();
+            uncompressed_folders_path = new HashSet<>();
+        }
+        
         if (file.getName().toLowerCase().endsWith(".tar.gz") || file.getName().toLowerCase().endsWith(".tar"))
             return uncompressTarGz(file, destDir, removeSource);
         else if (file.getName().toLowerCase().endsWith(".gz")) {
@@ -48,8 +53,6 @@ public class DataExtractionTool {
     }
 
     public static boolean uncompressTarGz(File tarFile, File destDir, boolean removeSource) {
-        experiments_path = new HashSet<>();
-        uncompressed_folders_path = new HashSet<>();
         uncompressed_folders_path.add(destDir.getAbsolutePath());
         
         try {
