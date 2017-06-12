@@ -36,7 +36,7 @@ public class Main {
         
         HashMap<String, HashMap<String, HashSet<String>>> gdcDataMap = GDCData.getBigGDCDataMap();
         for (String program: gdcDataMap.keySet()) {
-            if (program.toLowerCase().trim().equals("tcga")) {
+            if (program.toLowerCase().trim().equals("target")) {
                 for (String disease: gdcDataMap.get(program).keySet()) {
                     if (!skip_diseases.contains(disease)) {
                         HashSet<String> dataTypes = new HashSet<>();
@@ -48,8 +48,8 @@ public class Main {
 
                                 if (CMD.trim().toLowerCase().contains("download")) {
                                     /** DOWNLOAD DATA **/
-                                    //String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/";
-                                    String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
+                                    String outDirStr = "/Users/fabio/Downloads/test_gdc_download/TARGET-Metadata/"+program+"/"+disease+"/gdc/";
+                                    //String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
 
                                     File outDir = new File(outDirStr);
                                     outDir.mkdirs();
@@ -68,10 +68,10 @@ public class Main {
                                 }
                                 if (CMD.trim().toLowerCase().contains("convert")) {
                                     /** CONVERT DATA **/
-                                    //String inDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/";
-                                    String inDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
-                                    //String outDirStr = "/Users/fabio/Downloads/test_gdc_download/BED-Metadata/"+disease+"/meta/";
-                                    String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/meta/";
+                                    String inDirStr = "/Users/fabio/Downloads/test_gdc_download/TARGET-Metadata/"+program+"/"+disease+"/gdc/";
+                                    //String inDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
+                                    String outDirStr = "/Users/fabio/Downloads/test_gdc_download/TARGET-Metadata/"+program+"/"+disease+"/meta/";
+                                    //String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/meta/";
 
                                     File outDir = new File(outDirStr);
                                     outDir.mkdirs();

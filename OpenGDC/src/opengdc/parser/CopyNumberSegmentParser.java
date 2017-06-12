@@ -66,6 +66,7 @@ public class CopyNumberSegmentParser extends BioParser {
                                 else {
                                     String[] line_split = line.split("\t");
                                     String chr = line_split[1];
+                                    if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
                                     String start = line_split[2];
                                     String end = line_split[3];
                                     String strand = "*"; // unknown strand for copy number variation data

@@ -68,9 +68,11 @@ public class IsoformExpressionQuantificationParser extends BioParser {
                                     String isoform_coordinates = line_split[1];
                                     String[] coordinates_split = isoform_coordinates.split(":");
                                     String chr = coordinates_split[1];
-                                    String start = coordinates_split[2];
-                                    String end = coordinates_split[3];
-                                    String strand = coordinates_split[4];
+                                    if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
+                                    String[] start_end = coordinates_split[2].split("-");
+                                    String start = start_end[0];
+                                    String end = start_end[1];
+                                    String strand = coordinates_split[3];
 
                                     String mirna_id = line_split[0];
                                     String read_count = line_split[2];

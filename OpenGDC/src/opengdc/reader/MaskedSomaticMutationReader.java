@@ -189,7 +189,9 @@ public class MaskedSomaticMutationReader {
                                 entryData.put("entrez_gene_id", line_split[ENTREZ_GENE_ID_INDEX]);
                                 /*entryData.put("center", line_split[CENTER_INDEX]);
                                 entryData.put("ncbi_build", line_split[NCBI_BUILD_INDEX]);*/
-                                entryData.put("chromosome", line_split[CHROMOSOME_INDEX]);
+                                String chr = line_split[CHROMOSOME_INDEX];
+                                if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
+                                entryData.put("chromosome", chr);
                                 entryData.put("start_position", line_split[START_POSITION_INDEX]);
                                 entryData.put("end_position", line_split[END_POSITION_INDEX]);
                                 entryData.put("strand", line_split[STRAND_INDEX]);

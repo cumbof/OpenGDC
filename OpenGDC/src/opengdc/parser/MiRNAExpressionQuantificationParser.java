@@ -80,6 +80,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                                         coordinates = mirnaid2coordinates.get(mirna_id);
 
                                         String chr = coordinates.get("CHR");
+                                        if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
                                         String start = coordinates.get("START");
                                         String end = coordinates.get("END");
                                         String strand = coordinates.get("STRAND");

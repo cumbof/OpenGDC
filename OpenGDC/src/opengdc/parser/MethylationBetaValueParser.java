@@ -69,12 +69,14 @@ public class MethylationBetaValueParser extends BioParser {
                                 else {
                                     String[] line_split = line.split("\t");
                                     String chr = line_split[2];
+                                    if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
                                     String start = line_split[3];
                                     String end = line_split[4];
                                     String strand = "*";
                                     String composite_element_ref = line_split[0];
                                     String beta_value = line_split[1];
-                                    String gene_symbol = line_split[5].split(";")[0];
+                                    //String gene_symbol = line_split[5].split(";")[0];
+	                            String gene_symbol = line_split[5];
                                     String entrez = "NA";
                                     String gene_type = line_split[6].split(";")[0];
                                     String transcript_id = line_split[7];
@@ -85,15 +87,18 @@ public class MethylationBetaValueParser extends BioParser {
                                     // skip non-valid entry
                                     if (!chr.equals("*")) {
                                         // trying to retrive the entrez_id starting with the gene_symbol from GeneNames (HUGO)
-                                        String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
-                                        if (entrez_tmp != null) {
-                                            entrez = entrez_tmp;
-                                            // trying to retrieve the strand starting with the entrez from NCBI
-                                            HashMap<String, String> entrez_data = NCBI.getGeneInfo(entrez, gene_symbol);
-                                            if (!entrez_data.isEmpty()) {
-                                                String strand_tmp = entrez_data.get("STRAND");
-                                                if (!strand_tmp.trim().equals("") && !strand_tmp.trim().toLowerCase().equals("na") && !strand_tmp.trim().toLowerCase().equals("null"))
-                                                    strand = strand_tmp;
+                                        String[] gene_symbol_split = gene_symbol.split(";");
+                                        for (String gene_sym: gene_symbol_split) {
+                                            String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_sym);
+                                            if (entrez_tmp != null) {
+                                                entrez = entrez_tmp;
+                                                // trying to retrieve the strand starting with the entrez from NCBI
+                                                HashMap<String, String> entrez_data = NCBI.getGeneInfo(entrez, gene_symbol);
+                                                if (!entrez_data.isEmpty()) {
+                                                    String strand_tmp = entrez_data.get("STRAND");
+                                                    if (!strand_tmp.trim().equals("") && !strand_tmp.trim().toLowerCase().equals("na") && !strand_tmp.trim().toLowerCase().equals("null"))
+                                                        strand = strand_tmp;
+                                                }
                                             }
                                         }
 

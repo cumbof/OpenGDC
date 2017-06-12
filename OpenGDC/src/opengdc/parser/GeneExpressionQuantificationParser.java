@@ -89,6 +89,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                     HashMap<String, String> ensembl_data = Ensembl.extractEnsemblInfo(ensembl_id_noversion);
                                     if (!ensembl_data.isEmpty()) {
                                         String chr = ensembl_data.get("CHR");
+                                        if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
                                         String start = ensembl_data.get("START");
                                         String end = ensembl_data.get("END");
                                         String strand = ensembl_data.get("STRAND");
