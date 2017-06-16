@@ -73,10 +73,16 @@ public class Settings {
         return MIRBASE_HSA_GFF3_DATA;
     }
     
-    private static final String NCBI_DATA = "./package/appdata/ncbi/data.txt";
+    private static final String NCBI_DATA = "./package/appdata/ncbi/ref_GRCh38.p7_top_level.gff3";
     public static String getNCBIDataPath() {
-        if (DEBUG) return "/Users/eleonora/NetBeansProjects/OpenGDC/package/appdata/ncbi/data.txt";
+        if (DEBUG) return "/Users/eleonora/NetBeansProjects/OpenGDC/package/appdata/ncbi/ref_GRCh38.p7_top_level.gff3";
         return NCBI_DATA;
+    }
+    
+    private static final String NCBI_DATA_local = "./package/appdata/ncbi/GRCh38_data.txt";
+    public static String getNCBIDataPath_local() {
+        if (DEBUG) return "/Users/eleonora/NetBeansProjects/OpenGDC/package/appdata/ncbi/GRCh38_data.txt";
+        return NCBI_DATA_local;
     }
     
     private static final String GENENAMES_DATA = "./package/appdata/genenames/hgnc_complete_set.txt";
