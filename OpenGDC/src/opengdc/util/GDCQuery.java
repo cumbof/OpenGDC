@@ -216,7 +216,7 @@ public class GDCQuery {
     /*
         field: 
             - files.file_id
-            - files.cases.samples.portions.analytes.aliquots.aliquot_id
+            - cases.samples.portions.analytes.aliquots.aliquot_id
     */
     public static HashMap<String, String> retrieveExpInfoFromAttribute(String field, String value, HashSet<String> attributes) {
         if (attributes!=null) {
