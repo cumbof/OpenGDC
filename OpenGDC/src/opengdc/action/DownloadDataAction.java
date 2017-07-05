@@ -59,7 +59,6 @@ public class DownloadDataAction extends Action {
         GUI.appendLog("Data Amount: " + dataMap.size() + " files" + "\n\n");
         
         // TODO activate progress bar
-        // TODO show stack in Log tab
         
         /* DOWNLOAD (AND EXTRACT (AND REMOVE)) FILE BY FILE */
         for (String uuid: dataMap.keySet()) {

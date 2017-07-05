@@ -40,6 +40,8 @@ public class ConvertDataAction extends Action {
         System.err.println("Converting GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Format: " + format + "\n" + "Input Folder Path: " + input_path + "\n" + "Output Folder Path: " + output_path + "\n");
         GUI.appendLog("Converting GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Format: " + format + "\n" + "Input Folder Path: " + input_path + "\n" + "Output Folder Path: " + output_path + "\n");
         
+        // TODO activate progress bar
+        
         BioParser parser;
         switch (dataType.toLowerCase()) {
             case "clinical and biospecimen supplements":

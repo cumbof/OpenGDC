@@ -53,7 +53,14 @@ public class MethylationBetaValueParser extends BioParser {
                     GUI.appendLog("Processing " + f.getName() + "\n");
                     
                     String file_uuid = f.getName().split("_")[0];
-                    String aliquot_uuid = GDCQuery.retrieveAliquotFromFileUUID(file_uuid);
+                    HashSet<String> attributes = new HashSet<>();
+                    attributes.add("aliquot_id");
+                    HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("files.file_id", file_uuid, attributes);
+                    String aliquot_uuid = "";
+                    if (file_info != null)
+                        if (file_info.containsKey("aliquot_id"))
+                            aliquot_uuid = file_info.get("aliquot_id");
+                    
                     if (!aliquot_uuid.trim().equals("")) {
                         try {
                             Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
@@ -103,19 +110,19 @@ public class MethylationBetaValueParser extends BioParser {
                                         }
 
                                         ArrayList<String> values = new ArrayList<>();
-                                        values.add(chr);
-                                        values.add(start);
-                                        values.add(end);
-                                        values.add(strand);
-                                        values.add(composite_element_ref);
-                                        values.add(beta_value);
-                                        values.add(gene_symbol);
-                                        values.add(entrez);
-                                        values.add(gene_type);
-                                        values.add(transcript_id);
-                                        values.add(position_to_tss);
-                                        values.add(cgi_coordinate);
-                                        values.add(feature_type);
+                                        values.add(parseValue(chr, 0));
+                                        values.add(parseValue(start, 1));
+                                        values.add(parseValue(end, 2));
+                                        values.add(parseValue(strand, 3));
+                                        values.add(parseValue(composite_element_ref, 4));
+                                        values.add(parseValue(beta_value, 5));
+                                        values.add(parseValue(gene_symbol, 6));
+                                        values.add(parseValue(entrez, 7));
+                                        values.add(parseValue(gene_type, 8));
+                                        values.add(parseValue(transcript_id, 9));
+                                        values.add(parseValue(position_to_tss, 10));
+                                        values.add(parseValue(cgi_coordinate, 11));
+                                        values.add(parseValue(feature_type, 12));
 
                                         Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                     }

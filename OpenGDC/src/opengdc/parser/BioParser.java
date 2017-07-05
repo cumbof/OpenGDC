@@ -45,4 +45,22 @@ public abstract class BioParser {
         return this.acceptedInputFileFormats;
     }
     
+    public String parseValue(String value, int index) {
+        if (value == null)
+            value = "";
+        if ((value.equals("")) || (value.toLowerCase().equals("na")) || (value.toLowerCase().equals("nan")) || (value.toLowerCase().equals("null"))) {
+            try {
+                String attributeType = getAttributesType()[index];
+                if (attributeType.toLowerCase().equals("string") || attributeType.toLowerCase().equals("char"))
+                    value = "";
+                else if (attributeType.toLowerCase().equals("long") || attributeType.toLowerCase().equals("float"))
+                    value = "NA";
+                else
+                    value = "";
+            }
+            catch (Exception e) {}
+        }
+        return value;
+    }
+    
 }

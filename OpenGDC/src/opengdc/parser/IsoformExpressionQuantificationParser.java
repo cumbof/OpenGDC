@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
 import opengdc.util.FSUtils;
@@ -50,7 +51,14 @@ public class IsoformExpressionQuantificationParser extends BioParser {
                     GUI.appendLog("Processing " + f.getName() + "\n");
                     
                     String file_uuid = f.getName().split("_")[0];
-                    String aliquot_uuid = GDCQuery.retrieveAliquotFromFileUUID(file_uuid);
+                    HashSet<String> attributes = new HashSet<>();
+                    attributes.add("aliquot_id");
+                    HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("files.file_id", file_uuid, attributes);
+                    String aliquot_uuid = "";
+                    if (file_info != null)
+                        if (file_info.containsKey("aliquot_id"))
+                            aliquot_uuid = file_info.get("aliquot_id");
+                    
                     if (!aliquot_uuid.trim().equals("")) {
                         try {
                             Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
@@ -81,15 +89,15 @@ public class IsoformExpressionQuantificationParser extends BioParser {
                                     String mirna_region = line_split[5];
 
                                     ArrayList<String> values = new ArrayList<>();
-                                    values.add(chr);
-                                    values.add(start);
-                                    values.add(end);
-                                    values.add(strand);
-                                    values.add(mirna_id);
-                                    values.add(read_count);
-                                    values.add(reads_per_million_mirna_mapped);
-                                    values.add(cross_mapped);
-                                    values.add(mirna_region);
+                                    values.add(parseValue(chr, 0));
+                                    values.add(parseValue(start, 1));
+                                    values.add(parseValue(end, 2));
+                                    values.add(parseValue(strand, 3));
+                                    values.add(parseValue(mirna_id, 4));
+                                    values.add(parseValue(read_count, 5));
+                                    values.add(parseValue(reads_per_million_mirna_mapped, 6));
+                                    values.add(parseValue(cross_mapped, 7));
+                                    values.add(parseValue(mirna_region, 8));
 
                                     Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 }

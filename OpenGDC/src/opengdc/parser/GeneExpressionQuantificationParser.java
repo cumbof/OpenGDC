@@ -48,7 +48,13 @@ public class GeneExpressionQuantificationParser extends BioParser {
                 String extension = FSUtils.getFileExtension(f);
                 if (getAcceptedInputFileFormats().contains(extension)) {
                     String file_uuid = f.getName().split("_")[0];
-                    String aliquot_uuid = GDCQuery.retrieveAliquotFromFileUUID(file_uuid);
+                    HashSet<String> attributes = new HashSet<>();
+                    attributes.add("aliquot_id");
+                    HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("files.file_id", file_uuid, attributes);
+                    String aliquot_uuid = "";
+                    if (file_info != null)
+                        if (file_info.containsKey("aliquot_id"))
+                            aliquot_uuid = file_info.get("aliquot_id");
                     fileUUID2aliquotUUID.put(file_uuid, aliquot_uuid);
                 }
             }
@@ -107,17 +113,17 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                         String fpkm = (ensembl2fpkm.containsKey(ensembl_id)) ? ensembl2fpkm.get(ensembl_id) : "NA";
 
                                         ArrayList<String> values = new ArrayList<>();
-                                        values.add(chr);
-                                        values.add(start);
-                                        values.add(end);
-                                        values.add(strand);
-                                        values.add(ensembl_id);
-                                        values.add(entrez);
-                                        values.add(gene_symbol);
-                                        values.add(type);
-                                        values.add(htseq_count);
-                                        values.add(fpkm_uq);
-                                        values.add(fpkm);
+                                        values.add(parseValue(chr, 0));
+                                        values.add(parseValue(start, 1));
+                                        values.add(parseValue(end, 2));
+                                        values.add(parseValue(strand, 3));
+                                        values.add(parseValue(ensembl_id, 4));
+                                        values.add(parseValue(entrez, 5));
+                                        values.add(parseValue(gene_symbol, 6));
+                                        values.add(parseValue(type, 7));
+                                        values.add(parseValue(htseq_count, 8));
+                                        values.add(parseValue(fpkm_uq, 9));
+                                        values.add(parseValue(fpkm, 10));
                                         Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                     }
                                 }

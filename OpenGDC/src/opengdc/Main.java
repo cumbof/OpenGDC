@@ -36,19 +36,20 @@ public class Main {
         
         HashMap<String, HashMap<String, HashSet<String>>> gdcDataMap = GDCData.getBigGDCDataMap();
         for (String program: gdcDataMap.keySet()) {
-            if (program.toLowerCase().trim().equals("target")) {
+            if (program.toLowerCase().trim().equals("tcga")) {
                 for (String disease: gdcDataMap.get(program).keySet()) {
-                    if (!skip_diseases.contains(disease)) {
+                    if (disease.toLowerCase().equals("tcga-acc")) {
+                    //if (!skip_diseases.contains(disease)) {
                         HashSet<String> dataTypes = new HashSet<>();
-                        dataTypes.add("Clinical and Biospecimen Supplements");
+                        dataTypes.add("miRNA Expression Quantification");
                         //for (String dataType: gdcDataMap.get(program).get(disease)) {
                         for (String dataType: dataTypes) {    
-                            if (dataType.toLowerCase().trim().contains("clinical") || dataType.toLowerCase().trim().contains("biospecimen")) {
+                            //if (dataType.toLowerCase().trim().contains("clinical") || dataType.toLowerCase().trim().contains("biospecimen")) {
                                 System.err.println(program + "\t" + disease + "\t" + dataType);
 
                                 if (CMD.trim().toLowerCase().contains("download")) {
                                     /** DOWNLOAD DATA **/
-                                    String outDirStr = "/Users/fabio/Downloads/test_gdc_download/TARGET-Metadata/"+program+"/"+disease+"/gdc/";
+                                    String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/mirna/gdc/";
                                     //String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
 
                                     File outDir = new File(outDirStr);
@@ -68,9 +69,9 @@ public class Main {
                                 }
                                 if (CMD.trim().toLowerCase().contains("convert")) {
                                     /** CONVERT DATA **/
-                                    String inDirStr = "/Users/fabio/Downloads/test_gdc_download/TARGET-Metadata/"+program+"/"+disease+"/gdc/";
+                                    String inDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/mirna/gdc/";
                                     //String inDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
-                                    String outDirStr = "/Users/fabio/Downloads/test_gdc_download/TARGET-Metadata/"+program+"/"+disease+"/meta/";
+                                    String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/mirna/bed/";
                                     //String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/meta/";
 
                                     File outDir = new File(outDirStr);
@@ -83,13 +84,13 @@ public class Main {
                                     arr[1] = program;               // Program
                                     arr[2] = disease;               // Disease
                                     arr[3] = dataType;              // Data type
-                                    //arr[4] = "BED";                 // Format
-                                    arr[4] = "META";
+                                    arr[4] = "BED";                 // Format
+                                    //arr[4] = "META";
 
                                     Controller controller = new Controller();
                                     controller.execute(arr);
                                 }
-                            }
+                            //}
                         }
                     }
                 }

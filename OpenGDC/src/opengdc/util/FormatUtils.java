@@ -39,7 +39,7 @@ public class FormatUtils {
         return formats;
     }
     
-    /*****************************************************************/
+    /*-------------------------------------------------------*/
     
     public static String initDocument(String formatExt) {
         if (formatExt.toLowerCase().equals("json"))
@@ -57,7 +57,7 @@ public class FormatUtils {
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + END_OF_LINE + "<aliquot>" + END_OF_LINE;
     }
     
-    /*****************************************************************/
+    /*-------------------------------------------------------*/
     
     public static String endDocument(String formatExt) {
         if (formatExt.toLowerCase().equals("json"))
@@ -81,7 +81,7 @@ public class FormatUtils {
         return "</aliquot>";
     }
     
-    /*****************************************************************/
+    /*-------------------------------------------------------*/
     
     public static String createEntry(String formatExt, ArrayList<String> values, String[] doc_header) {
         if (formatExt.toLowerCase().equals("bed"))
@@ -179,7 +179,7 @@ public class FormatUtils {
         return "";
     }
     
-    /*****************************************************************/
+    /*-------------------------------------------------------*/
     
     public static String generateDataSchema(String[] header, String[] types) {
         String schema = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
