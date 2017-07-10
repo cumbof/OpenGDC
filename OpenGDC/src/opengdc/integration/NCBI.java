@@ -252,21 +252,14 @@ public class NCBI {
 		String all_gene_types="";
 		String all_transcript_ids = ""; 
 		String all_positions_to_TSS = "";
-		boolean trovato = false;
 		HashMap<String, String> result = new HashMap<>();
 		String[] genes = gene_symbol_comp.split(";");
 		int i = 0;
-		while(i<genes.length && !trovato){
+		while(i<genes.length){
 			String gene_symbol_tmp = genes[i];
 			int last = getLastIndex(genes,i);
-			//	boolean unico_gene = false;
-			//			if(i==0 && last==genes.length){
-			//				unico_gene = true;
-			//				trovato=true;
-			//			}
-			//cerca nel file piccolo
-			//HashMap<String, HashMap<String, String>> data = loadNCBIData(false);
-			if (ncbi_data.containsKey(gene_symbol_tmp)){ //se è nella mappa
+			
+			if (ncbi_data.containsKey(gene_symbol_tmp)){ 
 				String start = ncbi_data.get(gene_symbol_tmp).get("START");
 				String end = ncbi_data.get(gene_symbol_tmp).get("END");
 				int startf = Integer.parseInt(start);
@@ -275,80 +268,44 @@ public class NCBI {
 				int e_site = Integer.parseInt(end_site);
 
 				if(s_site>= startf && endf>=e_site){
-					//trovato = true; 
-					// metto in una mappa "gene distanza_cpsite" 
+					
 					int distance= (s_site-startf)+(endf-e_site);
 					gene2CpGdistance.put(gene_symbol_tmp,distance);
 				}
 
 
 			}else{
-				gene2CpGdistance = isInCpGsite(chr, gene_symbol_tmp, start_site, end_site, gene2CpGdistance) ;//,unico_gene); //vedo se il gene è in CpG site
-				//if(arr!=null){ 
-				//					if(!unico_gene){
-				//
-				//						trovato = true;
-				//					}
-				//strand =arr.split("\t")[6];
-
-
-				//entrez = getEntrezFromNCBIline(arr.split("\t")[8]); 
-				//}
+				gene2CpGdistance = isInCpGsite(chr, gene_symbol_tmp, start_site, end_site, gene2CpGdistance) ;
+				
 			}
 			if(ncbi_data.containsKey(gene_symbol_tmp)){
-				entrez = ncbi_data.get(gene_symbol_tmp).get("GDC_ENTREZ");
+				entrez = ncbi_data.get(gene_symbol_tmp).get("GDC_ENTREZ"); //in ncbi_data map there are all gene symbols and entrez ids.
 			}else{
 				entrez = "null";
 			}
-			all_entrez_ids = all_entrez_ids +";"+entrez ;//avere tutti gli entrez id per il campo entrez_ids
+			all_entrez_ids = all_entrez_ids +";"+entrez ;
 			all_gene_symbols = all_gene_symbols +";"+gene_symbol_tmp;
 			
 			gene_type = gene_type_comp.split(";")[i];
 			all_gene_types = all_gene_types + ";"+gene_type;
 			
-			//fare mappa "gene i_last"
 			gene2startEnd.put(gene_symbol_tmp, i+"_"+last);
 
-			//				if(i==0 && last==genes.length){ //se ho un solo gene
-			//					unico_gene = true;
-			//
-			//				}
-			//				arr = isInCpGsite(gene_symbol_tmp, start_site, end_site, unico_gene); //vedo se il gene è in CpG site
-			//				if(arr!=null){//se arr non è vuoto ho l'intera riga se è ne CpG site, oppure ho lo strand se è l'unico gene
-			//					trovato = true;
-			//					for(int z =i;z<last;z++){
-			//						if(unico_gene){
-			//							transcript =";" + transcript_id_comp;
-			//							position_to_TSS =";" + position_to_tss_comp;
-			//							strand =arr;
-			//							break; //esco dal ciclo perchè è l'unico gene 
-			//						}else{
-			//							transcript = (transcript+";" + transcript_id_comp.split(";")[z]);
-			//							position_to_TSS = (position_to_TSS +";"+ position_to_tss_comp.split(";")[z]);
-			//							strand =arr.split("\t")[6];
-			//
-			//						}
-			//					}
-			//gene_symbol = gene_symbol_tmp;
-
-			
-			//} // se arr è null vai al prossimo gene
 			i=last;
 		}
-		//controllo nell mappa "gene distanza_cpsite" quale gene ha la distanza minima e diventa il gene_symbol
-		//potrebbe essere che in gene2CpGdistance non ci sia niente perchè il sito non rientra nella posizione di nessun gene quindi avremo
-		//i campi gene_symbol, entrez_id, gene_type, transcript_id, position_to_tss uguali a BLANK.
+		//finding in map "gene distance_CpGsite" the gene at min distance => gene_symbol
+		//if CpG site does not fall into any genomic region of the genes, then gene2CpGdistance is empty
+		//and the fileds gene_symbol, entrez_id, gene_type, transcript_id, position_to_tss are BLANK.
 		if(!gene2CpGdistance.keySet().isEmpty()){
 			gene_symbol = getMinDistanceformCpGsite(gene2CpGdistance);
-			//cerco nella mappa "gene i_last" il gene che ho scelto come gene_symbol e faccio
 			String start_end = gene2startEnd.get(gene_symbol);
 
 			int index_start = Integer.parseInt(start_end.split("_")[0]);
 			int index_end = Integer.parseInt(start_end.split("_")[1]);
 
 			for(int z =index_start;z<index_end;z++){
-				transcript = (transcript+";"+transcript_id_comp.split(";")[z]);
-				position_to_TSS = (position_to_TSS+";"+position_to_tss_comp.split(";")[z]);
+				transcript = (transcript+"|"+transcript_id_comp.split(";")[z]);
+				position_to_TSS = (position_to_TSS+"|"+position_to_tss_comp.split(";")[z]);
 			}
 			transcript=transcript.substring(1); 
 			position_to_TSS=position_to_TSS.substring(1);
@@ -367,7 +324,7 @@ public class NCBI {
 		}
 
 		for(String gene: gene2startEnd.keySet()){
-			//cerco nella mappa "gene i_last" il gene che ho scelto come gene_symbol e faccio
+			
 			String start_end = gene2startEnd.get(gene);
 
 			int index_start = Integer.parseInt(start_end.split("_")[0]);
@@ -380,7 +337,6 @@ public class NCBI {
 			}
 			all_transcript_ids=all_transcript_ids+";"+transcript_tmp.substring(1); 
 			all_positions_to_TSS=all_positions_to_TSS+";"+position_to_TSS_tmp.substring(1);
-			//strand = ncbi_data.get(gene_symbol).get("STRAND");
 
 		}
 
@@ -401,7 +357,7 @@ public class NCBI {
 		return result;
 	}
 
-	//ricavo il gene su cui ricade il CpGsite a distanza minima
+	//extracting gene related to the CpG site at min distance 
 	private static String getMinDistanceformCpGsite(
 			HashMap<String, Integer> gene2CpGdistance2) {
 		String gene_symbol = "";

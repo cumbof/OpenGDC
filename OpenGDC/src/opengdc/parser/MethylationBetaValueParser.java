@@ -95,22 +95,8 @@ public class MethylationBetaValueParser extends BioParser {
 									String gene_type = ""; //9
 									String transcript_id = ""; //10
 									String position_to_tss = ""; //11
-									
-
-									// skip non-valid entry
+				
 									if (!chr.equals("*")) {
-										// trying to retrive the entrez_id starting with the gene_symbol from GeneNames (HUGO)
-										//                                        String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
-										//                                        if (entrez_tmp != null) {
-										//                                            entrez = entrez_tmp;
-										//                                            // trying to retrieve the strand starting with the entrez from NCBI
-										//                                            HashMap<String, String> entrez_data = NCBI.getGeneInfo(entrez, gene_symbol);
-										//                                            if (!entrez_data.isEmpty()) {
-										//                                                String strand_tmp = entrez_data.get("STRAND");
-										//                                                if (!strand_tmp.trim().equals("") && !strand_tmp.trim().toLowerCase().equals("na") && !strand_tmp.trim().toLowerCase().equals("null"))
-										//                                                    strand = strand_tmp;
-										//                                            }
-										//                                        }
 
 										if (!gene_symbols_comp.isEmpty()) {
 											if(!gene_symbols_comp.equals(".")){
@@ -128,21 +114,6 @@ public class MethylationBetaValueParser extends BioParser {
 												all_positions_to_tss = ncbi_data.get("POSITIONS_TO_TSS");
 
 
-												
-
-											//}
-											//else{
-//											
-//												HashMap<String, String> data1= NCBI.getGeneInfo(gene_symbol);
-//												if(data1!=null){
-//													strand = data1.get("STRAND");
-//													entrez = data1.get("ENTREZ");
-//
-//												}else{
-//													strand = data1.get("STRAND");
-//													entrez = data1.get("ENTREZ");
-//												}
-//
 									}
 											ArrayList<String> values = new ArrayList<>();
 											values.add(chr);
