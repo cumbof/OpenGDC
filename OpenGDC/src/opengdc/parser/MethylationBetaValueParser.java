@@ -69,19 +69,33 @@ public class MethylationBetaValueParser extends BioParser {
 									firstLine = false; // just skip the first line (header)
 								else {
 									String[] line_split = line.split("\t");
-									String chr = line_split[2];
-									String start = line_split[3];
-									String end = line_split[4];
-									String strand = "*";
-									String composite_element_ref = line_split[0];
-									String beta_value = line_split[1];
-									String gene_symbol = line_split[5];
-									String entrez = "NA";
-									String gene_type = line_split[6];
-									String transcript_id = line_split[7];
-									String position_to_tss = line_split[8];
-									String cgi_coordinate = line_split[9];
-									String feature_type = line_split[10];
+									String chr = line_split[2]; // 1
+									String start = line_split[3]; //2
+									String end = line_split[4]; //3
+									String strand = "*"; //4
+									String composite_element_ref = line_split[0]; //5
+									String beta_value = line_split[1]; //6
+									String gene_symbols_comp = line_split[5]; 
+									String gene_types_comp = line_split[6];
+									String transcript_ids_comp = line_split[7];
+									String positions_to_tss_comp = line_split[8];
+									
+									String all_gene_symbols = ""; //12
+									String all_entrez_ids = "null"; //13
+									String all_gene_types = ""; //14
+									String all_transcript_ids = ""; //15
+									String all_positions_to_tss = "null"; //16
+									
+									
+									String cgi_coordinate = line_split[9]; //17
+									String feature_type = line_split[10]; //18
+									
+									String gene_symbol = ""; //7
+									String entrez_id = ""; //8
+									String gene_type = ""; //9
+									String transcript_id = ""; //10
+									String position_to_tss = ""; //11
+									
 
 									// skip non-valid entry
 									if (!chr.equals("*")) {
@@ -98,15 +112,23 @@ public class MethylationBetaValueParser extends BioParser {
 										//                                            }
 										//                                        }
 
-										if (!gene_symbol.isEmpty()) {
-											if(!gene_symbol.equals(".")){
-												HashMap<String, String> ncbi_data = NCBI.extractNCBIinfo(chr, gene_symbol, start,end , gene_type, transcript_id, position_to_tss);
+										if (!gene_symbols_comp.isEmpty()) {
+											if(!gene_symbols_comp.equals(".")){
+												HashMap<String, String> ncbi_data = NCBI.extractNCBIinfo(chr, gene_symbols_comp, start,end , gene_types_comp, transcript_ids_comp, positions_to_tss_comp);
 												strand = ncbi_data.get("STRAND");
 												gene_symbol = ncbi_data.get("SYMBOL");
 												gene_type = ncbi_data.get("GENE_TYPE");
 												transcript_id = ncbi_data.get("TRANSCRIPT_ID");
 												position_to_tss = ncbi_data.get("POSITION_TO_TSS");			
-												entrez = ncbi_data.get("ENTREZ");
+												entrez_id = ncbi_data.get("ENTREZ");
+												all_entrez_ids = ncbi_data.get("ENTREZ_IDs");
+												all_gene_symbols = ncbi_data.get("GENE_SYMBOLS");
+												all_gene_types = ncbi_data.get("GENE_TYPES");
+												all_transcript_ids = ncbi_data.get("TRANSCRIPT_IDS");
+												all_positions_to_tss = ncbi_data.get("POSITIONS_TO_TSS");
+
+
+												
 
 											//}
 											//else{
@@ -130,10 +152,18 @@ public class MethylationBetaValueParser extends BioParser {
 											values.add(composite_element_ref);
 											values.add(beta_value);
 											values.add(gene_symbol);
-											values.add(entrez);
+											values.add(entrez_id);
 											values.add(gene_type);
 											values.add(transcript_id);
 											values.add(position_to_tss);
+											
+											values.add(all_gene_symbols);
+											values.add(all_entrez_ids);
+											values.add(all_gene_types);
+											values.add(all_transcript_ids);
+											values.add(all_positions_to_tss);
+											
+											
 											values.add(cgi_coordinate);
 											values.add(feature_type);
 
@@ -178,7 +208,7 @@ public class MethylationBetaValueParser extends BioParser {
 
 	@Override
 	public String[] getHeader() {
-		String[] header = new String[13];
+		String[] header = new String[17];
 		header[0] = "chr";
 		header[1] = "start";
 		header[2] = "stop";
@@ -190,14 +220,20 @@ public class MethylationBetaValueParser extends BioParser {
 		header[8] = "gene_type";
 		header[9] = "transcript_id";
 		header[10] = "position_to_tss";
-		header[11] = "cgi_coordinate";
-		header[12] = "feature_type";
+		
+		header[11] ="all_gene_symbols";
+		header[12] ="all_entrez_gene_ids";
+		header[13] ="all_transcript_ids";
+		header[14] ="all_positions_to_tss";
+		
+		header[15] = "cgi_coordinate";
+		header[16] = "feature_type";
 		return header;
 	}
 
 	@Override
 	public String[] getAttributesType() {
-		String[] attr_type = new String[13];
+		String[] attr_type = new String[17];
 		attr_type[0] = "STRING";
 		attr_type[1] = "LONG";
 		attr_type[2] = "LONG";
@@ -209,8 +245,14 @@ public class MethylationBetaValueParser extends BioParser {
 		attr_type[8] = "STRING";
 		attr_type[9] = "STRING";
 		attr_type[10] = "STRING";
+		
 		attr_type[11] = "STRING";
 		attr_type[12] = "STRING";
+		attr_type[13] = "STRING";
+		attr_type[14] = "STRING";
+		
+		attr_type[15] = "STRING";
+		attr_type[16] = "STRING";
 		return attr_type;
 	}
 

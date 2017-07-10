@@ -73,9 +73,9 @@ public class Settings {
         return MIRBASE_HSA_GFF3_DATA;
     }
     
-    private static final String NCBI_DATA = "./package/appdata/ncbi/ref_GRCh38.p7_top_level.gff3";
+    private static final String NCBI_DATA = "./package/appdata/ncbi/ref_GRCh38_top_level.gff3";
     public static String getNCBIDataPath() {
-        if (DEBUG) return "/Users/eleonora/NetBeansProjects/OpenGDC/package/appdata/ncbi/ref_GRCh38.p7_top_level.gff3";
+        if (DEBUG) return "/Users/eleonora/NetBeansProjects/OpenGDC/package/appdata/ncbi/ref_GRCh38_top_level.gff3";
         return NCBI_DATA;
     }
     
