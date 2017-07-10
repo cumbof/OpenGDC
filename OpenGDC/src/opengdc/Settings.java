@@ -79,11 +79,11 @@ public class Settings {
         return NCBI_DATA;
     }
     
-    private static final String NCBI_DATA_local = "./package/appdata/ncbi/GRCh38_data.txt";
-    public static String getNCBIDataPath_local() {
-        if (DEBUG) return "/Users/eleonora/NetBeansProjects/OpenGDC/package/appdata/ncbi/GRCh38_data.txt";
-        return NCBI_DATA_local;
-    }
+//    private static final String NCBI_DATA_local = "./package/appdata/ncbi/GRCh38_data.txt";
+//    public static String getNCBIDataPath_local() {
+//        if (DEBUG) return "/Users/eleonora/NetBeansProjects/OpenGDC/package/appdata/ncbi/GRCh38_data.txt";
+//        return NCBI_DATA_local;
+//    }
     
     private static final String GENENAMES_DATA = "./package/appdata/genenames/hgnc_complete_set.txt";
     public static String getGENENAMESDataPath() {

@@ -33,7 +33,7 @@ public class NCBI {
 	private static final String GENOME_VERSION = "grch38";
 	private static HashMap<String, HashMap<String, String>> ncbi_data = new HashMap<>();
 
-	private static String ncbi_table_path = Settings.getNCBIDataPath_local();
+	//private static String ncbi_table_path = Settings.getNCBIDataPath_local();
 
 	public static boolean updateNCBIData(String gdc_entrez, String gdc_gene, String chr, String start, String end, String strand) {
 		//		File ncbidata = new File(ncbi_table_path);
@@ -60,181 +60,181 @@ public class NCBI {
 		return true;
 	}
 
-	public static HashMap<String, HashMap<String, String>> loadNCBIData(boolean forceLoad) {
-		if (ncbi_data.isEmpty() || forceLoad) {
-			ncbi_data = new HashMap<>();
-			try {
-				InputStream fstream = new FileInputStream(ncbi_table_path);
-				DataInputStream in = new DataInputStream(fstream);
-				BufferedReader br = new BufferedReader(new InputStreamReader(in));
-				String line;
-				while ((line = br.readLine()) != null) {
-					if (!line.startsWith("#")) {
-						String[] arr = line.split("\t");
-						HashMap<String, String> info = new HashMap<>();
-						info.put("STRAND", arr[5]);
-						info.put("START", arr[3]);
-						info.put("END", arr[4]);
-						info.put("CHR", arr[2]);
-						info.put("GDC_SYMBOL", arr[1]);
-						info.put("GDC_ENTREZ", arr[0]);
-						String gdc_symbol = arr[1];
-						ncbi_data.put(gdc_symbol, info);
-					}
-				}
-				br.close();
-				in.close();
-				fstream.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return ncbi_data;
-	}
+//	public static HashMap<String, HashMap<String, String>> loadNCBIData(boolean forceLoad) {
+//		if (ncbi_data.isEmpty() || forceLoad) {
+//			ncbi_data = new HashMap<>();
+//			try {
+//				InputStream fstream = new FileInputStream(ncbi_table_path);
+//				DataInputStream in = new DataInputStream(fstream);
+//				BufferedReader br = new BufferedReader(new InputStreamReader(in));
+//				String line;
+//				while ((line = br.readLine()) != null) {
+//					if (!line.startsWith("#")) {
+//						String[] arr = line.split("\t");
+//						HashMap<String, String> info = new HashMap<>();
+//						info.put("STRAND", arr[5]);
+//						info.put("START", arr[3]);
+//						info.put("END", arr[4]);
+//						info.put("CHR", arr[2]);
+//						info.put("GDC_SYMBOL", arr[1]);
+//						info.put("GDC_ENTREZ", arr[0]);
+//						String gdc_symbol = arr[1];
+//						ncbi_data.put(gdc_symbol, info);
+//					}
+//				}
+//				br.close();
+//				in.close();
+//				fstream.close();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		return ncbi_data;
+//	}
 
-	public static HashMap<String, String> getGeneInfo(String symbol) {
-		HashMap<String, HashMap<String, String>> data = loadNCBIData(false);
-		if (data.containsKey(symbol))
-			return data.get(symbol);
+//	public static HashMap<String, String> getGeneInfo(String symbol) {
+//		HashMap<String, HashMap<String, String>> data = loadNCBIData(false);
+//		if (data.containsKey(symbol))
+//			return data.get(symbol);
+//
+//		return null;
+//	}
 
-		return null;
-	}
-
-	public static HashMap<String, String> retrieveGenomicCoordinates(String entrez, String gene) {
-		try {
-			HashMap<String, String> result = new HashMap<>();
-			HashMap<String, String> result_tmp = new HashMap<String, String>();
-
-			String strand = "";
-			String chr = "";
-			int start = -1;
-			int end = -1;
-
-			//String ncbiBiotabQuery = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi/?db=Gene&id=" + entrez + "&format=biotab";
-			String ncbiBiotabQuery = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi/?db=Gene&amp;id=" + entrez;
-			File ncbiBiotab_tmp = new File(Settings.getTmpDir()+"ncbi.efetch.fcgi.txt"); 
-			//File.createTempFile("efetch.fcgi", "txt");
-			DownloadUtils.downloadDataFromUrl(ncbiBiotabQuery, ncbiBiotab_tmp.getAbsolutePath(), 0);
-			BufferedReader reader = new BufferedReader(new FileReader(ncbiBiotab_tmp.getAbsolutePath()));
-			String line = reader.readLine();
-
-			boolean genomeMatch = false; // match on GRCh38 genome version
-
-			boolean replaced = false;
-			boolean db_GeneID = false;
-
-			String newGene = "";
-			String newEntrez = "";
-			while (line != null) {
-				/////////////////////////////////////////////////
-				if (line.trim().toLowerCase().contains("heading") && line.toLowerCase().contains(GENOME_VERSION))
-					genomeMatch = true;
-				/////////////////////////////////////////////////
-				if (line.trim().toLowerCase().contains("current-id")) {
-					replaced = true;
-				}
-				if (replaced) {
-					if (line.trim().toLowerCase().contains("db \"geneid\"")) {
-						db_GeneID = true;
-					}
-					if (db_GeneID) {
-						if (line.trim().toLowerCase().contains("tag id")) {
-							String[] line_split = line.split(" ");
-							newEntrez = line_split[line_split.length-1];
-							result_tmp = retrieveGenomicCoordinates(newEntrez, gene);
-							result_tmp.put("GDC_ENTREZ", newEntrez);
-							break;
-						}
-					}
-				}
-				////////////////////////////////////////////////
-				if (line.trim().toLowerCase().contains("locus")) {
-					if (newGene.equals("")) {
-						String[] lineSplit = line.split(" ");
-						String lastString = lineSplit[lineSplit.length-1].replaceAll("\"", "");
-						newGene = lastString.substring(0, lastString.length()-1);
-						//System.err.println("--- newGene: " + newGene);
-					}
-				}
-				else if (line.trim().toLowerCase().contains("geneid")) {
-					if (newEntrez.equals("")) {
-						String[] lineSplit = line.split(" ");
-						String lastString = lineSplit[lineSplit.length-1];
-						newEntrez = lastString.substring(0, lastString.length()-1);
-						//System.err.println("--- newEntrez: " + newEntrez);
-					}
-				}
-
-				if (genomeMatch) {
-					if (line.trim().toLowerCase().contains("label") && line.trim().toLowerCase().contains("chromosome")) {
-						if (chr.equals("")) {
-							String[] lineSplit = line.split(" ");
-							int i;
-							for(i= 0; i< lineSplit.length;i++){
-								String t = lineSplit[i].trim().toLowerCase();
-								if(t.equals("\"chromosome")){
-									chr = lineSplit[i+1];
-									break;
-								}
-							}
-							//String lastString = lineSplit[lineSplit.length-1].replaceAll("\"", "");
-							//chr = lastString.substring(0, lastString.length()-1);
-							// System.err.println("--- chr: " + chr);
-						}
-					}
-					else if (line.trim().toLowerCase().contains("from")) {
-						if (start == -1) {
-							String[] lineSplit = line.split(" ");
-							String lastString = lineSplit[lineSplit.length-1];
-							start = Integer.valueOf(lastString.substring(0, lastString.length()-1));
-							//System.err.println("--- start: " + start);
-						}
-					}
-					else if (line.trim().toLowerCase().contains("to")) {
-						if (end == -1) {
-							String[] lineSplit = line.split(" ");
-							String lastString = lineSplit[lineSplit.length-1];
-							end = Integer.valueOf(lastString.substring(0, lastString.length()-1));
-							//System.err.println("--- end: " + end);
-						}
-					}
-					else if (line.trim().toLowerCase().contains("strand")) {
-						if (strand.equals("")) {
-							String[] lineSplit = line.split(" ");
-							String lastString = lineSplit[lineSplit.length-1];
-							String strand_ = lastString.substring(0, lastString.length()-1);
-							if (strand_.trim().toLowerCase().equals("minus"))
-								strand = "-";
-							else if (strand_.trim().toLowerCase().equals("plus"))
-								strand = "+";
-							//System.err.println("--- strand: " + strand);
-						}
-					}
-				}
-				line = reader.readLine();
-			}
-			reader.close();
-			ncbiBiotab_tmp.delete();
-
-			//System.err.println();
-
-			if (!result_tmp.isEmpty())
-				return result_tmp;
-
-			if (!chr.equals("") && (start > 0 && end > 0)) {
-				result.put("CHR", chr);
-				result.put("START", String.valueOf(start+1)); // +1 : NCBI is 0-based
-				result.put("END", String.valueOf(end+1)); // +1 : NCBI is 0-based
-				result.put("STRAND", strand);
-				result.put("GDC_ENTREZ", entrez);
-				result.put("GDC_SYMBOL", gene);
-			}
-			return result;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return new HashMap<>();
-		}
-	}
+//	public static HashMap<String, String> retrieveGenomicCoordinates(String entrez, String gene) {
+//		try {
+//			HashMap<String, String> result = new HashMap<>();
+//			HashMap<String, String> result_tmp = new HashMap<String, String>();
+//
+//			String strand = "";
+//			String chr = "";
+//			int start = -1;
+//			int end = -1;
+//
+//			//String ncbiBiotabQuery = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi/?db=Gene&id=" + entrez + "&format=biotab";
+//			String ncbiBiotabQuery = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi/?db=Gene&amp;id=" + entrez;
+//			File ncbiBiotab_tmp = new File(Settings.getTmpDir()+"ncbi.efetch.fcgi.txt"); 
+//			//File.createTempFile("efetch.fcgi", "txt");
+//			DownloadUtils.downloadDataFromUrl(ncbiBiotabQuery, ncbiBiotab_tmp.getAbsolutePath(), 0);
+//			BufferedReader reader = new BufferedReader(new FileReader(ncbiBiotab_tmp.getAbsolutePath()));
+//			String line = reader.readLine();
+//
+//			boolean genomeMatch = false; // match on GRCh38 genome version
+//
+//			boolean replaced = false;
+//			boolean db_GeneID = false;
+//
+//			String newGene = "";
+//			String newEntrez = "";
+//			while (line != null) {
+//				/////////////////////////////////////////////////
+//				if (line.trim().toLowerCase().contains("heading") && line.toLowerCase().contains(GENOME_VERSION))
+//					genomeMatch = true;
+//				/////////////////////////////////////////////////
+//				if (line.trim().toLowerCase().contains("current-id")) {
+//					replaced = true;
+//				}
+//				if (replaced) {
+//					if (line.trim().toLowerCase().contains("db \"geneid\"")) {
+//						db_GeneID = true;
+//					}
+//					if (db_GeneID) {
+//						if (line.trim().toLowerCase().contains("tag id")) {
+//							String[] line_split = line.split(" ");
+//							newEntrez = line_split[line_split.length-1];
+//							result_tmp = retrieveGenomicCoordinates(newEntrez, gene);
+//							result_tmp.put("GDC_ENTREZ", newEntrez);
+//							break;
+//						}
+//					}
+//				}
+//				////////////////////////////////////////////////
+//				if (line.trim().toLowerCase().contains("locus")) {
+//					if (newGene.equals("")) {
+//						String[] lineSplit = line.split(" ");
+//						String lastString = lineSplit[lineSplit.length-1].replaceAll("\"", "");
+//						newGene = lastString.substring(0, lastString.length()-1);
+//						//System.err.println("--- newGene: " + newGene);
+//					}
+//				}
+//				else if (line.trim().toLowerCase().contains("geneid")) {
+//					if (newEntrez.equals("")) {
+//						String[] lineSplit = line.split(" ");
+//						String lastString = lineSplit[lineSplit.length-1];
+//						newEntrez = lastString.substring(0, lastString.length()-1);
+//						//System.err.println("--- newEntrez: " + newEntrez);
+//					}
+//				}
+//
+//				if (genomeMatch) {
+//					if (line.trim().toLowerCase().contains("label") && line.trim().toLowerCase().contains("chromosome")) {
+//						if (chr.equals("")) {
+//							String[] lineSplit = line.split(" ");
+//							int i;
+//							for(i= 0; i< lineSplit.length;i++){
+//								String t = lineSplit[i].trim().toLowerCase();
+//								if(t.equals("\"chromosome")){
+//									chr = lineSplit[i+1];
+//									break;
+//								}
+//							}
+//							//String lastString = lineSplit[lineSplit.length-1].replaceAll("\"", "");
+//							//chr = lastString.substring(0, lastString.length()-1);
+//							// System.err.println("--- chr: " + chr);
+//						}
+//					}
+//					else if (line.trim().toLowerCase().contains("from")) {
+//						if (start == -1) {
+//							String[] lineSplit = line.split(" ");
+//							String lastString = lineSplit[lineSplit.length-1];
+//							start = Integer.valueOf(lastString.substring(0, lastString.length()-1));
+//							//System.err.println("--- start: " + start);
+//						}
+//					}
+//					else if (line.trim().toLowerCase().contains("to")) {
+//						if (end == -1) {
+//							String[] lineSplit = line.split(" ");
+//							String lastString = lineSplit[lineSplit.length-1];
+//							end = Integer.valueOf(lastString.substring(0, lastString.length()-1));
+//							//System.err.println("--- end: " + end);
+//						}
+//					}
+//					else if (line.trim().toLowerCase().contains("strand")) {
+//						if (strand.equals("")) {
+//							String[] lineSplit = line.split(" ");
+//							String lastString = lineSplit[lineSplit.length-1];
+//							String strand_ = lastString.substring(0, lastString.length()-1);
+//							if (strand_.trim().toLowerCase().equals("minus"))
+//								strand = "-";
+//							else if (strand_.trim().toLowerCase().equals("plus"))
+//								strand = "+";
+//							//System.err.println("--- strand: " + strand);
+//						}
+//					}
+//				}
+//				line = reader.readLine();
+//			}
+//			reader.close();
+//			ncbiBiotab_tmp.delete();
+//
+//			//System.err.println();
+//
+//			if (!result_tmp.isEmpty())
+//				return result_tmp;
+//
+//			if (!chr.equals("") && (start > 0 && end > 0)) {
+//				result.put("CHR", chr);
+//				result.put("START", String.valueOf(start+1)); // +1 : NCBI is 0-based
+//				result.put("END", String.valueOf(end+1)); // +1 : NCBI is 0-based
+//				result.put("STRAND", strand);
+//				result.put("GDC_ENTREZ", entrez);
+//				result.put("GDC_SYMBOL", gene);
+//			}
+//			return result;
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			return new HashMap<>();
+//		}
+//	}
 
 
 	public static HashMap<String, String> extractNCBIinfo(String chr, String gene_symbol_comp,
@@ -252,7 +252,6 @@ public class NCBI {
 		String all_gene_types="";
 		String all_transcript_ids = ""; 
 		String all_positions_to_TSS = "";
-		String arr = null;
 		boolean trovato = false;
 		HashMap<String, String> result = new HashMap<>();
 		String[] genes = gene_symbol_comp.split(";");
