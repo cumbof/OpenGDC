@@ -91,9 +91,9 @@ public class Settings {
         return GENENAMES_DATA;
     }
     
-    private static final String ENSEMBL_DATA = "./package/appdata/ensembl/Homo_sapiens.GRCh38.88.chr.gff3";
+    private static final String ENSEMBL_DATA = "./package/appdata/ensembl/Homo_sapiens.GRCh38.77.gtf";
     public static String getENSEMBLDataPath() {
-        if (DEBUG) return "/Users/eleonora/NetBeansProjects/OpenGDC/package/appdata/ensembl/Homo_sapiens.GRCh38.88.chr.gff3";
+        if (DEBUG) return "/Users/eleonora/NetBeansProjects/OpenGDC/package/appdata/ensembl/Homo_sapiens.GRCh38.77.gtf";
         return ENSEMBL_DATA;
     }
     
