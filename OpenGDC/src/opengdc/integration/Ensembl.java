@@ -47,7 +47,7 @@ public class Ensembl {
                         String ensembl = "NA";
                         String[] extendedInfo_arr = arr[8].split(";");
                         for (String data: extendedInfo_arr) {
-                            if (data.toLowerCase().trim().startsWith("name")) {
+                            if (data.toLowerCase().trim().startsWith("gene_name")) {
                                 String[] name_split = data.split("=");
                                 symbol = name_split[name_split.length-1];
                             }
