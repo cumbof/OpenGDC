@@ -23,58 +23,60 @@ import opengdc.Settings;
  * @author fabio
  */
 public class Ensembl {
-    
-    private static String ensembl_table_path = Settings.getENSEMBLDataPath();
-    private static HashMap<String, HashMap<String, String>> ensembl_data = new HashMap<>();
-	
-    private static void loadEnsemblTable() {
-	try {
-            InputStream fstream = new FileInputStream(ensembl_table_path);
-            DataInputStream in = new DataInputStream(fstream);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String line;
-            while ((line = br.readLine()) != null) {
-                try {
-                    if (!line.startsWith("#") && !line.trim().equals("")) {
-                    	HashMap<String, String> entry = new HashMap<>();
-                    	String[] arr = line.split("\t");
-                    	entry.put("CHR", arr[0]);
-                        entry.put("START", arr[3]);
-                        entry.put("END", arr[4]);
-                        entry.put("STRAND", arr[6]);
-                        entry.put("TYPE", arr[2]);
-                        String symbol = "NA";
-                        String ensembl = "NA";
-                        String[] extendedInfo_arr = arr[8].split(";");
-                        for (String data: extendedInfo_arr) {
-                            if (data.toLowerCase().trim().startsWith("gene_name")) {
-                                String[] name_split = data.split("=");
-                                symbol = name_split[name_split.length-1];
-                            }
-                            else if (data.toLowerCase().trim().startsWith("gene_id")) {
-                            	String[] id_split = data.split("=");
-                            	ensembl = id_split[id_split.length-1];
-                            }
-                        }
-                        entry.put("SYMBOL", symbol);
-                        if (!ensembl.equals("NA"))
-                            ensembl_data.put(ensembl, entry);
-                    }
-                } catch (Exception e) { /* IF THROWS ERROR -> SKIP LINE */ }
-            }
-            br.close();
-            in.close();
-            fstream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-        
-    public static HashMap<String, String> extractEnsemblInfo(String ensembl_id) {
-    	if (ensembl_data.isEmpty()) 
-    		loadEnsemblTable();
-    	if (ensembl_data.containsKey(ensembl_id)) return ensembl_data.get(ensembl_id);
-        return new HashMap<>();
-    }
-    
+
+	private static String ensembl_table_path = Settings.getENSEMBLDataPath();
+	private static HashMap<String, HashMap<String, String>> ensembl_data = new HashMap<>();
+
+	private static void loadEnsemblTable() {
+		try {
+			InputStream fstream = new FileInputStream(ensembl_table_path);
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			String line;
+			while ((line = br.readLine()) != null) {
+				try {
+					if (!line.startsWith("#") && !line.trim().equals("")) {
+						HashMap<String, String> entry = new HashMap<>();
+						String[] arr = line.split("\t");
+						entry.put("CHR", arr[0]);
+						entry.put("START", arr[3]);
+						entry.put("END", arr[4]);
+						entry.put("STRAND", arr[6]);
+						entry.put("TYPE", arr[2]);
+						String symbol = "NA";
+						String ensembl = "NA";
+						String[] extendedInfo_arr = arr[8].split(";");
+						if(arr[2].equals("gene")){ //add control on type
+							for (String data: extendedInfo_arr) {
+								if (data.toLowerCase().trim().startsWith("gene_name")) {
+									String[] name_split = data.split("\"");
+									symbol = name_split[name_split.length-1];
+								}
+								else if (data.toLowerCase().trim().startsWith("gene_id")) {
+									String[] id_split = data.split("\"");
+									ensembl = id_split[id_split.length-1];
+								}
+							}
+						}
+						entry.put("SYMBOL", symbol);
+						if (!ensembl.equals("NA"))
+							ensembl_data.put(ensembl, entry);
+					}
+				} catch (Exception e) { /* IF THROWS ERROR -> SKIP LINE */ }
+			}
+			br.close();
+			in.close();
+			fstream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static HashMap<String, String> extractEnsemblInfo(String ensembl_id) {
+		if (ensembl_data.isEmpty()) 
+			loadEnsemblTable();
+		if (ensembl_data.containsKey(ensembl_id)) return ensembl_data.get(ensembl_id);
+		return new HashMap<>();
+	}
+
 }
