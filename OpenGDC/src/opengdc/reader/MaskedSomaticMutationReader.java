@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc.reader;
 
@@ -185,7 +189,9 @@ public class MaskedSomaticMutationReader {
                                 entryData.put("entrez_gene_id", line_split[ENTREZ_GENE_ID_INDEX]);
                                 /*entryData.put("center", line_split[CENTER_INDEX]);
                                 entryData.put("ncbi_build", line_split[NCBI_BUILD_INDEX]);*/
-                                entryData.put("chromosome", line_split[CHROMOSOME_INDEX]);
+                                String chr = line_split[CHROMOSOME_INDEX];
+                                if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
+                                entryData.put("chromosome", chr);
                                 entryData.put("start_position", line_split[START_POSITION_INDEX]);
                                 entryData.put("end_position", line_split[END_POSITION_INDEX]);
                                 entryData.put("strand", line_split[STRAND_INDEX]);

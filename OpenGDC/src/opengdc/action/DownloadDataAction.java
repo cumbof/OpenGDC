@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc.action;
 
@@ -36,9 +40,11 @@ public class DownloadDataAction extends Action {
         System.err.println("Downloading GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Output Folder Path: " + gdc_path + "\n" + "Auto-extract: " + autoextract + "\n" + "Auto-remove: " + autoremove + "\n");
         GUI.appendLog("Downloading GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Output Folder Path: " + gdc_path + "\n" + "Auto-extract: " + autoextract + "\n" + "Auto-remove: " + autoremove + "\n");
         
-        if (dataType.trim().toLowerCase().equals("clinical and biospecimen supplements")) {
-            retrieveData(disease, "Clinical Supplement", gdc_path, autoextract, autoremove);
-            retrieveData(disease, "Biospecimen Supplement", gdc_path, autoextract, autoremove);
+        if (dataType.trim().toLowerCase().contains("clinical") || dataType.trim().toLowerCase().contains("biospecimen")) {
+            if (dataType.trim().toLowerCase().contains("clinical"))
+                retrieveData(disease, "Clinical Supplement", gdc_path, autoextract, autoremove);
+            if (dataType.trim().toLowerCase().contains("biospecimen"))
+                retrieveData(disease, "Biospecimen Supplement", gdc_path, autoextract, autoremove);
         }
         else
             retrieveData(disease, dataType, gdc_path, autoextract, autoremove);
@@ -53,7 +59,6 @@ public class DownloadDataAction extends Action {
         GUI.appendLog("Data Amount: " + dataMap.size() + " files" + "\n\n");
         
         // TODO activate progress bar
-        // TODO show stack in Log tab
         
         /* DOWNLOAD (AND EXTRACT (AND REMOVE)) FILE BY FILE */
         for (String uuid: dataMap.keySet()) {
@@ -72,7 +77,7 @@ public class DownloadDataAction extends Action {
                     File destDir = new File(destDirPath);
                     
                     // extract data
-                    boolean uncompressed = DataExtractionTool.uncompressData(data_file, destDir, false);
+                    boolean uncompressed = DataExtractionTool.uncompressData(data_file, destDir, false, true);
                     //System.out.println("uncompressed: " + uncompressed);
                     uncompressed_folders_path.addAll(DataExtractionTool.getUncompressedFoldersPathList());
                     experiments_path.addAll(DataExtractionTool.getExperimentsPathList());

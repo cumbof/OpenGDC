@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc.parser;
 
@@ -51,7 +55,14 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                     GUI.appendLog("Processing " + f.getName() + "\n");
                     
                     String file_uuid = f.getName().split("_")[0];
-                    String aliquot_uuid = GDCQuery.retrieveAliquotFromFileUUID(file_uuid);
+                    HashSet<String> attributes = new HashSet<>();
+                    attributes.add("aliquot_id");
+                    HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("files.file_id", file_uuid, attributes);
+                    String aliquot_uuid = "";
+                    if (file_info != null)
+                        if (file_info.containsKey("aliquot_id"))
+                            aliquot_uuid = file_info.get("aliquot_id");
+                    
                     if (!aliquot_uuid.trim().equals("")) {
                         try {
                             Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
@@ -76,6 +87,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                                         coordinates = mirnaid2coordinates.get(mirna_id);
 
                                         String chr = coordinates.get("CHR");
+                                        if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
                                         String start = coordinates.get("START");
                                         String end = coordinates.get("END");
                                         String strand = coordinates.get("STRAND");
@@ -87,15 +99,15 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                                             entrez = entrez_tmp;
 
                                         ArrayList<String> values = new ArrayList<>();
-                                        values.add(chr);
-                                        values.add(start);
-                                        values.add(end);
-                                        values.add(strand);
-                                        values.add(mirna_id);
-                                        values.add(entrez);
-                                        values.add(read_count);
-                                        values.add(reads_per_million_mirna_mapped);
-                                        values.add(cross_mapped);
+                                        values.add(parseValue(chr, 0));
+                                        values.add(parseValue(start, 1));
+                                        values.add(parseValue(end, 2));
+                                        values.add(parseValue(strand, 3));
+                                        values.add(parseValue(mirna_id, 4));
+                                        values.add(parseValue(entrez, 5));
+                                        values.add(parseValue(read_count, 6));
+                                        values.add(parseValue(reads_per_million_mirna_mapped, 7));
+                                        values.add(parseValue(cross_mapped, 8));
 
                                         Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                     }
@@ -143,7 +155,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
         header[2] = "stop";
         header[3] = "strand";
         header[4] = "mirna_id";
-        header[5] = "entrez_id";
+        header[5] = "entrez_gene_id";
         header[6] = "read_count";
         header[7] = "reads_per_million_mirna_mapped";
         header[8] = "cross_mapped";

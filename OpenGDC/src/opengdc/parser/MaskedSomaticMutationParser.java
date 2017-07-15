@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc.parser;
 
@@ -55,25 +59,25 @@ public class MaskedSomaticMutationParser extends BioParser {
                             
                                 for (int entry: uuidData.keySet()) {
                                     ArrayList<String> values = new ArrayList<>();
-                                    values.add(uuidData.get(entry).get("chromosome"));
-                                    values.add(uuidData.get(entry).get("start_position"));
-                                    values.add(uuidData.get(entry).get("end_position"));
-                                    values.add(uuidData.get(entry).get("strand"));
-                                    values.add(uuidData.get(entry).get("hugo_symbol"));
-                                    values.add(uuidData.get(entry).get("entrez_gene_id"));
+                                    values.add(parseValue(uuidData.get(entry).get("chromosome"), 0));
+                                    values.add(parseValue(uuidData.get(entry).get("start_position"), 1));
+                                    values.add(parseValue(uuidData.get(entry).get("end_position"), 2));
+                                    values.add(parseValue(uuidData.get(entry).get("strand"), 3));
+                                    values.add(parseValue(uuidData.get(entry).get("hugo_symbol"), 4));
+                                    values.add(parseValue(uuidData.get(entry).get("entrez_gene_id"), 5));
                                     /*values.add(uuidData.get(entry).get("center"));
                                     values.add(uuidData.get(entry).get("ncbi_build"));*/
-                                    values.add(uuidData.get(entry).get("variant_classification"));
-                                    values.add(uuidData.get(entry).get("variant_type"));
-                                    values.add(uuidData.get(entry).get("reference_allele"));
-                                    values.add(uuidData.get(entry).get("tumor_seq_allele1"));
-                                    values.add(uuidData.get(entry).get("tumor_seq_allele2"));
-                                    values.add(uuidData.get(entry).get("dbsnp_rs"));
+                                    values.add(parseValue(uuidData.get(entry).get("variant_classification"), 6));
+                                    values.add(parseValue(uuidData.get(entry).get("variant_type"), 7));
+                                    values.add(parseValue(uuidData.get(entry).get("reference_allele"), 8));
+                                    values.add(parseValue(uuidData.get(entry).get("tumor_seq_allele1"), 9));
+                                    values.add(parseValue(uuidData.get(entry).get("tumor_seq_allele2"), 10));
+                                    values.add(parseValue(uuidData.get(entry).get("dbsnp_rs"), 11));
                                     //values.add(uuidData.get(entry).get("dbsnp_val_status"));
-                                    values.add(uuidData.get(entry).get("tumor_sample_barcode"));
-                                    values.add(uuidData.get(entry).get("matched_norm_sample_barcode"));
-                                    values.add(uuidData.get(entry).get("match_norm_seq_allele1"));
-                                    values.add(uuidData.get(entry).get("match_norm_seq_allele2"));
+                                    values.add(parseValue(uuidData.get(entry).get("tumor_sample_barcode"), 12));
+                                    values.add(parseValue(uuidData.get(entry).get("matched_norm_sample_barcode"), 13));
+                                    values.add(parseValue(uuidData.get(entry).get("match_norm_seq_allele1"), 14));
+                                    values.add(parseValue(uuidData.get(entry).get("match_norm_seq_allele2"), 15));
                                     /*values.add(uuidData.get(entry).get("tumor_validation_allele1"));
                                     values.add(uuidData.get(entry).get("tumor_validation_allele2"));
                                     values.add(uuidData.get(entry).get("match_norm_validation_allele1"));
@@ -87,8 +91,8 @@ public class MaskedSomaticMutationParser extends BioParser {
                                     values.add(uuidData.get(entry).get("score"));
                                     values.add(uuidData.get(entry).get("bam_file"));
                                     values.add(uuidData.get(entry).get("sequencer"));*/
-                                    values.add(uuidData.get(entry).get("tumor_sample_uuid"));
-                                    values.add(uuidData.get(entry).get("matched_norm_sample_uuid"));
+                                    values.add(parseValue(uuidData.get(entry).get("tumor_sample_uuid"), 16));
+                                    values.add(parseValue(uuidData.get(entry).get("matched_norm_sample_uuid"), 17));
                                     /*values.add(uuidData.get(entry).get("hgvsc"));
                                     values.add(uuidData.get(entry).get("hgvsp"));
                                     values.add(uuidData.get(entry).get("hgvsp_short"));

@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc;
 
@@ -17,6 +21,7 @@ import java.util.HashSet;
 public class Main {
     
     private static HashSet<String> skip_diseases = new HashSet<>();
+    private static final String CMD = "download and convert";
     
     private static void initSkipDiseases() {
         skip_diseases = new HashSet<>();
@@ -33,66 +38,59 @@ public class Main {
         for (String program: gdcDataMap.keySet()) {
             if (program.toLowerCase().trim().equals("tcga")) {
                 for (String disease: gdcDataMap.get(program).keySet()) {
-                    if (!skip_diseases.contains(disease)) {
-                        for (String dataType: gdcDataMap.get(program).get(disease)) {
-                            if (dataType.toLowerCase().trim().equals("clinical supplement") || dataType.toLowerCase().trim().equals("biospecimen supplement")) {
+                    if (disease.toLowerCase().equals("tcga-acc")) {
+                    //if (!skip_diseases.contains(disease)) {
+                        HashSet<String> dataTypes = new HashSet<>();
+                        dataTypes.add("miRNA Expression Quantification");
+                        //for (String dataType: gdcDataMap.get(program).get(disease)) {
+                        for (String dataType: dataTypes) {    
+                            //if (dataType.toLowerCase().trim().contains("clinical") || dataType.toLowerCase().trim().contains("biospecimen")) {
                                 System.err.println(program + "\t" + disease + "\t" + dataType);
 
-                                /** DOWNLOAD DATA **/
-                                /*String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/";
-                                //String outDirStr = "";
-                                //if (dataType.toLowerCase().trim().equals("clinical supplement"))
-                                    //outDirStr = "/Users/fabio/Downloads/test_gdc_download/TCGA-Metadata/"+disease+"/clinical/";
-                                //else if (dataType.toLowerCase().trim().equals("biospecimen supplement"))
-                                    //outDirStr = "/Users/fabio/Downloads/test_gdc_download/TCGA-Metadata/"+disease+"/biospecimen/";
+                                if (CMD.trim().toLowerCase().contains("download")) {
+                                    /** DOWNLOAD DATA **/
+                                    String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/mirna/gdc/";
+                                    //String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
 
-                                File outDir = new File(outDirStr);
-                                outDir.mkdirs();
-                                Settings.setOutputGDCFolder(outDirStr);
+                                    File outDir = new File(outDirStr);
+                                    outDir.mkdirs();
+                                    Settings.setOutputGDCFolder(outDirStr);
 
-                                String[] arr = new String[6];
-                                arr[0] = "download";            // Action name
-                                arr[1] = program;               // Program
-                                arr[2] = disease;               // Disease
-                                arr[3] = dataType;              // Data type
-                                arr[4] = "true";                // Auto-extract data
-                                arr[5] = "true";                // Auto-remove data
+                                    String[] arr = new String[6];
+                                    arr[0] = "download";            // Action name
+                                    arr[1] = program;               // Program
+                                    arr[2] = disease;               // Disease
+                                    arr[3] = dataType;              // Data type
+                                    arr[4] = "true";                // Auto-extract data
+                                    arr[5] = "true";                // Auto-remove data
 
-                                Controller controller = new Controller();
-                                controller.execute(arr);*/
+                                    Controller controller = new Controller();
+                                    controller.execute(arr);
+                                }
+                                if (CMD.trim().toLowerCase().contains("convert")) {
+                                    /** CONVERT DATA **/
+                                    String inDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/mirna/gdc/";
+                                    //String inDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
+                                    String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/mirna/bed/";
+                                    //String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/meta/";
 
-                                // -------------------------------------------------
+                                    File outDir = new File(outDirStr);
+                                    outDir.mkdirs();
+                                    Settings.setInputGDCFolder(inDirStr);
+                                    Settings.setOutputConvertedFolder(outDirStr);
 
-                                /** CONVERT DATA **/
-                                //String inDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/";
-                                String inDirStr = "";
-                                if (dataType.toLowerCase().trim().equals("clinical supplement"))
-                                    inDirStr = "/Users/fabio/Downloads/test_gdc_download/TCGA-Metadata/"+disease+"/clinical/";
-                                else if (dataType.toLowerCase().trim().equals("biospecimen supplement"))
-                                    inDirStr = "/Users/fabio/Downloads/test_gdc_download/TCGA-Metadata/"+disease+"/biospecimen/";
-                                //String outDirStr = "/Users/fabio/Downloads/test_gdc_download/BED/"+disease+"/";
-                                String outDirStr = "";
-                                if (dataType.toLowerCase().trim().equals("clinical supplement"))
-                                    outDirStr = "/Users/fabio/Downloads/test_gdc_download/BED-Metadata/"+disease+"/clinical/";
-                                else if (dataType.toLowerCase().trim().equals("biospecimen supplement"))
-                                    outDirStr = "/Users/fabio/Downloads/test_gdc_download/BED-Metadata/"+disease+"/biospecimen/";
-                                    
-                                File outDir = new File(outDirStr);
-                                outDir.mkdirs();
-                                Settings.setInputGDCFolder(inDirStr);
-                                Settings.setOutputConvertedFolder(outDirStr);
+                                    String[] arr = new String[5];
+                                    arr[0] = "convert";             // Action name
+                                    arr[1] = program;               // Program
+                                    arr[2] = disease;               // Disease
+                                    arr[3] = dataType;              // Data type
+                                    arr[4] = "BED";                 // Format
+                                    //arr[4] = "META";
 
-                                String[] arr = new String[5];
-                                arr[0] = "convert";             // Action name
-                                arr[1] = program;               // Program
-                                arr[2] = disease;               // Disease
-                                arr[3] = dataType;              // Data type
-                                //arr[4] = "BED";                 // Format
-                                arr[4] = "META";
-                                
-                                Controller controller = new Controller();
-                                controller.execute(arr);
-                            }
+                                    Controller controller = new Controller();
+                                    controller.execute(arr);
+                                }
+                            //}
                         }
                     }
                 }

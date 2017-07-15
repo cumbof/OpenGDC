@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc.integration;
 
@@ -20,6 +24,8 @@ import opengdc.Settings;
  */
 public class MIRBase {
     
+    private static String mirbase_table_path = Settings.getMirbaseHsaDataPath();
+    
     /*
     * mirnaid2coordinates.values : {CHR, START, END, STRAND}
     */
@@ -28,7 +34,7 @@ public class MIRBase {
     public static HashMap<String, HashMap<String, String>> getMirnaid2coordinates() {
         if (mirnaid2coordinates.isEmpty()) {
             try {
-                InputStream fstream = new FileInputStream(Settings.getMirbaseHsaDataPath());
+                InputStream fstream = new FileInputStream(mirbase_table_path);
                 DataInputStream in = new DataInputStream(fstream);
                 BufferedReader br = new BufferedReader(new InputStreamReader(in));
                 String line;

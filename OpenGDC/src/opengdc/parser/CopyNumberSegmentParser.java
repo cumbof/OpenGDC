@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc.parser;
 
@@ -14,6 +18,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
 import opengdc.util.FSUtils;
@@ -46,7 +51,14 @@ public class CopyNumberSegmentParser extends BioParser {
                     GUI.appendLog("Processing " + f.getName() + "\n");
                     
                     String file_uuid = f.getName().split("_")[0];
-                    String aliquot_uuid = GDCQuery.retrieveAliquotFromFileUUID(file_uuid);
+                    HashSet<String> attributes = new HashSet<>();
+                    attributes.add("aliquot_id");
+                    HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("files.file_id", file_uuid, attributes);
+                    String aliquot_uuid = "";
+                    if (file_info != null)
+                        if (file_info.containsKey("aliquot_id"))
+                            aliquot_uuid = file_info.get("aliquot_id");
+                    
                     if (!aliquot_uuid.trim().equals("")) {
                         try {
                             Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
@@ -62,6 +74,7 @@ public class CopyNumberSegmentParser extends BioParser {
                                 else {
                                     String[] line_split = line.split("\t");
                                     String chr = line_split[1];
+                                    if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
                                     String start = line_split[2];
                                     String end = line_split[3];
                                     String strand = "*"; // unknown strand for copy number variation data
@@ -69,12 +82,12 @@ public class CopyNumberSegmentParser extends BioParser {
                                     String segment_mean = line_split[5];
 
                                     ArrayList<String> values = new ArrayList<>();
-                                    values.add(chr);
-                                    values.add(start);
-                                    values.add(end);
-                                    values.add(strand);
-                                    values.add(num_probes);
-                                    values.add(segment_mean);
+                                    values.add(parseValue(chr, 0));
+                                    values.add(parseValue(start, 1));
+                                    values.add(parseValue(end, 2));
+                                    values.add(parseValue(strand, 3));
+                                    values.add(parseValue(num_probes, 4));
+                                    values.add(parseValue(segment_mean, 5));
 
                                     Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 }

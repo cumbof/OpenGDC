@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Application: OpenGDC
+ * Version: 1.0
+ * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
+ * Organizations: 
+ * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
+ * 2. Department of Engineering - Third University of Rome, Rome, Italy
+ * 3. Department of Engineering - Uninettuno International University, Rome, Italy
  */
 package opengdc.util;
 
@@ -18,91 +22,59 @@ public class GDCData {
     
     private static void initBigGDCDataMap() {
         program2tumor2datatype = new HashMap<>();
-        program2tumor2datatype.put("TARGET", new  HashMap<String, HashSet<String>>());
+        program2tumor2datatype.put("TARGET", new HashMap<String, HashSet<String>>());
         program2tumor2datatype.put("TCGA", new HashMap<String, HashSet<String>>());
         
         /** TARGET **/
         
         HashSet<String> dataTypes = new HashSet<>();
         dataTypes.add("Gene Expression Quantification");
-        dataTypes.add("Copy Number Segment");
-        dataTypes.add("Masked Copy Number Segment");
-        dataTypes.add("Methylation Beta Value");
-        dataTypes.add("Isoform Expression Quantification");
-        dataTypes.add("miRNA Expression Quantification");
         dataTypes.add("Biospecimen Supplement");
         dataTypes.add("Clinical Supplement");        
-        dataTypes.add("Masked Somatic Mutation");
         HashMap<String, HashSet<String>> tumor2dataType = program2tumor2datatype.get("TARGET");
         tumor2dataType.put("TARGET-NBL", dataTypes);
         program2tumor2datatype.put("TARGET", tumor2dataType);
         
         dataTypes = new HashSet<>();
         dataTypes.add("Gene Expression Quantification");
-        dataTypes.add("Copy Number Segment");
-        dataTypes.add("Masked Copy Number Segment");
-        dataTypes.add("Methylation Beta Value");
         dataTypes.add("Isoform Expression Quantification");
         dataTypes.add("miRNA Expression Quantification");
         dataTypes.add("Biospecimen Supplement");
         dataTypes.add("Clinical Supplement");        
-        dataTypes.add("Masked Somatic Mutation");
         tumor2dataType = program2tumor2datatype.get("TARGET");
         tumor2dataType.put("TARGET-AML", dataTypes);
         program2tumor2datatype.put("TARGET", tumor2dataType);
         
         dataTypes = new HashSet<>();
         dataTypes.add("Gene Expression Quantification");
-        dataTypes.add("Copy Number Segment");
-        dataTypes.add("Masked Copy Number Segment");
-        dataTypes.add("Methylation Beta Value");
         dataTypes.add("Isoform Expression Quantification");
         dataTypes.add("miRNA Expression Quantification");
         dataTypes.add("Biospecimen Supplement");
         dataTypes.add("Clinical Supplement");        
-        dataTypes.add("Masked Somatic Mutation");
         tumor2dataType = program2tumor2datatype.get("TARGET");
         tumor2dataType.put("TARGET-WT", dataTypes);
         program2tumor2datatype.put("TARGET", tumor2dataType);
 
         dataTypes = new HashSet<>();
-        dataTypes.add("Gene Expression Quantification");
-        dataTypes.add("Copy Number Segment");
-        dataTypes.add("Masked Copy Number Segment");
-        dataTypes.add("Methylation Beta Value");
-        dataTypes.add("Isoform Expression Quantification");
-        dataTypes.add("miRNA Expression Quantification");
         dataTypes.add("Biospecimen Supplement");
         dataTypes.add("Clinical Supplement");        
-        dataTypes.add("Masked Somatic Mutation");
         tumor2dataType = program2tumor2datatype.get("TARGET");
         tumor2dataType.put("TARGET-OS", dataTypes);
         program2tumor2datatype.put("TARGET", tumor2dataType);
 
         dataTypes = new HashSet<>();
         dataTypes.add("Gene Expression Quantification");
-        dataTypes.add("Copy Number Segment");
-        dataTypes.add("Masked Copy Number Segment");
-        dataTypes.add("Methylation Beta Value");
         dataTypes.add("Isoform Expression Quantification");
         dataTypes.add("miRNA Expression Quantification");
         dataTypes.add("Biospecimen Supplement");
         dataTypes.add("Clinical Supplement");        
-        dataTypes.add("Masked Somatic Mutation");
         tumor2dataType = program2tumor2datatype.get("TARGET");
         tumor2dataType.put("TARGET-RT", dataTypes);
         program2tumor2datatype.put("TARGET", tumor2dataType);
 
         dataTypes = new HashSet<>();
-        dataTypes.add("Gene Expression Quantification");
-        dataTypes.add("Copy Number Segment");
-        dataTypes.add("Masked Copy Number Segment");
-        dataTypes.add("Methylation Beta Value");
-        dataTypes.add("Isoform Expression Quantification");
-        dataTypes.add("miRNA Expression Quantification");
         dataTypes.add("Biospecimen Supplement");
         dataTypes.add("Clinical Supplement");        
-        dataTypes.add("Masked Somatic Mutation");
         tumor2dataType = program2tumor2datatype.get("TARGET");
         tumor2dataType.put("TARGET-CCSK", dataTypes);
         program2tumor2datatype.put("TARGET", tumor2dataType);
