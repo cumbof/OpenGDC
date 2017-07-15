@@ -3,6 +3,8 @@ OpenGDC is a Java tool for the automatic extraction and conversion in BED, GTF, 
 
 ## Notes
 - Import OpenGDC as a NetBeans Project;
+- Remove Homo_sapiens.GRCh38.88.gff3.gz from package/ensembl/ folder
+- Remove GRCh38_data.txt from package/ncbi/ folder
 - Extract Homo_sapiens.GRCh38.77.gtf.gz inside package/ensembl/ folder before running the application;
 - Extract ref_GRCh38_top_level.gff3.gz inside package/ncbi/ folder before running the application;
 - Set the "DEBUG" boolean variable to "false" in Settings class before exporting the project to the final JAR;

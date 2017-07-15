@@ -48,11 +48,13 @@ public class Ensembl {
                         String[] extendedInfo_arr = arr[8].split(";");
                         for (String data: extendedInfo_arr) {
                             if (data.toLowerCase().trim().startsWith("gene_name")) {
-                                String[] name_split = data.split("=");
+                                //String[] name_split = data.split("="); // for gff3
+                                String[] name_split = data.split("\""); // for gtf
                                 symbol = name_split[name_split.length-1];
                             }
                             else if (data.toLowerCase().trim().startsWith("gene_id")) {
-                            	String[] id_split = data.split("=");
+                            	//String[] id_split = data.split("="); // for gff3
+                                String[] id_split = data.split("\""); //for gtf
                             	ensembl = id_split[id_split.length-1];
                             }
                         }
