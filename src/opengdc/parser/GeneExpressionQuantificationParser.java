@@ -92,16 +92,19 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                     /** convert ensembl_id to symbol and retrieve chromosome, start and end position, strand, and other relevant info **/
                                     // remove ensembl version from id
                                     String ensembl_id_noversion = ensembl_id.split("\\.")[0];
-                                    HashMap<String, String> ensembl_data = Ensembl.extractEnsemblInfo(ensembl_id_noversion);
+                                    ArrayList<HashMap<String, String>> ensembl_data = Ensembl.extractEnsemblInfo(ensembl_id_noversion, "gene");
                                     if (!ensembl_data.isEmpty()) {
-                                        String chr = ensembl_data.get("CHR");
+                                        // get first entry
+                                        HashMap<String, String> gene_info = ensembl_data.get(0);
+
+                                        String chr = gene_info.get("CHR");
                                         if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
-                                        String start = ensembl_data.get("START");
-                                        String end = ensembl_data.get("END");
-                                        String strand = ensembl_data.get("STRAND");
-                                        String gene_symbol = ensembl_data.get("SYMBOL");
-                                        String type = ensembl_data.get("TYPE");
-                                        
+                                        String start = gene_info.get("START");
+                                        String end = gene_info.get("END");
+                                        String strand = gene_info.get("STRAND");
+                                        String gene_symbol = gene_info.get("SYMBOL");
+                                        String type = gene_info.get("TYPE");
+
                                         // trying to retrive the entrez_id starting with the symbol from GeneNames (HUGO)
                                         String entrez = "NA";
                                         String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
