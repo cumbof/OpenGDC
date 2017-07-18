@@ -31,6 +31,9 @@ public class Ensembl {
     private static HashMap<String, ArrayList<HashMap<String, String>>> ensembl_data_exon = new HashMap<>();
     private static HashMap<String, ArrayList<HashMap<String, String>>> ensembl_data_transcript = new HashMap<>();
     private static HashMap<String, ArrayList<HashMap<String, String>>> ensembl_data_utr = new HashMap<>();
+    private static HashMap<String, ArrayList<HashMap<String, String>>> ensembl_data_cds = new HashMap<>();
+    private static HashMap<String, ArrayList<HashMap<String, String>>> ensembl_data_start_codon = new HashMap<>();
+    private static HashMap<String, ArrayList<HashMap<String, String>>> ensembl_data_stop_codon = new HashMap<>();
 	
     private static void loadEnsemblTableByType(String type) {
 	try {
@@ -93,6 +96,24 @@ public class Ensembl {
                                     entries.add(entry);
                                     ensembl_data_utr.put(ensembl, entries);
                                 }
+                                else if (type.toLowerCase().trim().equals("cds")) {
+                                    if (ensembl_data_cds.containsKey(ensembl))
+                                        entries = ensembl_data_cds.get(ensembl);
+                                    entries.add(entry);
+                                    ensembl_data_cds.put(ensembl, entries);
+                                }
+                                else if (type.toLowerCase().trim().equals("start_codon")) {
+                                    if (ensembl_data_start_codon.containsKey(ensembl))
+                                        entries = ensembl_data_start_codon.get(ensembl);
+                                    entries.add(entry);
+                                    ensembl_data_start_codon.put(ensembl, entries);
+                                }
+                                else if (type.toLowerCase().trim().equals("stop_codon")) {
+                                    if (ensembl_data_stop_codon.containsKey(ensembl))
+                                        entries = ensembl_data_stop_codon.get(ensembl);
+                                    entries.add(entry);
+                                    ensembl_data_stop_codon.put(ensembl, entries);
+                                }
                             }
                         }
                     }
@@ -111,11 +132,17 @@ public class Ensembl {
         else if (type.toLowerCase().trim().equals("exon") && ensembl_data_exon.isEmpty()) loadEnsemblTableByType(type);
         else if (type.toLowerCase().trim().equals("transcript") && ensembl_data_transcript.isEmpty()) loadEnsemblTableByType(type);
         else if (type.toLowerCase().trim().equals("utr") && ensembl_data_utr.isEmpty()) loadEnsemblTableByType(type);
+        else if (type.toLowerCase().trim().equals("cds") && ensembl_data_cds.isEmpty()) loadEnsemblTableByType(type);
+        else if (type.toLowerCase().trim().equals("start_codon") && ensembl_data_start_codon.isEmpty()) loadEnsemblTableByType(type);
+        else if (type.toLowerCase().trim().equals("stop_codon") && ensembl_data_stop_codon.isEmpty()) loadEnsemblTableByType(type);
         
         if (type.toLowerCase().trim().equals("gene")) { if (ensembl_data_gene.containsKey(ensembl_id)) return ensembl_data_gene.get(ensembl_id); }
         if (type.toLowerCase().trim().equals("exon")) { if (ensembl_data_exon.containsKey(ensembl_id)) return ensembl_data_exon.get(ensembl_id); }
         if (type.toLowerCase().trim().equals("transcript")) { if (ensembl_data_transcript.containsKey(ensembl_id)) return ensembl_data_transcript.get(ensembl_id); }
         if (type.toLowerCase().trim().equals("utr")) { if (ensembl_data_utr.containsKey(ensembl_id)) return ensembl_data_utr.get(ensembl_id); }
+        if (type.toLowerCase().trim().equals("cds")) { if (ensembl_data_cds.containsKey(ensembl_id)) return ensembl_data_cds.get(ensembl_id); }
+        if (type.toLowerCase().trim().equals("start_codon")) { if (ensembl_data_start_codon.containsKey(ensembl_id)) return ensembl_data_start_codon.get(ensembl_id); }
+        if (type.toLowerCase().trim().equals("stop_codon")) { if (ensembl_data_stop_codon.containsKey(ensembl_id)) return ensembl_data_stop_codon.get(ensembl_id); }
         
         return new ArrayList<>();
     }
