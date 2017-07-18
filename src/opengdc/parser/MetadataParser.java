@@ -83,16 +83,9 @@ public class MetadataParser extends BioParser {
             }
         }
         
-        // merge clinical and biospecimen info
-        HashSet<String> manually_curated_attributes = new HashSet<>();
-        manually_curated_attributes.add("experimental_strategy");
-        manually_curated_attributes.add("platform");
-        manually_curated_attributes.add("workflow_link");
-        manually_curated_attributes.add("data_category");
-        manually_curated_attributes.add("data_type");
-        manually_curated_attributes.add("data_format");
-        manually_curated_attributes.add("file_size");
+        // merge clinical and biospecimen info (plus additional metadata)
         if (!clinicalBigMap.isEmpty() || !biospecimenBigMap.isEmpty()) {
+            HashMap<String, HashSet<String>> additional_attributes = getAdditionalAttributes();
             for (String aliquot_uuid: biospecimenBigMap.keySet()) {
                 try {
                     FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "." + this.getFormat());
@@ -114,12 +107,16 @@ public class MetadataParser extends BioParser {
                             }
                         }
                     }
-                    // print manually curated info
-                    HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), manually_curated_attributes);
-                    if (file_info != null) {
-                        for (String attribute: file_info.keySet()) {
-                            String attribute_parsed = FSUtils.stringToValidJavaIdentifier("manually_curated__" + attribute.replaceAll(":", "__"));
-                            out.println(attribute_parsed + "\t" + file_info.get(attribute));
+                    // print additional metadata
+                    if (!additional_attributes.isEmpty()) {
+                        for (String metakey: additional_attributes.keySet()) {
+                            HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), additional_attributes.get(metakey));
+                            if (file_info != null) {
+                                for (String attribute: file_info.keySet()) {
+                                    String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll(":", "__"));
+                                    out.println(attribute_parsed + "\t" + file_info.get(attribute));
+                                }
+                            }
                         }
                     }
                     out.close();
@@ -134,7 +131,7 @@ public class MetadataParser extends BioParser {
         return 0;
     }
     
-    public HashMap<String, String> extractParentMetadata(XMLNode node, HashMap<String, String> meta) {
+    private HashMap<String, String> extractParentMetadata(XMLNode node, HashMap<String, String> meta) {
         if (meta == null)
             meta = new HashMap<>();
         meta.putAll(node.getAttributes());
@@ -144,7 +141,7 @@ public class MetadataParser extends BioParser {
         return extractParentMetadata(node.getParent(), meta);
     }
     
-    public void searchForAliquots(XMLNode root) {
+    private void searchForAliquots(XMLNode root) {
         if (root.getLabel().toLowerCase().trim().endsWith("bio:aliquot") && root.getAttributes().size()>0) {
             aliquotNodes.add(root);
             //System.err.println(root.getLabel() + "\t" + "attributes: " + root.getAttributes().size());
@@ -158,7 +155,7 @@ public class MetadataParser extends BioParser {
         }
     }
     
-    public XMLNode convertMapToIndexedTree(HashMap<String, Object> map, XMLNode root) {
+    private XMLNode convertMapToIndexedTree(HashMap<String, Object> map, XMLNode root) {
         for (String k: map.keySet()) {
             if (map.get(k) instanceof HashMap) {
                 XMLNode child = new XMLNode();
@@ -172,6 +169,20 @@ public class MetadataParser extends BioParser {
             }
         }
         return root;
+    }
+    
+    private HashMap<String, HashSet<String>> getAdditionalAttributes() {
+        HashMap<String, HashSet<String>> additionalAttributes = new HashMap<>();
+        HashSet<String> attributes = new HashSet<>();
+        attributes.add("experimental_strategy");
+        attributes.add("platform");
+        attributes.add("workflow_link");
+        attributes.add("data_category");
+        attributes.add("data_type");
+        attributes.add("data_format");
+        attributes.add("file_size");
+        additionalAttributes.put("manually_curated", attributes);
+        return additionalAttributes;
     }
 
     @Override
