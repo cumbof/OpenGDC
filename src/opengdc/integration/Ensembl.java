@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import opengdc.Settings;
 
@@ -34,6 +33,7 @@ public class Ensembl {
     private static HashMap<String, ArrayList<HashMap<String, String>>> ensembl_data_cds = new HashMap<>();
     private static HashMap<String, ArrayList<HashMap<String, String>>> ensembl_data_start_codon = new HashMap<>();
     private static HashMap<String, ArrayList<HashMap<String, String>>> ensembl_data_stop_codon = new HashMap<>();
+    private static HashMap<String, ArrayList<HashMap<String, String>>> ensembl_data_selenocysteine = new HashMap<>();
 	
     private static void loadEnsemblTableByType(String type) {
 	try {
@@ -114,6 +114,12 @@ public class Ensembl {
                                     entries.add(entry);
                                     ensembl_data_stop_codon.put(ensembl, entries);
                                 }
+                                else if (type.toLowerCase().trim().equals("selenocysteine")) {
+                                    if (ensembl_data_selenocysteine.containsKey(ensembl))
+                                        entries = ensembl_data_selenocysteine.get(ensembl);
+                                    entries.add(entry);
+                                    ensembl_data_selenocysteine.put(ensembl, entries);
+                                }
                             }
                         }
                     }
@@ -135,6 +141,7 @@ public class Ensembl {
         else if (type.toLowerCase().trim().equals("cds") && ensembl_data_cds.isEmpty()) loadEnsemblTableByType(type);
         else if (type.toLowerCase().trim().equals("start_codon") && ensembl_data_start_codon.isEmpty()) loadEnsemblTableByType(type);
         else if (type.toLowerCase().trim().equals("stop_codon") && ensembl_data_stop_codon.isEmpty()) loadEnsemblTableByType(type);
+        else if (type.toLowerCase().trim().equals("selenocysteine") && ensembl_data_selenocysteine.isEmpty()) loadEnsemblTableByType(type);
         
         if (type.toLowerCase().trim().equals("gene")) { if (ensembl_data_gene.containsKey(ensembl_id)) return ensembl_data_gene.get(ensembl_id); }
         if (type.toLowerCase().trim().equals("exon")) { if (ensembl_data_exon.containsKey(ensembl_id)) return ensembl_data_exon.get(ensembl_id); }
@@ -143,6 +150,7 @@ public class Ensembl {
         if (type.toLowerCase().trim().equals("cds")) { if (ensembl_data_cds.containsKey(ensembl_id)) return ensembl_data_cds.get(ensembl_id); }
         if (type.toLowerCase().trim().equals("start_codon")) { if (ensembl_data_start_codon.containsKey(ensembl_id)) return ensembl_data_start_codon.get(ensembl_id); }
         if (type.toLowerCase().trim().equals("stop_codon")) { if (ensembl_data_stop_codon.containsKey(ensembl_id)) return ensembl_data_stop_codon.get(ensembl_id); }
+        if (type.toLowerCase().trim().equals("selenocysteine")) { if (ensembl_data_selenocysteine.containsKey(ensembl_id)) return ensembl_data_selenocysteine.get(ensembl_id); }
         
         return new ArrayList<>();
     }
