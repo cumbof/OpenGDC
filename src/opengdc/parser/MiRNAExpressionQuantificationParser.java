@@ -92,11 +92,16 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                                         String end = coordinates.get("END");
                                         String strand = coordinates.get("STRAND");
                                         String entrez = "NA";
+                                        String symbol = "NA";
                                         
                                         // retrieve entrez_id from GeneNames (HUGO)
                                         String entrez_tmp = GeneNames.getEntrezFromMirnaID(mirna_id);
-                                        if (entrez_tmp != null)
+                                        if (entrez_tmp != null) {
                                             entrez = entrez_tmp;
+                                            String symbol_tmp = GeneNames.getSymbolFromEntrez(entrez);
+                                            if (symbol_tmp != null)
+                                                symbol = symbol_tmp;
+                                        }
 
                                         ArrayList<String> values = new ArrayList<>();
                                         values.add(parseValue(chr, 0));
@@ -104,10 +109,11 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                                         values.add(parseValue(end, 2));
                                         values.add(parseValue(strand, 3));
                                         values.add(parseValue(mirna_id, 4));
-                                        values.add(parseValue(entrez, 5));
-                                        values.add(parseValue(read_count, 6));
-                                        values.add(parseValue(reads_per_million_mirna_mapped, 7));
-                                        values.add(parseValue(cross_mapped, 8));
+                                        values.add(parseValue(read_count, 5));
+                                        values.add(parseValue(reads_per_million_mirna_mapped, 6));
+                                        values.add(parseValue(cross_mapped, 7));
+                                        values.add(parseValue(entrez, 8));
+                                        values.add(parseValue(symbol, 9));
 
                                         Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                     }
@@ -149,31 +155,33 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
 
     @Override
     public String[] getHeader() {
-        String[] header = new String[9];
+        String[] header = new String[10];
         header[0] = "chr";
         header[1] = "start";
         header[2] = "stop";
         header[3] = "strand";
         header[4] = "mirna_id";
-        header[5] = "entrez_gene_id";
-        header[6] = "read_count";
-        header[7] = "reads_per_million_mirna_mapped";
-        header[8] = "cross_mapped";
+        header[5] = "read_count";
+        header[6] = "reads_per_million_mirna_mapped";
+        header[7] = "cross_mapped";
+        header[8] = "entrez_gene_id";
+        header[9] = "gene_symbol";
         return header;
     }
 
     @Override
     public String[] getAttributesType() {
-        String[] attr_type = new String[9];
+        String[] attr_type = new String[10];
         attr_type[0] = "STRING";
         attr_type[1] = "LONG";
         attr_type[2] = "LONG";
         attr_type[3] = "CHAR";
         attr_type[4] = "STRING";
-        attr_type[5] = "STRING";
-        attr_type[6] = "LONG";
-        attr_type[7] = "FLOAT";
+        attr_type[5] = "LONG";
+        attr_type[6] = "FLOAT";
+        attr_type[7] = "STRING";
         attr_type[8] = "STRING";
+        attr_type[9] = "STRING";
         return attr_type;
     }
 

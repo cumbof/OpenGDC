@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
+import opengdc.integration.GeneNames;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
 import opengdc.util.GDCQuery;
@@ -75,6 +76,7 @@ public class IsoformExpressionQuantificationParser extends BioParser {
                                     String[] line_split = line.split("\t");
                                     String isoform_coordinates = line_split[1];
                                     String[] coordinates_split = isoform_coordinates.split(":");
+                                    String genome_version = coordinates_split[0];
                                     String chr = coordinates_split[1];
                                     if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
                                     String[] start_end = coordinates_split[2].split("-");
@@ -87,17 +89,35 @@ public class IsoformExpressionQuantificationParser extends BioParser {
                                     String reads_per_million_mirna_mapped = line_split[3];
                                     String cross_mapped = line_split[4];
                                     String mirna_region = line_split[5];
+                                    
+                                    String entrez = "NA";
+                                    String symbol = "NA";
+
+                                    // retrieve entrez_id from GeneNames (HUGO)
+                                    String entrez_tmp = GeneNames.getEntrezFromMirnaID(mirna_id);
+                                    if (entrez_tmp != null) {
+                                        entrez = entrez_tmp;
+                                        String symbol_tmp = GeneNames.getSymbolFromEntrez(entrez);
+                                        if (symbol_tmp != null)
+                                            symbol = symbol_tmp;
+                                    }
 
                                     ArrayList<String> values = new ArrayList<>();
                                     values.add(parseValue(chr, 0));
                                     values.add(parseValue(start, 1));
                                     values.add(parseValue(end, 2));
                                     values.add(parseValue(strand, 3));
-                                    values.add(parseValue(mirna_id, 4));
-                                    values.add(parseValue(read_count, 5));
-                                    values.add(parseValue(reads_per_million_mirna_mapped, 6));
-                                    values.add(parseValue(cross_mapped, 7));
-                                    values.add(parseValue(mirna_region, 8));
+                                    
+                                    values.add(parseValue(genome_version, 4));
+                                    
+                                    values.add(parseValue(mirna_id, 5));
+                                    values.add(parseValue(read_count, 6));
+                                    values.add(parseValue(reads_per_million_mirna_mapped, 7));
+                                    values.add(parseValue(cross_mapped, 8));
+                                    values.add(parseValue(mirna_region, 9));
+                                    
+                                    values.add(parseValue(entrez, 10));
+                                    values.add(parseValue(symbol, 11));
 
                                     Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 }
@@ -138,31 +158,37 @@ public class IsoformExpressionQuantificationParser extends BioParser {
 
     @Override
     public String[] getHeader() {
-        String[] header = new String[9];
+        String[] header = new String[12];
         header[0] = "chr";
         header[1] = "start";
         header[2] = "stop";
         header[3] = "strand";
-        header[4] = "mirna_id";
-        header[5] = "read_count";
-        header[6] = "reads_per_million_mirna_mapped";
-        header[7] = "cross_mapped";
-        header[8] = "mirna_region";
+        header[4] = "genome_version";
+        header[5] = "mirna_id";
+        header[6] = "read_count";
+        header[7] = "reads_per_million_mirna_mapped";
+        header[8] = "cross_mapped";
+        header[9] = "mirna_region";
+        header[10] = "entrez_gene_id";
+        header[11] = "gene_symbol";
         return header;
     }
 
     @Override
     public String[] getAttributesType() {
-        String[] attr_type = new String[9];
+        String[] attr_type = new String[12];
         attr_type[0] = "STRING";
         attr_type[1] = "LONG";
         attr_type[2] = "LONG";
         attr_type[3] = "CHAR";
         attr_type[4] = "STRING";
-        attr_type[5] = "LONG";
-        attr_type[6] = "FLOAT";
-        attr_type[7] = "STRING";
+        attr_type[5] = "STRING";
+        attr_type[6] = "LONG";
+        attr_type[7] = "FLOAT";
         attr_type[8] = "STRING";
+        attr_type[9] = "STRING";
+        attr_type[10] = "STRING";
+        attr_type[11] = "STRING";
         return attr_type;
     }
 
