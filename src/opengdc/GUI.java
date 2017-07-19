@@ -727,7 +727,7 @@ public class GUI extends javax.swing.JFrame {
                     if (!dataType.trim().toLowerCase().equals("biospecimen supplement") && !dataType.trim().toLowerCase().equals("clinical supplement"))
                         jComboBox3.addItem(dataType);
                 }
-                jComboBox3.addItem("Clinical and Biospecimen supplements");
+                jComboBox3.addItem("Clinical and Biospecimen Supplements");
             }
             else {
                 jComboBox3.removeAllItems();
@@ -815,7 +815,7 @@ public class GUI extends javax.swing.JFrame {
                     if (!dataType.trim().toLowerCase().equals("biospecimen supplement") && !dataType.trim().toLowerCase().equals("clinical supplement"))
                         jComboBox7.addItem(dataType);
                 }
-                jComboBox7.addItem("Clinical and Biospecimen supplements");
+                jComboBox7.addItem("Clinical and Biospecimen Supplements");
             }
             else {
                 jComboBox7.removeAllItems();
