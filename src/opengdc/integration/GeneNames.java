@@ -62,6 +62,17 @@ public class GeneNames {
         return symbol2entrez;
     }
     
+    public static String getSymbolFromEntrez(String entrez) {
+        HashMap<String, String> data = getSymbol2Entrez();
+        if (!data.isEmpty()) {
+            for (String gs: data.keySet()) {
+                if (data.get(gs).trim().toLowerCase().equals(entrez.trim().toLowerCase()))
+                    return gs;
+            }
+        }
+        return null;
+    }
+    
     public static HashMap<String, String> getMirnaID2Entrez() {
         if (mirnaid2entrez.isEmpty()) {
             try {
