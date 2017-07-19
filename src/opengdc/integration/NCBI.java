@@ -64,6 +64,9 @@ public class NCBI {
             String gene_symbol_tmp = genes[i];
             int last = getLastIndex(genes,i);
 
+            if(ncbi_data.isEmpty()){
+                loadNCBItable(chr,"gene");
+            }
             if (ncbi_data.containsKey(gene_symbol_tmp)) { 
                 String start = ncbi_data.get(gene_symbol_tmp).get("START");
                 String end = ncbi_data.get(gene_symbol_tmp).get("END");
@@ -76,12 +79,8 @@ public class NCBI {
                     int distance= (s_site-startf)+(endf-e_site);
                     gene2CpGdistance.put(gene_symbol_tmp,distance);
                 }
-            }
-            else
-                gene2CpGdistance = isInCpGsite(chr, gene_symbol_tmp, start_site, end_site, gene2CpGdistance) ;
-
-            if (ncbi_data.containsKey(gene_symbol_tmp))
                 entrez = ncbi_data.get(gene_symbol_tmp).get("GDC_ENTREZ"); //in ncbi_data map there are all gene symbols and entrez ids.
+            }
             else
                 entrez = "null";
 
@@ -184,7 +183,7 @@ public class NCBI {
         return entrez;
     }
     
-    public static HashMap<String, Integer> isInCpGsite(String chr, String gene_symbol, String start_site, String end_site, HashMap<String, Integer> gene2CpGdistance) {
+    public static void loadNCBItable(String chr, String type) {
         try {
             InputStream fstream = new FileInputStream(Settings.getNCBIDataPath());
             DataInputStream in = new DataInputStream(fstream);
@@ -195,26 +194,19 @@ public class NCBI {
                 try {
                     if (!line.startsWith("#") && !line.equals("")) {
                         String[] arr = line.split("\t");
-                        String extendedInfo = arr[8];
-                        int start = Integer.parseInt(arr[3]);
-                        int s_site = Integer.parseInt(start_site);
-                        int end = Integer.parseInt(arr[4]);
-                        int e_site = Integer.parseInt(end_site);
-                        if (extendedInfo.contains("Name=")) {
-                            String[] extendedInfo_arr = extendedInfo.split(";");
-                            for (String data: extendedInfo_arr) {
-                                if (data.toLowerCase().trim().startsWith("name")) {
-                                    String[] name_split = data.split("=");
-                                    String symbol = name_split[name_split.length-1];
-                                    if(gene_symbol.equals(symbol)){
-                                        if((s_site>= start && end>=e_site)){
-                                            // if CpG island is in the current interval -> put in map
-                                            int distance = (s_site-start)+(end-e_site);
-                                            gene2CpGdistance.put(gene_symbol, distance);
-                                        }
+                        if (arr[2].trim().toLowerCase().equals(type.trim().toLowerCase())) {
+
+                            String extendedInfo = arr[8];
+                            if (extendedInfo.contains("Name=")) {
+                                String[] extendedInfo_arr = extendedInfo.split(";");
+                                for (String data: extendedInfo_arr) {
+
+                                    if (data.toLowerCase().trim().startsWith("name")) {
+                                        String[] name_split = data.split("=");
+                                        String symbol = name_split[name_split.length-1];
                                         String entrez_tmp = getEntrezFromNCBIline(extendedInfo);
                                         updateNCBIData(entrez_tmp, symbol, chr, arr[3], arr[4], arr[6]);
-                                        found = true;
+                                    
                                     }
                                 }
                             }
@@ -228,7 +220,6 @@ public class NCBI {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return  gene2CpGdistance;
     }
     
     public static int getLastIndex(String[] genes, int i) {
