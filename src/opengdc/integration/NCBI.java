@@ -173,11 +173,16 @@ public class NCBI {
     
     private static String getEntrezFromNCBIline(String arr) {
         String entrez = "";
-        for (String data: arr.split(",")) {
+        for (String data: arr.split(";")) {
             if (data.toLowerCase().trim().contains("geneid")) {
-                String[] name_split = data.split(":");
-                entrez = name_split[name_split.length-1];
-                break;
+                for (String data1: data.split(",")) {
+
+                    if (data1.toLowerCase().trim().contains("geneid")) {
+                        String[] name_split = data1.split(":");
+                        entrez = name_split[name_split.length-1];
+                         break;
+                    }
+                }
             }
         }
         return entrez;
@@ -189,7 +194,6 @@ public class NCBI {
             DataInputStream in = new DataInputStream(fstream);
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line;
-            boolean found = false;
             while ((line = br.readLine()) != null && !found) {
                 try {
                     if (!line.startsWith("#") && !line.equals("")) {
