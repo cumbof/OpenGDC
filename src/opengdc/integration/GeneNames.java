@@ -27,6 +27,7 @@ public class GeneNames {
     private static String genenames_table_path = Settings.getGENENAMESDataPath();
     private static HashMap<String, String> symbol2entrez = new HashMap<>();
     private static HashMap<String, String> mirnaid2entrez = new HashMap<>();
+    private static HashMap<String, String> ensembl2symbol = new HashMap<>();
     
     public static HashMap<String, String> getSymbol2Entrez() {
         if (symbol2entrez.isEmpty()) {
@@ -60,6 +61,36 @@ public class GeneNames {
             }
         }
         return symbol2entrez;
+    }
+
+     public static HashMap<String, String> getEnsemblId2Symbol() {
+        if (ensembl2symbol.isEmpty()) {
+            try {
+                boolean firstLine = true; // just to skip the first line (header)
+                InputStream fstream = new FileInputStream(genenames_table_path);
+                DataInputStream in = new DataInputStream(fstream);
+                BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    try {
+                        if (!firstLine) {
+                            String[] arr = line.split("\t");
+                            String ensembl_id = arr[19];
+                            String symbol = arr[1];
+                            ensembl2symbol.put(ensembl_id, symbol);         
+                        }
+                        else
+                            firstLine = false;
+                    } catch (Exception e) {}
+                }
+                br.close();
+                in.close();
+                fstream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return ensembl2symbol;
     }
     
     public static String getSymbolFromEntrez(String entrez) {
@@ -120,6 +151,17 @@ public class GeneNames {
             for (String mid: data.keySet()) {
                 if (mid.trim().toLowerCase().equals(mirnaid.trim().toLowerCase()))
                     return data.get(mid);
+            }
+        }
+        return null;
+    }
+
+    public static String getSymbolFromEnsemblID(String ensembl_id) {
+        HashMap<String, String> data = getEnsemblId2Symbol();
+        if (!data.isEmpty()) {
+            for (String gs: data.keySet()) {
+                if (gs.trim().toLowerCase().equals(ensembl_id.trim().toLowerCase()))
+                    return data.get(gs);
             }
         }
         return null;
