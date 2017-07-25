@@ -48,13 +48,13 @@ public abstract class BioParser {
     public String parseValue(String value, int index) {
         if (value == null)
             value = "";
-        if ((value.equals("")) || (value.toLowerCase().equals("na")) || (value.toLowerCase().equals("nan")) || (value.toLowerCase().equals("null"))) {
+        if ((value.equals("")) || (value.toLowerCase().equals("na")) || (value.toLowerCase().equals("nan")) || (value.toLowerCase().equals("null")) || (value.toLowerCase().equals("."))) {
             try {
                 String attributeType = getAttributesType()[index];
                 if (attributeType.toLowerCase().equals("string") || attributeType.toLowerCase().equals("char"))
                     value = "";
                 else if (attributeType.toLowerCase().equals("long") || attributeType.toLowerCase().equals("float"))
-                    value = "NA";
+                    value = "null";
                 else
                     value = "";
             }
