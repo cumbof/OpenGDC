@@ -110,6 +110,15 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                         String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
                                         if (entrez_tmp != null)
                                             entrez = entrez_tmp;
+                                        else{
+                                            gene_symbol_tmp = GeneNames.getSymbolFromEnsemblID(ensembl_id_noversion);
+                                            if (gene_symbol_tmp != null){
+                                                gene_symbol = gene_symbol_tmp;
+                                                entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
+                                                entrez = entrez_tmp;
+                                            }
+                                            else entrez= null;
+                                         }
                                         /***************************************************************************************************/
                                         String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
                                         String fpkm_uq = (ensembl2fpkmuq.containsKey(ensembl_id)) ? ensembl2fpkmuq.get(ensembl_id) : "NA";
