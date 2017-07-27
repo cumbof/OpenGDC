@@ -43,11 +43,14 @@ public class GeneNames {
                             String[] arr = line.split("\t");
                             String symbol = arr[1];
                             String entrez = arr[18];
-                            symbol2entrez.put(symbol, entrez);
+                            String symbol_lower = symbol.trim().toLowerCase();
+                            symbol2entrez.put(symbol_lower, entrez);
                             
                             String[] synonyms = arr[10].replaceAll("\"", "").split("\\|");
-                            for (String syn: synonyms)
-                                symbol2entrez.put(syn, entrez);
+                            for (String syn: synonyms){
+                                String synl_lower = syn.trim().toLowerCase();
+                                symbol2entrez.put(synl_lower, entrez);
+                            }
                         }
                         else
                             firstLine = false;
@@ -137,10 +140,12 @@ public class GeneNames {
     public static String getEntrezFromSymbol(String symbol) {
         HashMap<String, String> data = getSymbol2Entrez();
         if (!data.isEmpty()) {
-            for (String gs: data.keySet()) {
-                if (gs.trim().toLowerCase().equals(symbol.trim().toLowerCase()))
-                    return data.get(gs);
-            }
+            //          for (String gs: data.keySet()) {
+            //              if (gs.trim().toLowerCase().equals(symbol.trim().toLowerCase()))
+            //                  return data.get(gs);
+            //          }
+            String symbol_lower = symbol.trim().toLowerCase();
+            if(data.containsKey(symbol_lower)) return data.get(symbol_lower);
         }
         return null;
     }
