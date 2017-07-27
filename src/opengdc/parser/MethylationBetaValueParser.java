@@ -103,20 +103,18 @@ public class MethylationBetaValueParser extends BioParser {
                                     
                                     if (!chr.equals("*")) {
                                         if (!gene_symbols_comp.isEmpty()) {
-                                            if (!gene_symbols_comp.equals(".")) {
-                                                HashMap<String, String> ncbi_data = NCBI.extractNCBIinfo(chr, gene_symbols_comp, start,end , gene_types_comp, transcript_ids_comp, positions_to_tss_comp);
-                                                strand = ncbi_data.get("STRAND");
-                                                gene_symbol = ncbi_data.get("SYMBOL");
-                                                gene_type = ncbi_data.get("GENE_TYPE");
-                                                transcript_id = ncbi_data.get("TRANSCRIPT_ID");
-                                                position_to_tss = ncbi_data.get("POSITION_TO_TSS");			
-                                                entrez_id = ncbi_data.get("ENTREZ");
-                                                all_entrez_ids = ncbi_data.get("ENTREZ_IDs");
-                                                all_gene_symbols = ncbi_data.get("GENE_SYMBOLS");
-                                                all_gene_types = ncbi_data.get("GENE_TYPES");
-                                                all_transcript_ids = ncbi_data.get("TRANSCRIPT_IDS");
-                                                all_positions_to_tss = ncbi_data.get("POSITIONS_TO_TSS");
-                                            }
+                                            HashMap<String, String> fields = extractFields(chr, gene_symbols_comp, start,end , gene_types_comp, transcript_ids_comp, positions_to_tss_comp);
+                                            strand = ncbi_data.get("STRAND");
+                                            gene_symbol = ncbi_data.get("SYMBOL");
+                                            gene_type = ncbi_data.get("GENE_TYPE");
+                                            transcript_id = ncbi_data.get("TRANSCRIPT_ID");
+                                            position_to_tss = ncbi_data.get("POSITION_TO_TSS");			
+                                            entrez_id = ncbi_data.get("ENTREZ");
+                                            all_entrez_ids = ncbi_data.get("ENTREZ_IDs");
+                                            all_gene_symbols = ncbi_data.get("GENE_SYMBOLS");
+                                            all_gene_types = ncbi_data.get("GENE_TYPES");
+                                            all_transcript_ids = ncbi_data.get("TRANSCRIPT_IDS");
+                                            all_positions_to_tss = ncbi_data.get("POSITIONS_TO_TSS");
 
                                             ArrayList<String> values = new ArrayList<>();
                                             values.add(parseValue(chr, 0));
@@ -139,7 +137,7 @@ public class MethylationBetaValueParser extends BioParser {
                                             values.add(parseValue(feature_type, 17));
 
                                             Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
-					}
+                                        }
                                     }
                                     
                                     
@@ -235,6 +233,157 @@ public class MethylationBetaValueParser extends BioParser {
         }
         
         return 0;
+    }
+
+    public static HashMap<String, String> extractFields(String chr, String gene_symbol_comp, String start_site, String end_site, String gene_type_comp, String transcript_id_comp, String position_to_tss_comp) {
+        HashMap<String, String> result = new HashMap<>();
+        HashMap<String, Integer> gene2CpGdistance = new HashMap<>();
+        HashMap<String, List<String>> gene2startEnd = new HashMap<>();
+
+        String transcript = ""; 
+        String position_to_TSS = ""; 
+        String gene_type = "";
+        String gene_symbol = "";
+        String strand = "";
+        String entrez = "";
+        String all_entrez_ids = "";
+        String all_gene_symbols = "";
+        String all_gene_types = "";
+        String all_transcript_ids = ""; 
+        String all_positions_to_TSS = "";
+        String[] genes = gene_symbol_comp.split(";");
+
+        int i = 0;
+        while (i < genes.length) {
+            String gene_symbol_tmp = genes[i];
+            int last = getLastIndex(genes,i);
+
+            ArrayList<HashMap<String, String>> gencode_info = Gencode.extractGencodeInfo("symbol", gene_symbol_tmp, "gene");
+            if (!gencode_info.isEmpty()) {
+
+                HashMap<String, String> gene_info = gencode_info.get(0);
+
+                if(!gene_info.isEmpty()){
+
+                    String start = gene_info.get("START");
+                    String end = gene_info.get("END");
+                    int startf = Integer.parseInt(start);
+                    int s_site = Integer.parseInt(start_site);
+                    int endf = Integer.parseInt(end);
+                    int e_site = Integer.parseInt(end_site);
+
+                    if(s_site>= startf && endf>=e_site){
+                        int distance= (s_site-startf)+(endf-e_site);
+                        gene2CpGdistance.put(gene_symbol_tmp,distance);
+                    }
+
+                    entrez = GeneNames.getEntrezFromSymbol(gene_symbol_tmp);
+                }
+            }
+            else
+                entrez = "null";
+
+            all_entrez_ids = all_entrez_ids +";"+entrez ;
+            all_gene_symbols = all_gene_symbols +";"+gene_symbol_tmp;
+
+            gene_type = gene_type_comp.split(";")[i];
+            all_gene_types = all_gene_types + ";"+gene_type;
+
+            List<String> index_entrez = new ArrayList<String>();
+            index_entrez.add(i+"_"+last);
+            index_entrez.add(entrez);
+            gene2startEnd.put(gene_symbol_tmp, index_entrez);
+
+            i=last;
+        }
+
+        //finding in map "gene distance_CpGsite" the gene at min distance => gene_symbol
+        //if CpG site does not fall into any genomic region of the genes, then gene2CpGdistance is empty
+        //and the fields gene_symbol, entrez_id, gene_type, transcript_id, position_to_tss are BLANK.
+
+        if (!gene2CpGdistance.keySet().isEmpty()) {
+            gene_symbol = getMinDistanceformCpGsite(gene2CpGdistance);
+            //String start_end = gene2startEnd.get(gene_symbol);
+            List<String> start_endentrezId = gene2startEnd.get(gene_symbol);
+            String start_end = start_endentrezId.get(0);
+            
+            int index_start = Integer.parseInt(start_end.split("_")[0]);
+            int index_end = Integer.parseInt(start_end.split("_")[1]);
+
+            for(int z =index_start;z<index_end;z++){
+                transcript = (transcript+"|"+transcript_id_comp.split(";")[z]);
+                position_to_TSS = (position_to_TSS+"|"+position_to_tss_comp.split(";")[z]);
+            }
+
+            transcript=transcript.substring(1); 
+            position_to_TSS=position_to_TSS.substring(1);
+            gene_type = gene_type_comp.split(";")[index_start];
+            ArrayList<HashMap<String, String>> gencode_info = Gencode.extractGencodeInfo("symbol", gene_symbol, "gene");
+            HashMap<String, String> gene_info = gencode_info.get(0);
+            strand = gene_info.get("STRAND");
+            entrez = start_endentrezId.get(1);
+            //entrez = GeneNames.getEntrezFromSymbol(gene_symbol);;
+        }
+        else {
+            entrez = "null";
+            gene_type = "";
+            strand = "*";
+            position_to_TSS = "null";
+        }
+
+        for (String gene: gene2startEnd.keySet()) {
+            List<String> start_endentrezId = gene2startEnd.get(gene);
+            String start_end = start_endentrezId.get(0);
+            int index_start = Integer.parseInt(start_end.split("_")[0]);
+            int index_end = Integer.parseInt(start_end.split("_")[1]);
+            String transcript_tmp= "";
+            String position_to_TSS_tmp = "";
+
+            for (int z =index_start; z<index_end; z++) {
+                transcript_tmp = (transcript_tmp+"|"+transcript_id_comp.split(";")[z]);
+                position_to_TSS_tmp = (position_to_TSS_tmp+"|"+position_to_tss_comp.split(";")[z]);
+            }
+
+            all_transcript_ids=all_transcript_ids+";"+transcript_tmp.substring(1); 
+            all_positions_to_TSS=all_positions_to_TSS+";"+position_to_TSS_tmp.substring(1);
+        }
+
+        result.put("GENE_TYPES", all_gene_types.substring(1)); 
+        result.put("GENE_SYMBOLS", all_gene_symbols.substring(1));
+        result.put("ENTREZ_IDs", all_entrez_ids.substring(1).replaceAll("null", ""));
+        result.put("TRANSCRIPT_IDS", all_transcript_ids.substring(1)); 
+        result.put("POSITIONS_TO_TSS", all_positions_to_TSS.substring(1)); 
+        result.put("TRANSCRIPT_ID", transcript); 
+        result.put("POSITION_TO_TSS", position_to_TSS); 
+        result.put("GENE_TYPE", gene_type); 
+        result.put("STRAND", strand);
+        result.put("SYMBOL", gene_symbol);
+        result.put("ENTREZ", entrez);       
+
+        return result;
+    }
+
+    private static String getMinDistanceformCpGsite(HashMap<String, Integer> gene2CpGdistance) {
+        ArrayList<String> genes_list = new ArrayList<>(gene2CpGdistance.keySet());
+        String gene_symbol = genes_list.get(0);
+        int min = gene2CpGdistance.get(gene_symbol);
+
+        for(String gene: genes_list){
+            int distance = gene2CpGdistance.get(gene);
+            if(min > distance){
+                min = distance;
+                gene_symbol = gene;
+            }
+        }
+        return gene_symbol;
+    }
+
+    public static int getLastIndex(String[] genes, int i) {
+        int j = i+1;
+        while(j< genes.length && genes[j].equals(genes[i])){
+            j ++;
+        }
+        return j;
     }
 
     @Override
