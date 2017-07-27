@@ -104,17 +104,17 @@ public class MethylationBetaValueParser extends BioParser {
                                     if (!chr.equals("*")) {
                                         if (!gene_symbols_comp.isEmpty()) {
                                             HashMap<String, String> fields = extractFields(chr, gene_symbols_comp, start,end , gene_types_comp, transcript_ids_comp, positions_to_tss_comp);
-                                                strand = ncbi_data.get("STRAND");
-                                                gene_symbol = ncbi_data.get("SYMBOL");
-                                                gene_type = ncbi_data.get("GENE_TYPE");
-                                                transcript_id = ncbi_data.get("TRANSCRIPT_ID");
-                                                position_to_tss = ncbi_data.get("POSITION_TO_TSS");			
-                                                entrez_id = ncbi_data.get("ENTREZ");
-                                                all_entrez_ids = ncbi_data.get("ENTREZ_IDs");
-                                                all_gene_symbols = ncbi_data.get("GENE_SYMBOLS");
-                                                all_gene_types = ncbi_data.get("GENE_TYPES");
-                                                all_transcript_ids = ncbi_data.get("TRANSCRIPT_IDS");
-                                                all_positions_to_tss = ncbi_data.get("POSITIONS_TO_TSS");
+                                            strand = ncbi_data.get("STRAND");
+                                            gene_symbol = ncbi_data.get("SYMBOL");
+                                            gene_type = ncbi_data.get("GENE_TYPE");
+                                            transcript_id = ncbi_data.get("TRANSCRIPT_ID");
+                                            position_to_tss = ncbi_data.get("POSITION_TO_TSS");			
+                                            entrez_id = ncbi_data.get("ENTREZ");
+                                            all_entrez_ids = ncbi_data.get("ENTREZ_IDs");
+                                            all_gene_symbols = ncbi_data.get("GENE_SYMBOLS");
+                                            all_gene_types = ncbi_data.get("GENE_TYPES");
+                                            all_transcript_ids = ncbi_data.get("TRANSCRIPT_IDS");
+                                            all_positions_to_tss = ncbi_data.get("POSITIONS_TO_TSS");
 
                                             ArrayList<String> values = new ArrayList<>();
                                             values.add(parseValue(chr, 0));
@@ -137,7 +137,7 @@ public class MethylationBetaValueParser extends BioParser {
                                             values.add(parseValue(feature_type, 17));
 
                                             Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
-					                     }
+                                        }
                                     }
                                     
                                     
