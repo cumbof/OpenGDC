@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
-import opengdc.integration.Ensembl;
+import opengdc.integration.Gencode;
 import opengdc.integration.GeneNames;
 import opengdc.reader.GeneExpressionQuantificationReader;
 import opengdc.util.FSUtils;
@@ -92,10 +92,10 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                     /** convert ensembl_id to symbol and retrieve chromosome, start and end position, strand, and other relevant info **/
                                     // remove ensembl version from id
                                     String ensembl_id_noversion = ensembl_id.split("\\.")[0];
-                                    ArrayList<HashMap<String, String>> ensembl_data = Ensembl.extractEnsemblInfo(ensembl_id_noversion, "gene");
-                                    if (!ensembl_data.isEmpty()) {
+                                    ArrayList<HashMap<String, String>> gencode_data = Gencode.extractGencodeInfo("ensembl_id", ensembl_id_noversion, "gene");
+                                    if (!gencode_data.isEmpty()) {
                                         // get first entry
-                                        HashMap<String, String> gene_info = ensembl_data.get(0);
+                                        HashMap<String, String> gene_info = gencode_data.get(0);
 
                                         String chr = gene_info.get("CHR");
                                         if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
@@ -107,6 +107,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
 
                                         // trying to retrive the entrez_id starting with the symbol from GeneNames (HUGO)
                                         String entrez = "NA";
+                                        String gene_symbol_tmp = "";
                                         String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
                                         if (entrez_tmp != null)
                                             entrez = entrez_tmp;
