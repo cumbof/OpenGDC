@@ -147,7 +147,6 @@ public class Gencode {
         else if (type.toLowerCase().trim().equals("cds") && gencode_data_cds.isEmpty()) loadGencodeTableByType(identifierName,type);
         else if (type.toLowerCase().trim().equals("start_codon") && gencode_data_start_codon.isEmpty()) loadGencodeTableByType(identifierName,type);
         else if (type.toLowerCase().trim().equals("stop_codon") && gencode_data_stop_codon.isEmpty()) loadGencodeTableByType(identifierName,type);
-
         
         if (type.toLowerCase().trim().equals("gene")) { if (gencode_data_gene.containsKey(identifier)) return gencode_data_gene.get(identifier); }
         if (type.toLowerCase().trim().equals("exon")) { if (gencode_data_exon.containsKey(identifier)) return gencode_data_exon.get(identifier); }
@@ -156,7 +155,6 @@ public class Gencode {
         if (type.toLowerCase().trim().equals("cds")) { if (gencode_data_cds.containsKey(identifier)) return gencode_data_cds.get(identifier); }
         if (type.toLowerCase().trim().equals("start_codon")) { if (gencode_data_start_codon.containsKey(identifier)) return gencode_data_start_codon.get(identifier); }
         if (type.toLowerCase().trim().equals("stop_codon")) { if (gencode_data_stop_codon.containsKey(identifier)) return gencode_data_stop_codon.get(identifier); }
-
         
         return new ArrayList<>();
     }
