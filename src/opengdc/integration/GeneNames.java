@@ -145,7 +145,7 @@ public class GeneNames {
             //                  return data.get(gs);
             //          }
             String symbol_lower = symbol.trim().toLowerCase();
-            if(data.containsKey(symbol)) return data.get(symbol_lower);
+            if(data.containsKey(symbol_lower)) return data.get(symbol_lower);
         }
         return null;
     }
