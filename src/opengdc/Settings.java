@@ -101,5 +101,11 @@ public class Settings {
         if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/ensembl/Homo_sapiens.GRCh38.77.gtf";
         return ENSEMBL_DATA;
     }
+
+    private static final String GENCODE_DATA = "./appdata/gencode/gencode.v22.annotation.gtf";
+    public static String getGENCODEDataPath() {
+        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/gencode/gencode.v22.annotation.gtf";
+        return GENCODE_DATA;
+    }
     
 }
