@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
-import opengdc.integration.Ensembl;
+import opengdc.integration.Gencode;
 import opengdc.integration.GeneNames;
 import opengdc.reader.GeneExpressionQuantificationReader;
 import opengdc.util.FSUtils;
