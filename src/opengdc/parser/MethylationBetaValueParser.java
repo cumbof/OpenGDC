@@ -20,9 +20,10 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import opengdc.GUI;
 import opengdc.integration.GeneNames;
-import opengdc.integration.NCBI;
+import opengdc.integration.Gencode;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
 import opengdc.util.GDCQuery;
@@ -104,17 +105,17 @@ public class MethylationBetaValueParser extends BioParser {
                                     if (!chr.equals("*")) {
                                         if (!gene_symbols_comp.isEmpty()) {
                                             HashMap<String, String> fields = extractFields(chr, gene_symbols_comp, start,end , gene_types_comp, transcript_ids_comp, positions_to_tss_comp);
-                                            strand = ncbi_data.get("STRAND");
-                                            gene_symbol = ncbi_data.get("SYMBOL");
-                                            gene_type = ncbi_data.get("GENE_TYPE");
-                                            transcript_id = ncbi_data.get("TRANSCRIPT_ID");
-                                            position_to_tss = ncbi_data.get("POSITION_TO_TSS");			
-                                            entrez_id = ncbi_data.get("ENTREZ");
-                                            all_entrez_ids = ncbi_data.get("ENTREZ_IDs");
-                                            all_gene_symbols = ncbi_data.get("GENE_SYMBOLS");
-                                            all_gene_types = ncbi_data.get("GENE_TYPES");
-                                            all_transcript_ids = ncbi_data.get("TRANSCRIPT_IDS");
-                                            all_positions_to_tss = ncbi_data.get("POSITIONS_TO_TSS");
+                                            strand = fields.get("STRAND");
+                                            gene_symbol = fields.get("SYMBOL");
+                                            gene_type = fields.get("GENE_TYPE");
+                                            transcript_id = fields.get("TRANSCRIPT_ID");
+                                            position_to_tss = fields.get("POSITION_TO_TSS");			
+                                            entrez_id = fields.get("ENTREZ");
+                                            all_entrez_ids = fields.get("ENTREZ_IDs");
+                                            all_gene_symbols = fields.get("GENE_SYMBOLS");
+                                            all_gene_types = fields.get("GENE_TYPES");
+                                            all_transcript_ids = fields.get("TRANSCRIPT_IDS");
+                                            all_positions_to_tss = fields.get("POSITIONS_TO_TSS");
 
                                             ArrayList<String> values = new ArrayList<>();
                                             values.add(parseValue(chr, 0));
@@ -139,66 +140,6 @@ public class MethylationBetaValueParser extends BioParser {
                                             Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                         }
                                     }
-                                    
-                                    
-                                    /*************************************************************************************************************/
-                                    /************************************************ OLD METHOD: ************************************************/
-                                    /*********************************************** QUERYING NCBI ***********************************************/
-                                    /*************************************************************************************************************/
-                                    
-                                    
-                                    /*String[] line_split = line.split("\t");
-                                    String chr = line_split[2];
-                                    if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
-                                    String start = line_split[3];
-                                    String end = line_split[4];
-                                    String strand = "*";
-                                    String composite_element_ref = line_split[0];
-                                    String beta_value = line_split[1];
-                                    //String gene_symbol = line_split[5].split(";")[0];
-	                            String gene_symbol = line_split[5];
-                                    String entrez = "NA";
-                                    String gene_type = line_split[6].split(";")[0];
-                                    String transcript_id = line_split[7];
-                                    String position_to_tss = line_split[8];
-                                    String cgi_coordinate = line_split[9];
-                                    String feature_type = line_split[10];
-                                    
-                                    // skip non-valid entry
-                                    if (!chr.equals("*")) {
-                                        // trying to retrive the entrez_id starting with the gene_symbol from GeneNames (HUGO)
-                                        String[] gene_symbol_split = gene_symbol.split(";");
-                                        for (String gene_sym: gene_symbol_split) {
-                                            String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_sym);
-                                            if (entrez_tmp != null) {
-                                                entrez = entrez_tmp;
-                                                // trying to retrieve the strand starting with the entrez from NCBI
-                                                HashMap<String, String> entrez_data = NCBI.getGeneInfo(entrez, gene_symbol);
-                                                if (!entrez_data.isEmpty()) {
-                                                    String strand_tmp = entrez_data.get("STRAND");
-                                                    if (!strand_tmp.trim().equals("") && !strand_tmp.trim().toLowerCase().equals("na") && !strand_tmp.trim().toLowerCase().equals("null"))
-                                                        strand = strand_tmp;
-                                                }
-                                            }
-                                        }
-
-                                        ArrayList<String> values = new ArrayList<>();
-                                        values.add(parseValue(chr, 0));
-                                        values.add(parseValue(start, 1));
-                                        values.add(parseValue(end, 2));
-                                        values.add(parseValue(strand, 3));
-                                        values.add(parseValue(composite_element_ref, 4));
-                                        values.add(parseValue(beta_value, 5));
-                                        values.add(parseValue(gene_symbol, 6));
-                                        values.add(parseValue(entrez, 7));
-                                        values.add(parseValue(gene_type, 8));
-                                        values.add(parseValue(transcript_id, 9));
-                                        values.add(parseValue(position_to_tss, 10));
-                                        values.add(parseValue(cgi_coordinate, 11));
-                                        values.add(parseValue(feature_type, 12));
-
-                                        Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
-                                    }*/
                                 }
                             }
                             br.close();
@@ -231,7 +172,6 @@ public class MethylationBetaValueParser extends BioParser {
                 e.printStackTrace();
             }
         }
-        
         return 0;
     }
 
@@ -300,7 +240,6 @@ public class MethylationBetaValueParser extends BioParser {
         //finding in map "gene distance_CpGsite" the gene at min distance => gene_symbol
         //if CpG site does not fall into any genomic region of the genes, then gene2CpGdistance is empty
         //and the fields gene_symbol, entrez_id, gene_type, transcript_id, position_to_tss are BLANK.
-
         if (!gene2CpGdistance.keySet().isEmpty()) {
             gene_symbol = getMinDistanceformCpGsite(gene2CpGdistance);
             //String start_end = gene2startEnd.get(gene_symbol);
@@ -322,7 +261,6 @@ public class MethylationBetaValueParser extends BioParser {
             HashMap<String, String> gene_info = gencode_info.get(0);
             strand = gene_info.get("STRAND");
             entrez = start_endentrezId.get(1);
-            //entrez = GeneNames.getEntrezFromSymbol(gene_symbol);;
         }
         else {
             entrez = "null";
@@ -343,7 +281,6 @@ public class MethylationBetaValueParser extends BioParser {
                 transcript_tmp = (transcript_tmp+"|"+transcript_id_comp.split(";")[z]);
                 position_to_TSS_tmp = (position_to_TSS_tmp+"|"+position_to_tss_comp.split(";")[z]);
             }
-
             all_transcript_ids=all_transcript_ids+";"+transcript_tmp.substring(1); 
             all_positions_to_TSS=all_positions_to_TSS+";"+position_to_TSS_tmp.substring(1);
         }
