@@ -56,6 +56,7 @@ public class Gencode {
                             entry.put("STRAND", arr[6].trim());
                             entry.put("TYPE", arr[2].trim());
                             String symbol = "NA";
+                            String symbol_lower = "NA";
                             String ensembl = "NA";
                             String ensembl_id_noversion = "NA";
                             String identifier = "NA";
@@ -65,18 +66,19 @@ public class Gencode {
                                     //String[] name_split = data.split("="); // for gff3
                                     String[] name_split = data.split("\""); // for gtf
                                     symbol = name_split[name_split.length-1];
+                                    symbol_lower = symbol.toLowerCase();
+
                                 }
                                 else if (data.toLowerCase().trim().startsWith("gene_id")) {
                                     //String[] id_split = data.split("="); // for gff3
                                     String[] id_split = data.split("\""); //for gtf
                                     ensembl = id_split[id_split.length-1];
-									ensembl_id_noversion = ensembl.split("\\.")[0];
-
+				    ensembl_id_noversion = ensembl.split("\\.")[0];
                                 }
                             }
                             
                             if(identifierName.toLowerCase().trim().equals("symbol"))
-                            	identifier = symbol;
+                            	identifier = symbol_lower;
                             else if (identifierName.toLowerCase().trim().equals("ensembl_id"))
                             	identifier = ensembl_id_noversion;
                             
@@ -140,8 +142,7 @@ public class Gencode {
     }
         
     public static ArrayList<HashMap<String, String>> extractGencodeInfo(String identifierName, String identifier, String type) {
-    	if (type.toLowerCase().trim().equals("gene") && gencode_data_gene.isEmpty())
-    		loadGencodeTableByType(identifierName,type);
+    	if (type.toLowerCase().trim().equals("gene") && gencode_data_gene.isEmpty()) loadGencodeTableByType(identifierName,type);
         else if (type.toLowerCase().trim().equals("exon") && gencode_data_exon.isEmpty()) loadGencodeTableByType(identifierName,type);
         else if (type.toLowerCase().trim().equals("transcript") && gencode_data_transcript.isEmpty()) loadGencodeTableByType(identifierName,type);
         else if (type.toLowerCase().trim().equals("utr") && gencode_data_utr.isEmpty()) loadGencodeTableByType(identifierName,type);
@@ -149,6 +150,7 @@ public class Gencode {
         else if (type.toLowerCase().trim().equals("start_codon") && gencode_data_start_codon.isEmpty()) loadGencodeTableByType(identifierName,type);
         else if (type.toLowerCase().trim().equals("stop_codon") && gencode_data_stop_codon.isEmpty()) loadGencodeTableByType(identifierName,type);
         
+        if(identifierName.toLowerCase().trim().equals("symbol")) {identifier = identifier.toLowerCase(); }
         if (type.toLowerCase().trim().equals("gene")) { if (gencode_data_gene.containsKey(identifier)) return gencode_data_gene.get(identifier); }
         if (type.toLowerCase().trim().equals("exon")) { if (gencode_data_exon.containsKey(identifier)) return gencode_data_exon.get(identifier); }
         if (type.toLowerCase().trim().equals("transcript")) { if (gencode_data_transcript.containsKey(identifier)) return gencode_data_transcript.get(identifier); }
