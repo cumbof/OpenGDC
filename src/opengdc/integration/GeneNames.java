@@ -140,10 +140,6 @@ public class GeneNames {
     public static String getEntrezFromSymbol(String symbol) {
         HashMap<String, String> data = getSymbol2Entrez();
         if (!data.isEmpty()) {
-            //          for (String gs: data.keySet()) {
-            //              if (gs.trim().toLowerCase().equals(symbol.trim().toLowerCase()))
-            //                  return data.get(gs);
-            //          }
             String symbol_lower = symbol.trim().toLowerCase();
             if(data.containsKey(symbol_lower)) return data.get(symbol_lower);
         }
@@ -164,11 +160,8 @@ public class GeneNames {
     public static String getSymbolFromEnsemblID(String ensembl_id) {
         HashMap<String, String> data = getEnsemblId2Symbol();
         if (!data.isEmpty()) {
-//          for (String gs: data.keySet()) {
-//              if (gs.trim().toLowerCase().equals(ensembl_id.trim().toLowerCase()))
-//                  return data.get(gs);
-//          }
-            if(data.containsKey(ensembl_id)) return data.get(ensembl_id);
+            if(data.containsKey(ensembl_id)) 
+                return data.get(ensembl_id);
         }
         return null;
     }
