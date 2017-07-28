@@ -73,8 +73,7 @@ public class Gencode {
                                     //String[] id_split = data.split("="); // for gff3
                                     String[] id_split = data.split("\""); //for gtf
                                     ensembl = id_split[id_split.length-1];
-									ensembl_id_noversion = ensembl.split("\\.")[0];
-
+				    ensembl_id_noversion = ensembl.split("\\.")[0];
                                 }
                             }
                             
@@ -143,8 +142,7 @@ public class Gencode {
     }
         
     public static ArrayList<HashMap<String, String>> extractGencodeInfo(String identifierName, String identifier, String type) {
-    	if (type.toLowerCase().trim().equals("gene") && gencode_data_gene.isEmpty())
-    		loadGencodeTableByType(identifierName,type);
+    	if (type.toLowerCase().trim().equals("gene") && gencode_data_gene.isEmpty()) loadGencodeTableByType(identifierName,type);
         else if (type.toLowerCase().trim().equals("exon") && gencode_data_exon.isEmpty()) loadGencodeTableByType(identifierName,type);
         else if (type.toLowerCase().trim().equals("transcript") && gencode_data_transcript.isEmpty()) loadGencodeTableByType(identifierName,type);
         else if (type.toLowerCase().trim().equals("utr") && gencode_data_utr.isEmpty()) loadGencodeTableByType(identifierName,type);
