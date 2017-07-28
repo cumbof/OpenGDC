@@ -81,6 +81,7 @@ public class Gencode {
                             	identifier = ensembl_id_noversion;
                             
                             entry.put("SYMBOL", symbol);
+                            entry.put("ENSEMBL_ID", ensembl_id_noversion);
                             if (!identifier.equals("NA")) {
                                 ArrayList<HashMap<String, String>> entries = new ArrayList<>();
                                 if (type.toLowerCase().trim().equals("gene")) {
