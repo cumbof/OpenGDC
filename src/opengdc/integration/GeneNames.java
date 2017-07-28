@@ -172,5 +172,22 @@ public class GeneNames {
         }
         return null;
     }
+
+    public static String getEntrezFromEnsemblID(String entrez_tmp, String ensembl_id) {
+        String entrez = "NA";
+        String gene_symbol_tmp = "";
+        if (entrez_tmp != null)
+            entrez = entrez_tmp;
+        else{
+            gene_symbol_tmp = GeneNames.getSymbolFromEnsemblID(ensembl_id);
+            if (gene_symbol_tmp != null){
+                //gene_symbol = gene_symbol_tmp;
+                entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol_tmp);
+                entrez = entrez_tmp;
+            }
+            else entrez= null;
+         }
+        return entrez;
+    }
     
 }

@@ -216,8 +216,9 @@ public class MethylationBetaValueParser extends BioParser {
                         int distance= (s_site-startf)+(endf-e_site);
                         gene2CpGdistance.put(gene_symbol_tmp,distance);
                     }
-
-                    entrez = GeneNames.getEntrezFromSymbol(gene_symbol_tmp);
+                    String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol_tmp);
+                    String ensembl_id = gene_info.get("ENSEMBL_ID");
+                    entrez = GeneNames.getEntrezFromEnsemblID(entrez_tmp, ensembl_id);
                 }
             }
             else
