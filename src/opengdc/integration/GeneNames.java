@@ -167,9 +167,9 @@ public class GeneNames {
     }
 
     public static String getEntrezFromEnsemblID(String ensembl_id) {
-        String gene_symbol_tmp = GeneNames.getSymbolFromEnsemblID(ensembl_id);
+        String gene_symbol_tmp = getSymbolFromEnsemblID(ensembl_id);
         if (gene_symbol_tmp != null)
-            return GeneNames.getEntrezFromSymbol(gene_symbol_tmp);
+            return getEntrezFromSymbol(gene_symbol_tmp);
         return null; 
     }
     
