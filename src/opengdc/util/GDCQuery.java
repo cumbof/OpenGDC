@@ -262,7 +262,7 @@ public class GDCQuery {
 
                     for (String attribute: attributes) {
                         String val = searchFor(attribute, data_node_obj);
-                        info.put(attribute, val!=null ? val : "null");
+                        info.put(attribute, val!=null ? val : "");
                     }
 
                     conn.disconnect();
