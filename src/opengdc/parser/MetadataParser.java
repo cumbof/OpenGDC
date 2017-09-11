@@ -174,13 +174,23 @@ public class MetadataParser extends BioParser {
     private HashMap<String, HashSet<String>> getAdditionalAttributes() {
         HashMap<String, HashSet<String>> additionalAttributes = new HashMap<>();
         HashSet<String> attributes = new HashSet<>();
-        attributes.add("experimental_strategy");
-        attributes.add("platform");
-        attributes.add("workflow_link");
         attributes.add("data_category");
-        attributes.add("data_type");
         attributes.add("data_format");
+        attributes.add("data_type");
+        attributes.add("experimental_strategy");
+        attributes.add("file_id");
+        attributes.add("file_name");
         attributes.add("file_size");
+        attributes.add("platform");
+        attributes.add("analysis.analysis_id");
+        attributes.add("analysis.workflow_link");
+        attributes.add("analysis.workflow_type");
+        attributes.add("cases.case_id");
+        attributes.add("cases.disease_type");
+        attributes.add("cases.primary_site");
+        attributes.add("cases.demographic.year_of_birth");
+        attributes.add("cases.project.program.program_id");
+        attributes.add("cases.project.program.name");
         additionalAttributes.put("manually_curated", attributes);
         return additionalAttributes;
     }
