@@ -123,8 +123,10 @@ public class GDCQuery {
             HashMap<String, Object> hashmap = (HashMap<String, Object>)obj;
             HashSet<String> tmps = new HashSet<>();
             for (String k: hashmap.keySet()) {
-                if (k.toLowerCase().trim().equals(key))
-                    return (String)hashmap.get(k);
+                if (k.toLowerCase().trim().equals(key)) {
+                    //return (String)hashmap.get(k);
+                    return String.valueOf(hashmap.get(k));
+                }
                 else
                     tmps.add(searchFor(key, hashmap.get(k)));
             }
@@ -223,7 +225,13 @@ public class GDCQuery {
             if (!attributes.isEmpty()) {
                 try {
                     HashMap<String, String> info = new HashMap<>();
-                    String fields = "\"file_id,file_name,cases.submitter_id,cases.case_id,data_category,data_type,cases.samples.tumor_descriptor,cases.samples.tissue_type,cases.samples.sample_type,cases.samples.submitter_id,cases.samples.sample_id,cases.samples.portions.analytes.aliquots.aliquot_id,cases.samples.portions.analytes.aliquots.submitter_id,experimental_strategy,platform,analysis.workflow_link,data_format,file_size\"";
+                    //String fields = "\"file_id,file_name,cases.submitter_id,cases.case_id,data_category,data_type,cases.samples.tumor_descriptor,cases.samples.tissue_type,cases.samples.sample_type,cases.samples.submitter_id,cases.samples.sample_id,cases.samples.portions.analytes.aliquots.aliquot_id,cases.samples.portions.analytes.aliquots.submitter_id,experimental_strategy,platform,analysis.workflow_link,data_format,file_size\"";
+                    //String fields = "\"";
+                    String fields = "\",";
+                    for (String attr: attributes)
+                        fields += attr + ",";
+                    //fields = fields.substring(0, fields.length()-1) + "\"";
+                    
                     String conn_str = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&fields="+fields+"&format=JSON&filters=";
                     String json_str = "{" +
                                             "\"op\":\"in\"," +
@@ -247,8 +255,11 @@ public class GDCQuery {
                     FileOutputStream fos = new FileOutputStream(Settings.getTmpDir() + query_file_name);
                     PrintStream out = new PrintStream(fos);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    for (String line; (line = reader.readLine()) != null;)
+                    for (String line; (line = reader.readLine()) != null;) {
+                        //System.err.println(line);
                         out.println(line);
+                    }
+                    //System.err.println("----------------\n\n");
                     reader.close();
                     out.close();
                     fos.close();
@@ -261,7 +272,9 @@ public class GDCQuery {
                     Object data_node_obj = json_data.get("data");
 
                     for (String attribute: attributes) {
-                        String val = searchFor(attribute, data_node_obj);
+                        String[] attribute_split = attribute.split("\\.");
+                        String searchForKey = attribute_split[attribute_split.length-1];
+                        String val = searchFor(searchForKey, data_node_obj);
                         info.put(attribute, val!=null ? val : "");
                     }
 
