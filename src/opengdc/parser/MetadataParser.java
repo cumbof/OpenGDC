@@ -96,14 +96,14 @@ public class MetadataParser extends BioParser {
                         if (MetadataHandler.getAttributeFromKey(attribute).trim().toLowerCase().equals("shared:bcr_patient_uuid"))
                             patient_uuid = biospecimenBigMap.get(aliquot_uuid).get(attribute);
                         String attribute_parsed = FSUtils.stringToValidJavaIdentifier("biospecimen__" + MetadataHandler.getAttributeFromKey(attribute).replaceAll(":","__"));
-                        out.println(attribute_parsed + "\t" + biospecimenBigMap.get(aliquot_uuid).get(attribute));
+                        out.println(attribute_parsed + "\t" + checkForNAs(biospecimenBigMap.get(aliquot_uuid).get(attribute)));
                     }
                     // print clinical info
                     if (!patient_uuid.equals("")) {
                         if (clinicalBigMap.containsKey(patient_uuid)) {
                             for (String attribute: clinicalBigMap.get(patient_uuid).keySet()) {
                                 String attribute_parsed = FSUtils.stringToValidJavaIdentifier("clinical__" + MetadataHandler.getAttributeFromKey(attribute).replaceAll(":", "__"));
-                                out.println(attribute_parsed + "\t" + clinicalBigMap.get(patient_uuid).get(attribute));
+                                out.println(attribute_parsed + "\t" + checkForNAs(clinicalBigMap.get(patient_uuid).get(attribute)));
                             }
                         }
                     }
@@ -114,7 +114,7 @@ public class MetadataParser extends BioParser {
                             if (file_info != null) {
                                 for (String attribute: file_info.keySet()) {
                                     String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll(":", "__"));
-                                    out.println(attribute_parsed + "\t" + file_info.get(attribute));
+                                    out.println(attribute_parsed + "\t" + checkForNAs(file_info.get(attribute)));
                                 }
                             }
                         }
@@ -169,6 +169,12 @@ public class MetadataParser extends BioParser {
             }
         }
         return root;
+    }
+    
+    private String checkForNAs(String metaValue) {
+        if (metaValue.trim().toLowerCase().equals("na"))
+            return "";
+        else return metaValue;
     }
     
     private HashMap<String, HashSet<String>> getAdditionalAttributes() {
