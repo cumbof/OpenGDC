@@ -113,7 +113,7 @@ public class MetadataParser extends BioParser {
                             HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), additional_attributes.get(metakey));
                             if (file_info != null) {
                                 for (String attribute: file_info.keySet()) {
-                                    String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll(".", "__"));
+                                    String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
                                     out.println(attribute_parsed + "\t" + checkForNAs(file_info.get(attribute)));
                                 }
                             }
