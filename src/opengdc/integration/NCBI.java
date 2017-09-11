@@ -194,7 +194,7 @@ public class NCBI {
             DataInputStream in = new DataInputStream(fstream);
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line;
-            while ((line = br.readLine()) != null && !found) {
+            while ((line = br.readLine()) != null) {
                 try {
                     if (!line.startsWith("#") && !line.equals("")) {
                         String[] arr = line.split("\t");
