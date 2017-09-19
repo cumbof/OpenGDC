@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
@@ -93,32 +94,80 @@ public class MetadataParser extends BioParser {
                     // print biospecimen info
                     String patient_uuid = "";
                     for (String attribute: biospecimenBigMap.get(aliquot_uuid).keySet()) {
-                        if (MetadataHandler.getAttributeFromKey(attribute).trim().toLowerCase().equals("shared:bcr_patient_uuid"))
+                        if (MetadataHandler.getAttributeFromKey(attribute).trim().toLowerCase().equals("shared:bcr_patient_uuid")) {
                             patient_uuid = biospecimenBigMap.get(aliquot_uuid).get(attribute);
-                        String attribute_parsed = FSUtils.stringToValidJavaIdentifier("biospecimen__" + MetadataHandler.getAttributeFromKey(attribute).replaceAll(":","__"));
-                        out.println(attribute_parsed + "\t" + checkForNAs(biospecimenBigMap.get(aliquot_uuid).get(attribute)));
+                            break;
+                        }
+                    }
+                    HashMap<String, String> biospecimen_map = new HashMap<>();
+                    for (String attr: biospecimenBigMap.get(aliquot_uuid).keySet())
+                        biospecimen_map.put(MetadataHandler.getAttributeFromKey(attr).replaceAll(":","__"), biospecimenBigMap.get(aliquot_uuid).get(attr));
+                    ArrayList<String> biospecimen_sorted = new ArrayList<>(biospecimen_map.keySet());
+                    Collections.sort(biospecimen_sorted);
+                    for (String attribute: biospecimen_sorted) {
+                        String attribute_parsed = FSUtils.stringToValidJavaIdentifier("biospecimen__" + attribute);
+                        String value_parsed = checkForNAs(biospecimen_map.get(attribute));
+                        if (!value_parsed.trim().equals(""))
+                            out.println(attribute_parsed + "\t" + value_parsed);
                     }
                     // print clinical info
                     if (!patient_uuid.equals("")) {
                         if (clinicalBigMap.containsKey(patient_uuid)) {
-                            for (String attribute: clinicalBigMap.get(patient_uuid).keySet()) {
-                                String attribute_parsed = FSUtils.stringToValidJavaIdentifier("clinical__" + MetadataHandler.getAttributeFromKey(attribute).replaceAll(":", "__"));
-                                out.println(attribute_parsed + "\t" + checkForNAs(clinicalBigMap.get(patient_uuid).get(attribute)));
+                            HashMap<String, String> clinical_map = new HashMap<>();
+                            for (String attr: clinicalBigMap.get(patient_uuid).keySet())
+                                clinical_map.put(MetadataHandler.getAttributeFromKey(attr).replaceAll(":","__"), clinicalBigMap.get(patient_uuid).get(attr));
+                            ArrayList<String> clinical_sorted = new ArrayList<>(clinical_map.keySet());
+                            Collections.sort(clinical_sorted);
+                            for (String attribute: clinical_sorted) {
+                                String attribute_parsed = FSUtils.stringToValidJavaIdentifier("clinical__" + attribute);
+                                String value_parsed = checkForNAs(clinical_map.get(attribute));
+                                if (!value_parsed.trim().equals(""))
+                                    out.println(attribute_parsed + "\t" + value_parsed);
                             }
                         }
                     }
-                    // print additional metadata
+                    
+                    
+                    HashMap<String, String> manually_curated = new HashMap<>();
+                    // print manually curated metadata
                     if (!additional_attributes.isEmpty()) {
-                        for (String metakey: additional_attributes.keySet()) {
+                        ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes.keySet());
+                        Collections.sort(additional_attributes_sorted);
+                        for (String metakey: additional_attributes_sorted) {
                             HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), additional_attributes.get(metakey));
                             if (file_info != null) {
-                                for (String attribute: file_info.keySet()) {
+                                ArrayList<String> file_info_sorted = new ArrayList<>(file_info.keySet());
+                                Collections.sort(file_info_sorted);
+                                for (String attribute: file_info_sorted) {
                                     String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
-                                    out.println(attribute_parsed + "\t" + checkForNAs(file_info.get(attribute)));
+                                    String value_parsed = checkForNAs(file_info.get(attribute));
+                                    if (!value_parsed.trim().equals("")) {
+                                        //out.println(attribute_parsed + "\t" + value_parsed);
+                                        manually_curated.put(attribute_parsed, value_parsed);
+                                    }
                                 }
                             }
                         }
                     }
+                    // print additional manually curated metadata
+                    HashMap<String, String> additional_manually_curated = getAdditionalManuallyCuratedAttributes(biospecimenBigMap.get(aliquot_uuid));
+                    if (!additional_manually_curated.isEmpty()) {
+                        for (String attr: additional_manually_curated.keySet()) {
+                            String attribute_parsed = FSUtils.stringToValidJavaIdentifier(attr);
+                            String value_parsed = checkForNAs(additional_manually_curated.get(attr));
+                            if (!value_parsed.trim().equals("")) {
+                                //out.println(attribute_parsed + "\t" + value_parsed);
+                                manually_curated.put(attribute_parsed, value_parsed);
+                            }
+                        }
+                    }
+                    
+                    ArrayList<String> manually_curated_attributes_sorted = new ArrayList<>(manually_curated.keySet());
+                    Collections.sort(manually_curated_attributes_sorted);
+                    for (String attr: manually_curated_attributes_sorted) {
+                        out.println(attr + "\t" + manually_curated.get(attr));
+                    }
+                    
                     out.close();
                     fos.close();
                 }
@@ -129,6 +178,26 @@ public class MetadataParser extends BioParser {
         }
         
         return 0;
+    }
+    
+    private HashMap<String, String> getAdditionalManuallyCuratedAttributes(HashMap<String, String> biospecimen_attributes) {
+        // FROM TCGA2BED
+        // 'manually_curated__tissue_status' ricavare da 'biospecimen__bio__sample_type' oppure da 'biospecimen__bio__sample_type_id'
+        
+        HashMap<String, String> additional_attributes = new HashMap<>();
+        String tissue_id = "";
+        for (String bio_attr: biospecimen_attributes.keySet()) {
+            if (bio_attr.trim().toLowerCase().contains("sample_type_id")) {
+                tissue_id = biospecimen_attributes.get(bio_attr);
+                break;
+            }
+        }
+        if (!tissue_id.trim().equals("")) {
+            String tissue_status = getTissueStatus(tissue_id);
+            if (!tissue_status.trim().equals(""))
+                additional_attributes.put("manually_curated__tissue_status", tissue_status);
+        }
+        return additional_attributes;
     }
     
     private HashMap<String, String> extractParentMetadata(XMLNode node, HashMap<String, String> meta) {
@@ -172,7 +241,7 @@ public class MetadataParser extends BioParser {
     }
     
     private String checkForNAs(String metaValue) {
-        if (metaValue.trim().toLowerCase().equals("na"))
+        if (metaValue.trim().toLowerCase().equals("na") || metaValue.trim().toLowerCase().equals("null"))
             return "";
         else return metaValue;
     }
@@ -197,6 +266,24 @@ public class MetadataParser extends BioParser {
         attributes.add("cases.demographic.year_of_birth");
         attributes.add("cases.project.program.program_id");
         attributes.add("cases.project.program.name");
+        
+        
+        // exp_data_bed_url
+        // exp_metadata_url
+        
+        // non inserire md5sum tra i metadati.
+        // -> creare file con gli md5 per tutti i meta e bed
+        
+        // NEW GDC ATTRIBUTES
+        attributes.add("cases.submitter_id");
+        attributes.add("cases.samples.tumor_descriptor");
+        attributes.add("cases.samples.tissue_type");
+        attributes.add("cases.samples.sample_type");
+        attributes.add("cases.samples.submitter_id");
+        attributes.add("cases.samples.sample_id");
+        attributes.add("cases.samples.portions.analytes.aliquots.aliquot_id");
+        attributes.add("cases.samples.portions.analytes.aliquots.submitter_id");
+        
         additionalAttributes.put("manually_curated", attributes);
         return additionalAttributes;
     }
@@ -215,6 +302,22 @@ public class MetadataParser extends BioParser {
     public void initAcceptedInputFileFormats() {
         this.acceptedInputFileFormats = new HashSet<>();
         this.acceptedInputFileFormats.add(".xml");
+    }
+    
+    private String getTissueStatus(String tissue_id) {
+        try {
+            if (tissue_id.startsWith("0")) {
+                return "tumoral";
+            } else if (tissue_id.startsWith("1")) {
+                return "normal";
+            } else if (tissue_id.startsWith("2")) {
+                return "control";
+            } else {
+                return "undefined";
+            }
+        } catch (Exception e) {
+            return "undefined";
+        }
     }
     
 }

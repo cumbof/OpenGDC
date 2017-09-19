@@ -129,9 +129,9 @@ public class CopyNumberSegmentParser extends BioParser {
     @Override
     public String[] getHeader() {
         String[] header = new String[6];
-        header[0] = "chr";
+        header[0] = "chrom";
         header[1] = "start";
-        header[2] = "stop";
+        header[2] = "end";
         header[3] = "strand";
         header[4] = "num_probes";
         header[5] = "segment_mean";
@@ -146,7 +146,7 @@ public class CopyNumberSegmentParser extends BioParser {
         attr_type[2] = "LONG";
         attr_type[3] = "CHAR";
         attr_type[4] = "LONG";
-        attr_type[5] = "FLOAT";
+        attr_type[5] = "DOUBLE";
         return attr_type;
     }
 

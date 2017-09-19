@@ -159,9 +159,9 @@ public class IsoformExpressionQuantificationParser extends BioParser {
     @Override
     public String[] getHeader() {
         String[] header = new String[12];
-        header[0] = "chr";
+        header[0] = "chrom";
         header[1] = "start";
-        header[2] = "stop";
+        header[2] = "end";
         header[3] = "strand";
         header[4] = "genome_version";
         header[5] = "mirna_id";
@@ -184,7 +184,7 @@ public class IsoformExpressionQuantificationParser extends BioParser {
         attr_type[4] = "STRING";
         attr_type[5] = "STRING";
         attr_type[6] = "LONG";
-        attr_type[7] = "FLOAT";
+        attr_type[7] = "DOUBLE";
         attr_type[8] = "STRING";
         attr_type[9] = "STRING";
         attr_type[10] = "STRING";

@@ -330,36 +330,37 @@ public class MethylationBetaValueParser extends BioParser {
 
     @Override
     public String[] getHeader() {
-        String[] header = new String[17];
-        header[0] = "chr";
+        String[] header = new String[18];
+        header[0] = "chrom";
         header[1] = "start";
-        header[2] = "stop";
+        header[2] = "end";
         header[3] = "strand";
         header[4] = "composite_element_ref";
         header[5] = "beta_value";
         header[6] = "gene_symbol";
         header[7] = "entrez_gene_id";
         header[8] = "gene_type";
-        header[9] = "transcript_id";
+        header[9] = "ensembl_transcript_id";
         header[10] = "position_to_tss";
-        header[11] ="all_gene_symbols";
-        header[12] ="all_entrez_gene_ids";
-        header[13] ="all_transcript_ids";
-        header[14] ="all_positions_to_tss";
-        header[15] = "cgi_coordinate";
-        header[16] = "feature_type";
+        header[11] = "all_gene_symbols";
+        header[12] = "all_entrez_gene_ids";
+        header[13] = "all_gene_types";
+        header[14] = "all_ensembl_transcript_ids";
+        header[15] = "all_positions_to_tss";
+        header[16] = "cgi_coordinate";
+        header[17] = "feature_type";
         return header;
     }
 
     @Override
     public String[] getAttributesType() {
-        String[] attr_type = new String[17];
+        String[] attr_type = new String[18];
         attr_type[0] = "STRING";
         attr_type[1] = "LONG";
         attr_type[2] = "LONG";
         attr_type[3] = "CHAR";
         attr_type[4] = "STRING";
-        attr_type[5] = "FLOAT";
+        attr_type[5] = "DOUBLE";
         attr_type[6] = "STRING";
         attr_type[7] = "STRING";
         attr_type[8] = "STRING";
@@ -371,6 +372,7 @@ public class MethylationBetaValueParser extends BioParser {
         attr_type[14] = "STRING";
         attr_type[15] = "STRING";
         attr_type[16] = "STRING";
+        attr_type[17] = "STRING";
         return attr_type;
     }
 

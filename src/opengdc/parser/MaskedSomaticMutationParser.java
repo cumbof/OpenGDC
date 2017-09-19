@@ -214,9 +214,9 @@ public class MaskedSomaticMutationParser extends BioParser {
     @Override
     public String[] getHeader() {
         String[] header = new String[18];
-        header[0] = "chr";
+        header[0] = "chrom";
         header[1] = "start";
-        header[2] = "stop";
+        header[2] = "end";
         header[3] = "strand";
         header[4] = "hugo_symbol";
         header[5] = "entrez_gene_id";

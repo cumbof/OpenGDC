@@ -156,7 +156,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
     @Override
     public String[] getHeader() {
         String[] header = new String[10];
-        header[0] = "chr";
+        header[0] = "chrom";
         header[1] = "start";
         header[2] = "stop";
         header[3] = "strand";
@@ -178,7 +178,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
         attr_type[3] = "CHAR";
         attr_type[4] = "STRING";
         attr_type[5] = "LONG";
-        attr_type[6] = "FLOAT";
+        attr_type[6] = "DOUBLE";
         attr_type[7] = "STRING";
         attr_type[8] = "STRING";
         attr_type[9] = "STRING";

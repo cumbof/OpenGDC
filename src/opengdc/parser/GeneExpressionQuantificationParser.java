@@ -167,11 +167,11 @@ public class GeneExpressionQuantificationParser extends BioParser {
     @Override
     public String[] getHeader() {
         String[] header = new String[11];
-        header[0] = "chr";
+        header[0] = "chrom";
         header[1] = "start";
-        header[2] = "stop";
+        header[2] = "end";
         header[3] = "strand";
-        header[4] = "ensembl_id";
+        header[4] = "ensembl_gene_id";
         header[5] = "entrez_gene_id";
         header[6] = "gene_symbol";
         header[7] = "type";
@@ -193,8 +193,8 @@ public class GeneExpressionQuantificationParser extends BioParser {
         attr_type[6] = "STRING";
         attr_type[7] = "STRING";
         attr_type[8] = "LONG";
-        attr_type[9] = "FLOAT";
-        attr_type[10] = "FLOAT";
+        attr_type[9] = "DOUBLE";
+        attr_type[10] = "DOUBLE";
         return attr_type;
     }
 
