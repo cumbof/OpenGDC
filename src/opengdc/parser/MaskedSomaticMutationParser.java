@@ -218,7 +218,7 @@ public class MaskedSomaticMutationParser extends BioParser {
         header[1] = "start";
         header[2] = "end";
         header[3] = "strand";
-        header[4] = "hugo_symbol";
+        header[4] = "gene_symbol";
         header[5] = "entrez_gene_id";
         header[6] = "variant_classification";
         header[7] = "variant_type";
