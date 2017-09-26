@@ -278,11 +278,11 @@ public class MetadataParser extends BioParser {
         attributes.add("cases.submitter_id");
         attributes.add("cases.samples.tumor_descriptor");
         attributes.add("cases.samples.tissue_type");
-        attributes.add("cases.samples.sample_type");
-        attributes.add("cases.samples.submitter_id");
-        attributes.add("cases.samples.sample_id");
-        attributes.add("cases.samples.portions.analytes.aliquots.aliquot_id");
-        attributes.add("cases.samples.portions.analytes.aliquots.submitter_id");
+        //attributes.add("cases.samples.sample_type");
+        //attributes.add("cases.samples.submitter_id");
+        //attributes.add("cases.samples.sample_id");
+        //attributes.add("cases.samples.portions.analytes.aliquots.aliquot_id");
+        //attributes.add("cases.samples.portions.analytes.aliquots.submitter_id");
         
         additionalAttributes.put("manually_curated", attributes);
         return additionalAttributes;
