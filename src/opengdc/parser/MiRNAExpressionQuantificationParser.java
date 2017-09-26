@@ -158,7 +158,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
         String[] header = new String[10];
         header[0] = "chrom";
         header[1] = "start";
-        header[2] = "stop";
+        header[2] = "end";
         header[3] = "strand";
         header[4] = "mirna_id";
         header[5] = "read_count";
