@@ -184,12 +184,10 @@ public class FormatUtils {
     public static String generateDataSchema(String[] header, String[] types) {
         String schema = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
                         "<gmqlSchemaCollection xmlns=\"http://genomic.elet.polimi.it/entities\" name=\"GLOBAL_SCHEMAS\">\n" +
-                        "<gmqlSchema type=\"tab\" coordinate_system=\"1-based\" >\n" +
-                        "\t<fields>\n";
+                        "\t<gmqlSchema type=\"tab\" coordinate_system=\"1-based\" >\n";
         for (int i=0; i<header.length; i++)
             schema += "\t\t<field type=\""+types[i]+"\">"+header[i]+"</field>\n";
-        schema += "\t</fields>\n"+
-                  "</gmqlSchema>\n"+
+        schema += "\t</gmqlSchema>\n"+
                   "</gmqlSchemaCollection>";
         return schema;
     }
