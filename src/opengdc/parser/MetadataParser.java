@@ -17,7 +17,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
+import opengdc.Settings;
 import opengdc.util.FSUtils;
+import opengdc.util.GDCData;
 import opengdc.util.GDCQuery;
 import opengdc.util.MetadataHandler;
 import opengdc.util.XMLNode;
@@ -135,7 +137,7 @@ public class MetadataParser extends BioParser {
                         ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes.keySet());
                         Collections.sort(additional_attributes_sorted);
                         for (String metakey: additional_attributes_sorted) {
-                            HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()));
+                            HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0);
                             if (file_info != null) {
                                 HashMap<String, Boolean> attribute2required = additional_attributes.get(metakey);
                                 ArrayList<String> file_info_sorted = new ArrayList<>(file_info.keySet());
@@ -156,7 +158,7 @@ public class MetadataParser extends BioParser {
                         }
                     }
                     // generate additional manually curated metadata
-                    HashMap<String, HashMap<String, Object>> additional_manually_curated = getAdditionalManuallyCuratedAttributes(biospecimenBigMap.get(aliquot_uuid));
+                    HashMap<String, HashMap<String, Object>> additional_manually_curated = getAdditionalManuallyCuratedAttributes(program, disease, dataType, aliquot_uuid, biospecimenBigMap.get(aliquot_uuid), clinicalBigMap.get(patient_uuid), manually_curated);
                     if (!additional_manually_curated.isEmpty()) {
                         for (String attr: additional_manually_curated.keySet()) {
                             String attribute_parsed = FSUtils.stringToValidJavaIdentifier(attr);
@@ -197,11 +199,12 @@ public class MetadataParser extends BioParser {
     }
     
     // the attributes in this methods are all required 
-    private HashMap<String, HashMap<String, Object>> getAdditionalManuallyCuratedAttributes(HashMap<String, String> biospecimen_attributes) {
-        // retrieve 'manually_curated__tissue_status' from 'biospecimen__bio__sample_type_id'
+    private HashMap<String, HashMap<String, Object>> getAdditionalManuallyCuratedAttributes(String program, String disease, String dataType, String aliquot_uuid, HashMap<String, String> biospecimen_attributes, HashMap<String, String> clinical_attributes, HashMap<String, String> manually_curated) {
         String attributes_prefix = "manually_curated";
         String category_separator = "__";
         
+        /******* tissue_status *******/
+        // retrieve 'manually_curated__tissue_status' from 'biospecimen__bio__sample_type_id'
         HashMap<String, HashMap<String, Object>> additional_attributes = new HashMap<>();
         String tissue_id = "";
         for (String bio_attr: biospecimen_attributes.keySet()) {
@@ -210,14 +213,38 @@ public class MetadataParser extends BioParser {
                 break;
             }
         }
-        
-        HashMap<String, Object> tissue_status_values = new HashMap<>();
+        HashMap<String, Object> values = new HashMap<>();
         String tissue_status = "";
         if (!tissue_id.trim().equals(""))
             tissue_status = getTissueStatus(tissue_id);
-        tissue_status_values.put("value", tissue_status);
-        tissue_status_values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"tissue_status", tissue_status_values);
+        values.put("value", tissue_status);
+        values.put("required", true);
+        additional_attributes.put(attributes_prefix+category_separator+"tissue_status", values);
+        
+        /******* exp_data_bed_url *******/
+        values = new HashMap<>();
+        String expDataType = "";
+        for (String man_attr: manually_curated.keySet()) {
+            if (man_attr.trim().toLowerCase().contains("data_type")) {
+                expDataType = manually_curated.get(man_attr);
+                break;
+            }
+        }
+        if (!expDataType.trim().equals("")) {
+            if (GDCData.getGDCData2FTPFolderName().containsKey(expDataType.trim().toLowerCase())) {
+                String opengdc_data_folder_name = GDCData.getGDCData2FTPFolderName().get(expDataType.trim().toLowerCase());
+                expDataType = Settings.getOpenGDCFTPRepoProgram(program, false)+disease.trim().toLowerCase()+"/"+opengdc_data_folder_name+"/"+aliquot_uuid.trim().toLowerCase()+"."+this.getFormat();
+            }            
+        }
+        values.put("value", expDataType);
+        values.put("required", true);
+        additional_attributes.put(attributes_prefix+category_separator+"exp_data_bed_url", values);
+        
+        /******* exp_metadata_url *******/
+        values = new HashMap<>();
+        values.put("value", Settings.getOpenGDCFTPRepoProgram(program, false)+disease.trim().toLowerCase()+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.trim().toLowerCase())+"/"+aliquot_uuid.trim().toLowerCase()+"."+this.getFormat());
+        values.put("required", true);
+        additional_attributes.put(attributes_prefix+category_separator+"exp_metadata_url", values);
         
         return additional_attributes;
     }

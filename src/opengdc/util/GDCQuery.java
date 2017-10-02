@@ -52,12 +52,13 @@ public class GDCQuery {
     private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&filters=";
     private static final String BASE_DOWNLOAD_URL = "https://gdc-api.nci.nih.gov/data/";
     private static String last_query_file_path = "NA";
+    private static int recursive_limit = 10;
     
     public static String getLastQueryFilePath() {
         return last_query_file_path;
     }
     
-    public static void query(String disease, String dataType) {
+    public static void query(String disease, String dataType, int recursive_iteration) {
         try {
             String json_str = "{" +
                                   "\"op\":\"and\"," +
@@ -98,8 +99,12 @@ public class GDCQuery {
             
             Date now = new Date();
             SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
-            
             String query_file_name = "query_"+ft.format(now)+".json";
+            
+            File outFile = new File(Settings.getTmpDir() + query_file_name);
+            if (outFile.exists())
+                outFile.delete();
+            
             FileOutputStream fos = new FileOutputStream(Settings.getTmpDir() + query_file_name);
             PrintStream out = new PrintStream(fos);
             BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -112,6 +117,13 @@ public class GDCQuery {
             fos.close();
             
             last_query_file_path = Settings.getTmpDir() + query_file_name;
+        }
+        catch (IOException e) {
+            recursive_iteration++;
+            if (recursive_iteration < recursive_limit)
+                query(disease, dataType, recursive_iteration++);
+            else
+                e.printStackTrace();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -194,7 +206,7 @@ public class GDCQuery {
         return data;
     }
     
-    public static void downloadFile(String uuid, String outFolderPath, String fileName, boolean requestRelated) {
+    public static void downloadFile(String uuid, String outFolderPath, String fileName, boolean requestRelated, int recursive_iteration) {
         try {
             String url = BASE_DOWNLOAD_URL + uuid;
             if (requestRelated)
@@ -203,12 +215,23 @@ public class GDCQuery {
             System.err.println(uuid + "\t" + fileName);
             GUI.appendLog(uuid + "\t" + fileName + "\n");
             
+            File outFile = new File(outFolderPath + fileName);
+            if (outFile.exists())
+                outFile.delete();
+            
             URL website = new URL(url);
             ReadableByteChannel rbc = Channels.newChannel(website.openStream());
             FileOutputStream fos = new FileOutputStream(outFolderPath + fileName);
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             fos.close();
             rbc.close();
+        }
+        catch (IOException e) {
+            recursive_iteration++;
+            if (recursive_iteration < recursive_limit)
+                downloadFile(uuid, outFolderPath, fileName, requestRelated, recursive_iteration);
+            else
+                e.printStackTrace();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -220,7 +243,7 @@ public class GDCQuery {
             - files.file_id
             - cases.samples.portions.analytes.aliquots.aliquot_id
     */
-    public static HashMap<String, String> retrieveExpInfoFromAttribute(String field, String value, HashSet<String> attributes) {
+    public static HashMap<String, String> retrieveExpInfoFromAttribute(String field, String value, HashSet<String> attributes, int recursive_iteration) {
         if (attributes!=null) {
             if (!attributes.isEmpty()) {
                 try {
@@ -281,6 +304,13 @@ public class GDCQuery {
                     conn.disconnect();
                     return info;
                 }
+                catch (IOException e) {
+                    recursive_iteration++;
+                    if (recursive_iteration < recursive_limit)
+                        return retrieveExpInfoFromAttribute(field, value, attributes, recursive_iteration);
+                    else
+                        e.printStackTrace();
+                }
                 catch (Exception e) {
                     e.printStackTrace();
                     return null;
@@ -291,8 +321,32 @@ public class GDCQuery {
     }
     
     //public static void main(String[] args) {
-        /*String file_uuid = "0b50ee5b-3130-4401-84b1-630596632a12";
-        System.err.println(retrieveAliquotFromFileUUID(file_uuid));*/
+        /*HashMap<String, Boolean> attributes = new HashMap<>();
+        attributes.put("data_category", false);
+        attributes.put("data_format", false);
+        attributes.put("data_type", true);
+        attributes.put("experimental_strategy", false);
+        attributes.put("file_id", true);
+        attributes.put("file_name", false);
+        attributes.put("file_size", false);
+        attributes.put("platform", false);
+        attributes.put("analysis.analysis_id", false);
+        attributes.put("analysis.workflow_link", false);
+        attributes.put("analysis.workflow_type", false);
+        attributes.put("cases.case_id", false);
+        attributes.put("cases.disease_type", true);
+        attributes.put("cases.primary_site", false);
+        attributes.put("cases.demographic.year_of_birth", false);
+        attributes.put("cases.project.program.program_id", false);
+        attributes.put("cases.project.program.name", false);
+        attributes.put("cases.submitter_id", false);
+        attributes.put("cases.samples.tumor_descriptor", false);
+        attributes.put("cases.samples.tissue_type", false);
+        
+        String aliquot_uuid = "0aac83d9-dfb0-4aa8-9fc4-b12acef7fdee";
+        HashMap<String, String> data = retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(attributes.keySet()));
+        for (String attr: data.keySet())
+            System.err.println(attr + "\t" + data.get(attr));*/
         
         /*String disease = "TCGA-ACC";
         String dataType = "Gene Expression Quantification";

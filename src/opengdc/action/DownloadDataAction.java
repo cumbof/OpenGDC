@@ -54,7 +54,7 @@ public class DownloadDataAction extends Action {
     }
     
     private void retrieveData(String disease, String dataType, String gdc_path, boolean autoextract, boolean autoremove) {
-        GDCQuery.query(disease, dataType);
+        GDCQuery.query(disease, dataType, 0);
         HashMap<String, HashMap<String, String>> dataMap = GDCQuery.extractInfo(GDCQuery.getLastQueryFilePath());
         GUI.appendLog("Data Amount: " + dataMap.size() + " files" + "\n\n");
         
@@ -67,7 +67,7 @@ public class DownloadDataAction extends Action {
             for (String s: dataMap.get(uuid).keySet())
                 System.err.println(s + "\t" + dataMap.get(uuid).get(s));
             
-            GDCQuery.downloadFile(uuid, gdc_path, fileName, false);
+            GDCQuery.downloadFile(uuid, gdc_path, fileName, false, 0);
             if (autoextract) {
                 HashSet<String> uncompressed_folders_path = new HashSet<>();
                 HashSet<String> experiments_path = new HashSet<>();

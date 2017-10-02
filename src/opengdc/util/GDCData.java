@@ -19,6 +19,25 @@ import java.util.HashSet;
 public class GDCData {
     
     private static HashMap<String, HashMap<String, HashSet<String>>> program2tumor2datatype = new HashMap<>();
+    private static HashMap<String, String> datatype2ftpfoldername = new HashMap<>();
+    
+    private static void initGDCData2FTPFolderName() {
+        datatype2ftpfoldername = new HashMap<>();
+        
+        datatype2ftpfoldername.put("gene expression quantification", "gene_expression_quantification");
+        datatype2ftpfoldername.put("isoform expression quantification", "isoform_expression_quantification");
+        datatype2ftpfoldername.put("mirna expression quantification", "mirna_expression_quantification");
+        datatype2ftpfoldername.put("copy number segment", "copy_number_segment");
+        datatype2ftpfoldername.put("masked copy number segment", "masked_copy_number_segment");
+        datatype2ftpfoldername.put("methylation beta value", "methylation_beta_value");
+        datatype2ftpfoldername.put("masked somatic mutation", "masked_somatic_mutation");
+        datatype2ftpfoldername.put("clinical and biospecimen supplements", "clinical_and_biospecimen_supplements");
+    }
+    
+    public static HashMap<String, String> getGDCData2FTPFolderName() {
+        if (datatype2ftpfoldername.isEmpty()) initGDCData2FTPFolderName();
+        return datatype2ftpfoldername;
+    }
     
     private static void initBigGDCDataMap() {
         program2tumor2datatype = new HashMap<>();

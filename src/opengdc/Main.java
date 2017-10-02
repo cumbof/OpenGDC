@@ -39,7 +39,7 @@ public class Main {
         for (String program: gdcDataMap.keySet()) {
             if (program.toLowerCase().trim().equals("tcga")) {
                 for (String disease: gdcDataMap.get(program).keySet()) {
-                    if (disease.toLowerCase().equals("tcga-acc")) {
+                    if (disease.toLowerCase().equals("tcga-brca")) {
                     //if (!skip_diseases.contains(disease)) {
                         HashSet<String> dataTypes = new HashSet<>();
                         dataTypes.add("Clinical and Biospecimen Supplements");

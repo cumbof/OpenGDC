@@ -64,9 +64,38 @@ public class Settings {
         return GDC_DATA_PORTAL_URL;
     }
     
-    private static final String OPEN_GDC_PAGE_URL = "http://bioinf.iasi.cnr.it/opengdc/";
+    private static final String OPEN_GDC_PAGE_URL = "http://bioinformatics.iasi.cnr.it/opengdc/";
     public static String getOpenGDCPageURL() {
         return OPEN_GDC_PAGE_URL;
+    }
+    
+    private static final String OPEN_GDC_FTP_REPO_BASE = "ftp://bioinformatics.iasi.cnr.it/";
+    public static String getOpenGDCFTPRepoBase() {
+        return OPEN_GDC_FTP_REPO_BASE;
+    }
+    
+    private static final String OPEN_GDC_FTP_REPO_ORIGINAL = "original";
+    public static String getOpenGDCFTPRepoOriginal() {
+        return getOpenGDCFTPRepoBase()+OPEN_GDC_FTP_REPO_ORIGINAL+"/";
+    }
+    
+    private static final String OPEN_GDC_FTP_REPO_BED_CONVERTED = "bed";
+    public static String getOpenGDCFTPRepoBEDConverted() {
+        return getOpenGDCFTPRepoBase()+OPEN_GDC_FTP_REPO_BED_CONVERTED+"/";
+    }
+    
+    private static final String OPEN_GDC_FTP_REPO_TCGA = "tcga";
+    private static final String OPEN_GDC_FTP_REPO_TARGET = "target";
+    public static String getOpenGDCFTPRepoProgram(String program, boolean original) {
+        if (program.trim().toLowerCase().contains("tcga")) {
+            if (original) return getOpenGDCFTPRepoOriginal()+OPEN_GDC_FTP_REPO_TCGA+"/";
+            return getOpenGDCFTPRepoBEDConverted()+OPEN_GDC_FTP_REPO_TCGA+"/";
+        }
+        else if (program.trim().toLowerCase().contains("target")) {
+            if (original) return getOpenGDCFTPRepoOriginal()+OPEN_GDC_FTP_REPO_TARGET+"/";
+            return getOpenGDCFTPRepoBEDConverted()+OPEN_GDC_FTP_REPO_TARGET+"/";
+        }
+        return "";
     }
     // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     
