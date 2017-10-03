@@ -9,6 +9,8 @@
  */
 package opengdc;
 
+import java.io.File;
+
 /**
  *
  * @author fabio
@@ -22,8 +24,11 @@ public class Settings {
     // ****************** tmp dir ******************
     private static final String TMP_DIR = "./appdata/tmp/";
     public static String getTmpDir() {
-        if (DEBUG) return "/Users/fabio/Downloads/test_gdc_download/tmp/";
-        return TMP_DIR;
+        String tmpDir = TMP_DIR;
+        if (DEBUG) tmpDir = "/Users/fabio/Downloads/test_gdc_download/tmp/";
+        if (!(new File(tmpDir)).exists())
+            (new File(tmpDir)).mkdir();
+        return tmpDir;
     }
     // *********************************************
     

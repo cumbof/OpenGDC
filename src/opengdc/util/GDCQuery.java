@@ -52,7 +52,7 @@ public class GDCQuery {
     private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&filters=";
     private static final String BASE_DOWNLOAD_URL = "https://gdc-api.nci.nih.gov/data/";
     private static String last_query_file_path = "NA";
-    private static int recursive_limit = 10;
+    private static final int recursive_limit = 10;
     
     public static String getLastQueryFilePath() {
         return last_query_file_path;
@@ -298,7 +298,7 @@ public class GDCQuery {
                         String[] attribute_split = attribute.split("\\.");
                         String searchForKey = attribute_split[attribute_split.length-1];
                         String val = searchFor(searchForKey, data_node_obj);
-                        info.put(attribute, val!=null ? val : "");
+                        info.put(searchForKey, val!=null ? val : "");
                     }
 
                     conn.disconnect();
