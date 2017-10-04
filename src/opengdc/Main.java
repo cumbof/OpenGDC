@@ -22,7 +22,7 @@ public class Main {
     
     private static HashSet<String> skip_diseases = new HashSet<>();
     //private static final String CMD = "download and convert";
-    private static final String CMD = "convert";
+    private static final String CMD = "download and convert";
     
     private static void initSkipDiseases() {
         skip_diseases = new HashSet<>();
@@ -39,7 +39,7 @@ public class Main {
         for (String program: gdcDataMap.keySet()) {
             if (program.toLowerCase().trim().equals("tcga")) {
                 for (String disease: gdcDataMap.get(program).keySet()) {
-                    if (disease.toLowerCase().equals("tcga-brca")) {
+                    //if (disease.toLowerCase().equals("tcga-acc")) {
                     //if (!skip_diseases.contains(disease)) {
                         HashSet<String> dataTypes = new HashSet<>();
                         dataTypes.add("Clinical and Biospecimen Supplements");
@@ -50,7 +50,8 @@ public class Main {
 
                                 if (CMD.trim().toLowerCase().contains("download")) {
                                     /** DOWNLOAD DATA **/
-                                    String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/gdc/";
+                                    //String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/gdc/";
+                                    String outDirStr = "/DATA/ftp-root/original/"+program.toLowerCase()+"/"+disease.toLowerCase().split("-")[1]+"/clinical_and_biospecimen_supplements/";
                                     //String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
 
                                     File outDir = new File(outDirStr);
@@ -70,9 +71,11 @@ public class Main {
                                 }
                                 if (CMD.trim().toLowerCase().contains("convert")) {
                                     /** CONVERT DATA **/
-                                    String inDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/gdc/";
+                                    String inDirStr = "/DATA/ftp-root/original/"+program.toLowerCase()+"/"+disease.toLowerCase().split("-")[1]+"/clinical_and_biospecimen_supplements/";
+                                    //String inDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease.split("-")[1]+"/gdc/";
                                     //String inDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
-                                    String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/meta/";
+                                    String outDirStr = "/DATA/ftp-root/bed/"+program.toLowerCase()+"/"+disease.toLowerCase().split("-")[1]+"/clinical_and_biospecimen_supplements/";
+                                    //String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease.split("-")[1]+"/meta/";
                                     //String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/meta/";
 
                                     File outDir = new File(outDirStr);
@@ -93,7 +96,7 @@ public class Main {
                                 }
                             //}
                         }
-                    }
+                    //}
                 }
             }
         }

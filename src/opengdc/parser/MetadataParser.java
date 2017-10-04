@@ -94,7 +94,7 @@ public class MetadataParser extends BioParser {
                     FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "." + this.getFormat());
                     PrintStream out = new PrintStream(fos);
                     // handle missing required attributes
-                    boolean missing_required_attributes = false;
+                    HashSet<String> missing_required_attributes = new HashSet<>();
                     // print biospecimen info
                     String patient_uuid = "";
                     for (String attribute: biospecimenBigMap.get(aliquot_uuid).keySet()) {
@@ -150,8 +150,14 @@ public class MetadataParser extends BioParser {
                                         manually_curated.put(attribute_parsed, value_parsed);
                                     }
                                     else {
-                                        if (attribute2required.get(attribute)) // if attribute is required
-                                            missing_required_attributes = true;
+                                        
+                                        for (String attr: attribute2required.keySet()) {
+                                            if (attr.toLowerCase().equals(attribute.toLowerCase())) {
+                                                if (attribute2required.get(attr)) { // if attribute is required
+                                                    missing_required_attributes.add(attribute_parsed);
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -171,14 +177,18 @@ public class MetadataParser extends BioParser {
                                 }
                                 else {
                                     if ((Boolean)additional_manually_curated.get(attr).get("required")) // if attribute is required
-                                        missing_required_attributes = true;
+                                        missing_required_attributes.add(attr);
                                 }
                             }
                         }
                     }
                     // generate audit_warning
-                    if (missing_required_attributes)
-                        manually_curated.put("manually_curated__audit_warning", "missed required metadata");
+                    if (!missing_required_attributes.isEmpty()) {
+                        String missed_attributes_list = "";
+                        for (String ma: missing_required_attributes)
+                            missed_attributes_list += ma+", ";
+                        manually_curated.put("manually_curated__audit_warning", "missed the following required metadata: ["+missed_attributes_list.substring(0, missed_attributes_list.length()-2)+"]");
+                    }
                     // sort and print manually_curated attributes
                     ArrayList<String> manually_curated_attributes_sorted = new ArrayList<>(manually_curated.keySet());
                     Collections.sort(manually_curated_attributes_sorted);
@@ -324,11 +334,11 @@ public class MetadataParser extends BioParser {
         attributes.put("cases.submitter_id", false);
         attributes.put("cases.samples.tumor_descriptor", false);
         attributes.put("cases.samples.tissue_type", false);
-        //attributes.add("cases.samples.sample_type");
-        //attributes.add("cases.samples.submitter_id");
-        //attributes.add("cases.samples.sample_id");
-        //attributes.add("cases.samples.portions.analytes.aliquots.aliquot_id");
-        //attributes.add("cases.samples.portions.analytes.aliquots.submitter_id");
+        //attributes.put("cases.samples.sample_type", false);
+        //attributes.put("cases.samples.submitter_id", false);
+        //attributes.put("cases.samples.sample_id", false);
+        //attributes.put("cases.samples.portions.analytes.aliquots.aliquot_id", false);
+        //attributes.put("cases.samples.portions.analytes.aliquots.submitter_id", false);
         
         additionalAttributes.put("manually_curated", attributes);
         return additionalAttributes;
