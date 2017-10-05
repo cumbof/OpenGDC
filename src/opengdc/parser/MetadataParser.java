@@ -243,13 +243,13 @@ public class MetadataParser extends BioParser {
         if (!expDataType.trim().equals("")) {
             if (GDCData.getGDCData2FTPFolderName().containsKey(expDataType.trim().toLowerCase())) {
                 String opengdc_data_folder_name = GDCData.getGDCData2FTPFolderName().get(expDataType.trim().toLowerCase());
-                expDataType = Settings.getOpenGDCFTPRepoProgram(program, false)+disease.trim().toLowerCase()+"/"+opengdc_data_folder_name+"/"+aliquot_uuid.trim().toLowerCase()+Settings.getOpenGDCFTPConvertedDataFormat();
+                expDataType = Settings.getOpenGDCFTPRepoProgram(program, false)+disease.trim().toLowerCase()+"/"+opengdc_data_folder_name+"/"+aliquot_uuid.trim().toLowerCase()+"."+Settings.getOpenGDCFTPConvertedDataFormat();
             }
             else expDataType = "";
         }
         values.put("value", expDataType);
         values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"exp_data_bed_url", values);
+        additional_attributes.put(attributes_prefix+category_separator+"exp_data_"+Settings.getOpenGDCFTPConvertedDataFormat()+"_url", values);
         
         /******* exp_metadata_url *******/
         values = new HashMap<>();
