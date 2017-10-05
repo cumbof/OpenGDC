@@ -102,6 +102,11 @@ public class Settings {
         }
         return "";
     }
+    
+    private static final String OPEN_GDC_FTP_CONVERTED_DATA_FORMAT = ".bed";
+    public static String getOpenGDCFTPConvertedDataFormat() {
+        return OPEN_GDC_FTP_CONVERTED_DATA_FORMAT;
+    }
     // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
     
     
