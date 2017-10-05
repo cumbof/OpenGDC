@@ -49,12 +49,13 @@ public class GeneExpressionQuantificationParser extends BioParser {
                 if (getAcceptedInputFileFormats().contains(extension)) {
                     String file_uuid = f.getName().split("_")[0];
                     HashSet<String> attributes = new HashSet<>();
-                    attributes.add("cases.samples.portions.analytes.aliquots.aliquot_id");
+                    String aliquot_id_path = "cases.samples.portions.analytes.aliquots.aliquot_id";
+                    attributes.add(aliquot_id_path);
                     HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("files.file_id", file_uuid, attributes, 0);
                     String aliquot_uuid = "";
                     if (file_info != null)
-                        if (file_info.containsKey("aliquot_id"))
-                            aliquot_uuid = file_info.get("aliquot_id");
+                        if (file_info.containsKey(aliquot_id_path))
+                            aliquot_uuid = file_info.get(aliquot_id_path);
                     fileUUID2aliquotUUID.put(file_uuid, aliquot_uuid);
                 }
             }

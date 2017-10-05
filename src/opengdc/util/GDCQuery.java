@@ -298,7 +298,7 @@ public class GDCQuery {
                         String[] attribute_split = attribute.split("\\.");
                         String searchForKey = attribute_split[attribute_split.length-1];
                         String val = searchFor(searchForKey, data_node_obj);
-                        info.put(searchForKey, val!=null ? val : "");
+                        info.put(attribute, val!=null ? val : "");
                     }
 
                     conn.disconnect();
