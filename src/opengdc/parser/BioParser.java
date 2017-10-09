@@ -53,7 +53,7 @@ public abstract class BioParser {
                 String attributeType = getAttributesType()[index];
                 if (attributeType.toLowerCase().equals("string") || attributeType.toLowerCase().equals("char"))
                     value = "";
-                else if (attributeType.toLowerCase().equals("long") || attributeType.toLowerCase().equals("float"))
+                else if (attributeType.toLowerCase().equals("long") || attributeType.toLowerCase().equals("float") || attributeType.toLowerCase().equals("double"))
                     value = "null";
                 else
                     value = "";
