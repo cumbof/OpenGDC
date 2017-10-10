@@ -74,7 +74,7 @@ public class Settings {
         return OPEN_GDC_PAGE_URL;
     }
     
-    private static final String OPEN_GDC_FTP_REPO_BASE = "ftp://bioinformatics.iasi.cnr.it/";
+    private static final String OPEN_GDC_FTP_REPO_BASE = "ftp://bioinformatics.iasi.cnr.it/opengdc/";
     public static String getOpenGDCFTPRepoBase() {
         return OPEN_GDC_FTP_REPO_BASE;
     }

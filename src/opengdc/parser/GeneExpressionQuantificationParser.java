@@ -89,6 +89,9 @@ public class GeneExpressionQuantificationParser extends BioParser {
                         if (!ensembls.isEmpty()) {
                             try {
                                 Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                                /** store entries **/
+                                HashMap<String, HashMap<String, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
+                                
                                 for (String ensembl_id: ensembls) {
                                     /** convert ensembl_id to symbol and retrieve chromosome, start and end position, strand, and other relevant info **/
                                     // remove ensembl version from id
@@ -131,9 +134,32 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                         values.add(parseValue(htseq_count, 8));
                                         values.add(parseValue(fpkm_uq, 9));
                                         values.add(parseValue(fpkm, 10));
-                                        Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                        
+                                        /**********************************************************************/
+                                        /** populate dataMap then sort genomic coordinates and print entries **/
+                                        String chr_id = parseValue(chr, 0).replaceAll("chr", "");
+                                        String start_id = parseValue(start, 1);
+                                        HashMap<String, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
+                                        ArrayList<ArrayList<String>> dataList = new ArrayList<>();
+                                        if (dataMapChr.containsKey(chr_id)) {
+                                            dataMapStart = dataMapChr.get(chr_id);                                        
+                                            if (dataMapStart.containsKey(start_id))
+                                                dataList = dataMapStart.get(start_id);
+                                            dataList.add(values);
+                                        }
+                                        else
+                                            dataList.add(values);
+                                        dataMapStart.put(start_id, dataList);
+                                        dataMapChr.put(chr_id, dataMapStart);
+                                        /**********************************************************************/
+                                        
+                                        // decomment this line to print entries without sorting genomic coordinates
+                                        //Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                     }
                                 }
+                                // sort genomic coordinates and print data
+                                this.printData((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), dataMapChr, this.getFormat(), getHeader());
+                                
                                 Files.write((new File(outPath +  aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 filesPathConverted.add(outPath + file_uuid + "." + this.getFormat());
                             }

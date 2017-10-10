@@ -144,13 +144,17 @@ public class MetadataParser extends BioParser {
                                 Collections.sort(file_info_sorted);
                                 for (String attribute: file_info_sorted) {
                                     String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
+                                    /*************************************************************/
+                                    /** patch for the attribute 'manually_curated__data_format' **/
+                                    if (attribute_parsed.trim().toLowerCase().equals("manually_curated__data_format"))
+                                        attribute_parsed = "manually_curated__source_data_format";
+                                    /*************************************************************/
                                     String value_parsed = checkForNAs(file_info.get(attribute));
                                     if (!value_parsed.trim().equals("")) {
                                         //out.println(attribute_parsed + "\t" + value_parsed);
                                         manually_curated.put(attribute_parsed, value_parsed);
                                     }
                                     else {
-                                        
                                         for (String attr: attribute2required.keySet()) {
                                             if (attr.toLowerCase().equals(attribute.toLowerCase())) {
                                                 if (attribute2required.get(attr)) { // if attribute is required
@@ -256,6 +260,12 @@ public class MetadataParser extends BioParser {
         values.put("value", Settings.getOpenGDCFTPRepoProgram(program, false)+disease.trim().toLowerCase()+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.trim().toLowerCase())+"/"+aliquot_uuid.trim().toLowerCase()+"."+this.getFormat());
         values.put("required", true);
         additional_attributes.put(attributes_prefix+category_separator+"exp_metadata_url", values);
+        
+        /******* data_format *******/
+        values = new HashMap<>();
+        values.put("value", Settings.getOpenGDCFTPConvertedDataFormat().toUpperCase());
+        values.put("required", true);
+        additional_attributes.put(attributes_prefix+category_separator+"data_format", values);
         
         return additional_attributes;
     }

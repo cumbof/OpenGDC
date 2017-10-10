@@ -64,7 +64,9 @@ public class IsoformExpressionQuantificationParser extends BioParser {
                     if (!aliquot_uuid.trim().equals("")) {
                         try {
                             Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
-
+                            /** store entries **/
+                            HashMap<String, HashMap<String, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
+                            
                             InputStream fstream = new FileInputStream(f.getAbsolutePath());
                             DataInputStream in = new DataInputStream(fstream);
                             BufferedReader br = new BufferedReader(new InputStreamReader(in));
@@ -108,24 +110,43 @@ public class IsoformExpressionQuantificationParser extends BioParser {
                                     values.add(parseValue(start, 1));
                                     values.add(parseValue(end, 2));
                                     values.add(parseValue(strand, 3));
-                                    
-                                    values.add(parseValue(genome_version, 4));
-                                    
+                                    values.add(parseValue(genome_version, 4));                                    
                                     values.add(parseValue(mirna_id, 5));
                                     values.add(parseValue(read_count, 6));
                                     values.add(parseValue(reads_per_million_mirna_mapped, 7));
                                     values.add(parseValue(cross_mapped, 8));
                                     values.add(parseValue(mirna_region, 9));
-                                    
                                     values.add(parseValue(entrez, 10));
                                     values.add(parseValue(symbol, 11));
+                                    
+                                    /**********************************************************************/
+                                    /** populate dataMap then sort genomic coordinates and print entries **/
+                                    String chr_id = parseValue(chr, 0).replaceAll("chr", "");
+                                    String start_id = parseValue(start, 1);
+                                    HashMap<String, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
+                                    ArrayList<ArrayList<String>> dataList = new ArrayList<>();
+                                    if (dataMapChr.containsKey(chr_id)) {
+                                        dataMapStart = dataMapChr.get(chr_id);                                        
+                                        if (dataMapStart.containsKey(start_id))
+                                            dataList = dataMapStart.get(start_id);
+                                        dataList.add(values);
+                                    }
+                                    else
+                                        dataList.add(values);
+                                    dataMapStart.put(start_id, dataList);
+                                    dataMapChr.put(chr_id, dataMapStart);
+                                    /**********************************************************************/
 
-                                    Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                    // decomment this line to print entries without sorting genomic coordinates
+                                    //Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 }
                             }
                             br.close();
                             in.close();
                             fstream.close();
+                            
+                            // sort genomic coordinates and print data
+                            this.printData((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), dataMapChr, this.getFormat(), getHeader());
 
                             Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                             filesPathConverted.add(outPath + file_uuid + "." + this.getFormat());

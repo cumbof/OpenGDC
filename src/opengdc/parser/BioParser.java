@@ -9,7 +9,14 @@
  */
 package opengdc.parser;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import opengdc.util.FormatUtils;
 
 /**
  *
@@ -61,6 +68,31 @@ public abstract class BioParser {
             catch (Exception e) {}
         }
         return value;
+    }
+    
+    public void printData(Path outFilePath, HashMap<String, HashMap<String, ArrayList<ArrayList<String>>>> dataMap, String format, String[] header) {
+        if (!dataMap.isEmpty()) {
+            ArrayList<String> chrs = new ArrayList<>(dataMap.keySet());
+            // sort by chr
+            Collections.sort(chrs);
+            for (String chr: chrs) {
+                HashMap<String, ArrayList<ArrayList<String>>> dataList = dataMap.get(chr);
+                // sort by start position
+                ArrayList<String> starts = new ArrayList<>(dataList.keySet());
+                Collections.sort(starts);
+                for (String start: starts) {
+                    ArrayList<ArrayList<String>> dataArray = dataList.get(start);
+                    for (ArrayList<String> data: dataArray) {
+                        try {
+                            Files.write(outFilePath, (FormatUtils.createEntry(format, data, header)).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
     }
     
 }

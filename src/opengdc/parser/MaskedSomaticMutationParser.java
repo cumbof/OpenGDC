@@ -35,7 +35,8 @@ public class MaskedSomaticMutationParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
-        HashSet<String> filesPathConverted = new HashSet<>();
+        HashMap<String, String> filesPathConverted = new HashMap<>();
+        HashMap<String, Object> uuid_dataMap = new HashMap<>();
         
         File[] files = (new File(inPath)).listFiles();
         for (File f: files) {
@@ -51,10 +52,15 @@ public class MaskedSomaticMutationParser extends BioParser {
                         //System.err.println("data: "+uuidData.size());
                         
                         if (!uuidData.isEmpty()) {
+                            /** store entries **/
+                            HashMap<String, HashMap<String, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
+                            if (uuid_dataMap.containsKey(aliquot_uuid))
+                                dataMapChr = (HashMap<String, HashMap<String, ArrayList<ArrayList<String>>>>)uuid_dataMap.get(aliquot_uuid);
                             try {
-                                if (!filesPathConverted.contains(outPath + aliquot_uuid + "." + this.getFormat())) {
+                                HashSet<String> filePaths = new HashSet<>(filesPathConverted.values());
+                                if (!filePaths.contains(outPath + aliquot_uuid + "." + this.getFormat())) {
                                     Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
-                                    filesPathConverted.add(outPath + aliquot_uuid + "." + this.getFormat());
+                                    filesPathConverted.put(aliquot_uuid, outPath + aliquot_uuid + "." + this.getFormat());
                                 }
                             
                                 for (int entry: uuidData.keySet()) {
@@ -174,7 +180,26 @@ public class MaskedSomaticMutationParser extends BioParser {
                                     values.add(uuidData.get(entry).get("gdc_validation_status"));
                                     values.add(uuidData.get(entry).get("gdc_valid_somatic"));*/
                                     
-                                    Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                    /**********************************************************************/
+                                    /** populate dataMap then sort genomic coordinates and print entries **/
+                                    String chr_id = parseValue(uuidData.get(entry).get("chromosome"), 0).replaceAll("chr", "");
+                                    String start_id = parseValue(uuidData.get(entry).get("start_position"), 1);
+                                    HashMap<String, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
+                                    ArrayList<ArrayList<String>> dataList = new ArrayList<>();
+                                    if (dataMapChr.containsKey(chr_id)) {
+                                        dataMapStart = dataMapChr.get(chr_id);                                        
+                                        if (dataMapStart.containsKey(start_id))
+                                            dataList = dataMapStart.get(start_id);
+                                        dataList.add(values);
+                                    }
+                                    else
+                                        dataList.add(values);
+                                    dataMapStart.put(start_id, dataList);
+                                    dataMapChr.put(chr_id, dataMapStart);
+                                    /**********************************************************************/
+                                    
+                                    // decomment this line to print entries without sorting genomic coordinates
+                                    //Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 }
                             }
                             catch (Exception e) {
@@ -189,9 +214,12 @@ public class MaskedSomaticMutationParser extends BioParser {
         
         if (!filesPathConverted.isEmpty()) {
             // close documents
-            for (String path: filesPathConverted) {
+            for (String aliquot_uuid: filesPathConverted.keySet()) {
                 try {
-                    Files.write((new File(path)).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                    // sort genomic coordinates and print data
+                    HashMap<String, HashMap<String, ArrayList<ArrayList<String>>>> dataMapChr = (HashMap<String, HashMap<String, ArrayList<ArrayList<String>>>>)uuid_dataMap.get(aliquot_uuid);
+                    this.printData((new File(filesPathConverted.get(aliquot_uuid))).toPath(), dataMapChr, this.getFormat(), getHeader());
+                    Files.write((new File(filesPathConverted.get(aliquot_uuid))).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                 }
                 catch (Exception e) {
                     e.printStackTrace();
