@@ -255,18 +255,21 @@ public class MetadataParser extends BioParser {
         values.put("required", true);
         additional_attributes.put(attributes_prefix+category_separator+"exp_data_"+Settings.getOpenGDCFTPConvertedDataFormat()+"_url", values);
         
+        /******* data_format *******/
+        values = new HashMap<>();
+        String data_format = "";
+        if (!expDataType.trim().equals(""))
+            data_format = Settings.getOpenGDCFTPConvertedDataFormat().toUpperCase();
+        values.put("value", data_format);
+        values.put("required", true);
+        additional_attributes.put(attributes_prefix+category_separator+"data_format", values);
+        
         /******* exp_metadata_url *******/
         values = new HashMap<>();
         values.put("value", Settings.getOpenGDCFTPRepoProgram(program, false)+disease.trim().toLowerCase()+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.trim().toLowerCase())+"/"+aliquot_uuid.trim().toLowerCase()+"."+this.getFormat());
         values.put("required", true);
         additional_attributes.put(attributes_prefix+category_separator+"exp_metadata_url", values);
-        
-        /******* data_format *******/
-        values = new HashMap<>();
-        values.put("value", Settings.getOpenGDCFTPConvertedDataFormat().toUpperCase());
-        values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"data_format", values);
-        
+                
         return additional_attributes;
     }
     
