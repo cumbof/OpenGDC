@@ -12,9 +12,6 @@ import opengdc.Settings;
 
 public class IlluminaHumanMethylation {
 
-	/**
-	 * @param args
-	 */
 	private static String illumia_human_methylation = Settings.getILLUMINADataPath();
 	private static HashMap<String, String> cpgsite2strand = new HashMap<>();
 
@@ -64,8 +61,5 @@ public class IlluminaHumanMethylation {
 		}
 		return cpgsite2strand;
 	}
-
-
-
 
 }
