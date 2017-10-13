@@ -134,6 +134,12 @@ public class Settings {
         if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/genenames/hgnc_complete_set.txt";
         return GENENAMES_DATA;
     }
+
+    private static final String ILLUMINA_DATA = "./appdata/illumina/humanMethylation.txt";
+    public static String getILLUMINADataPath() {
+        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/illumina/humanMethylation.txt";
+        return ILLUMINA_DATA;
+    }
     
     private static final String ENSEMBL_DATA = "./appdata/ensembl/Homo_sapiens.GRCh38.77.gtf";
     public static String getENSEMBLDataPath() {

@@ -24,6 +24,7 @@ import java.util.List;
 import opengdc.GUI;
 import opengdc.integration.GeneNames;
 import opengdc.integration.Gencode;
+import opengdc.integration.IlluminaHumanMethylation;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
 import opengdc.util.GDCQuery;
@@ -89,13 +90,11 @@ public class MethylationBetaValueParser extends BioParser {
                                     String gene_types_comp = line_split[6];
                                     String transcript_ids_comp = line_split[7];
                                     String positions_to_tss_comp = line_split[8];
-
                                     String all_gene_symbols = ""; //12
                                     String all_entrez_ids = "null"; //13
                                     String all_gene_types = ""; //14
                                     String all_transcript_ids = ""; //15
                                     String all_positions_to_tss = "null"; //16
-
                                     String cgi_coordinate = line_split[9]; //17
                                     String feature_type = line_split[10]; //18
 
@@ -107,12 +106,12 @@ public class MethylationBetaValueParser extends BioParser {
                                     
                                     if (!chr.equals("*")) {
                                         if (!gene_symbols_comp.isEmpty()) {
-                                            HashMap<String, String> fields = extractFields(chr, gene_symbols_comp, start,end , gene_types_comp, transcript_ids_comp, positions_to_tss_comp);
+                                            HashMap<String, String> fields = extractFields(composite_element_ref, chr, gene_symbols_comp, start,end , gene_types_comp, transcript_ids_comp, positions_to_tss_comp);
                                             strand = fields.get("STRAND");
                                             gene_symbol = fields.get("SYMBOL");
                                             gene_type = fields.get("GENE_TYPE");
                                             transcript_id = fields.get("TRANSCRIPT_ID");
-                                            position_to_tss = fields.get("POSITION_TO_TSS");			
+                                            position_to_tss = fields.get("POSITION_TO_TSS");
                                             entrez_id = fields.get("ENTREZ");
                                             all_entrez_ids = fields.get("ENTREZ_IDs");
                                             all_gene_symbols = fields.get("GENE_SYMBOLS");
@@ -200,7 +199,7 @@ public class MethylationBetaValueParser extends BioParser {
         return 0;
     }
 
-    public static HashMap<String, String> extractFields(String chr, String gene_symbol_comp, String start_site, String end_site, String gene_type_comp, String transcript_id_comp, String position_to_tss_comp) {
+    public static HashMap<String, String> extractFields(String composite_element_ref, String chr, String gene_symbol_comp, String start_site, String end_site, String gene_type_comp, String transcript_id_comp, String position_to_tss_comp) {
         HashMap<String, String> result = new HashMap<>();
         HashMap<String, Integer> gene2CpGdistance = new HashMap<>();
         HashMap<String, List<String>> gene2startEnd = new HashMap<>();
@@ -222,14 +221,10 @@ public class MethylationBetaValueParser extends BioParser {
         while (i < genes.length) {
             String gene_symbol_tmp = genes[i];
             int last = getLastIndex(genes,i);
-
             ArrayList<HashMap<String, String>> gencode_info = Gencode.extractGencodeInfo("symbol", gene_symbol_tmp, "gene");
             if (!gencode_info.isEmpty()) {
-
                 HashMap<String, String> gene_info = gencode_info.get(0);
-
-                if(!gene_info.isEmpty()){
-
+                if (!gene_info.isEmpty()) {
                     String start = gene_info.get("START");
                     String end = gene_info.get("END");
                     int startf = Integer.parseInt(start);
@@ -237,8 +232,8 @@ public class MethylationBetaValueParser extends BioParser {
                     int endf = Integer.parseInt(end);
                     int e_site = Integer.parseInt(end_site);
 
-                    if(s_site>= startf && endf>=e_site){
-                        int distance= (s_site-startf)+(endf-e_site);
+                    if (s_site>= startf && endf>=e_site) {
+                        int distance = (s_site-startf)+(endf-e_site);
                         gene2CpGdistance.put(gene_symbol_tmp,distance);
                     }
                     String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol_tmp);
@@ -284,35 +279,36 @@ public class MethylationBetaValueParser extends BioParser {
                 position_to_TSS = (position_to_TSS+"|"+position_to_tss_comp.split(";")[z]);
             }
 
-            transcript=transcript.substring(1); 
-            position_to_TSS=position_to_TSS.substring(1);
+            transcript = transcript.substring(1); 
+            position_to_TSS = position_to_TSS.substring(1);
             gene_type = gene_type_comp.split(";")[index_start];
-            ArrayList<HashMap<String, String>> gencode_info = Gencode.extractGencodeInfo("symbol", gene_symbol, "gene");
-            HashMap<String, String> gene_info = gencode_info.get(0);
-            strand = gene_info.get("STRAND");
+            //ArrayList<HashMap<String, String>> gencode_info = Gencode.extractGencodeInfo("symbol", gene_symbol, "gene");
+            //HashMap<String, String> gene_info = gencode_info.get(0);
+            //strand = gene_info.get("STRAND");
             entrez = start_endentrezId.get(1);
         }
         else {
             entrez = "null";
             gene_type = "";
-            strand = "*";
+            //strand = "*";
             position_to_TSS = "null";
         }
+        strand = IlluminaHumanMethylation.getStrandFromCompositeElem(composite_element_ref);
 
         for (String gene: gene2startEnd.keySet()) {
             List<String> start_endentrezId = gene2startEnd.get(gene);
             String start_end = start_endentrezId.get(0);
             int index_start = Integer.parseInt(start_end.split("_")[0]);
             int index_end = Integer.parseInt(start_end.split("_")[1]);
-            String transcript_tmp= "";
+            String transcript_tmp = "";
             String position_to_TSS_tmp = "";
 
-            for (int z =index_start; z<index_end; z++) {
+            for (int z=index_start; z<index_end; z++) {
                 transcript_tmp = (transcript_tmp+"|"+transcript_id_comp.split(";")[z]);
                 position_to_TSS_tmp = (position_to_TSS_tmp+"|"+position_to_tss_comp.split(";")[z]);
             }
-            all_transcript_ids=all_transcript_ids+";"+transcript_tmp.substring(1); 
-            all_positions_to_TSS=all_positions_to_TSS+";"+position_to_TSS_tmp.substring(1);
+            all_transcript_ids = all_transcript_ids+";"+transcript_tmp.substring(1); 
+            all_positions_to_TSS = all_positions_to_TSS+";"+position_to_TSS_tmp.substring(1);
         }
 
         result.put("GENE_TYPES", all_gene_types.substring(1)); 
@@ -335,9 +331,9 @@ public class MethylationBetaValueParser extends BioParser {
         String gene_symbol = genes_list.get(0);
         int min = gene2CpGdistance.get(gene_symbol);
 
-        for(String gene: genes_list){
+        for (String gene: genes_list) {
             int distance = gene2CpGdistance.get(gene);
-            if(min > distance){
+            if (min > distance) {
                 min = distance;
                 gene_symbol = gene;
             }
@@ -347,9 +343,8 @@ public class MethylationBetaValueParser extends BioParser {
 
     public static int getLastIndex(String[] genes, int i) {
         int j = i+1;
-        while(j< genes.length && genes[j].equals(genes[i])){
+        while (j<genes.length && genes[j].equals(genes[i]))
             j ++;
-        }
         return j;
     }
 
