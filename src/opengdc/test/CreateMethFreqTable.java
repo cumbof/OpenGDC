@@ -23,22 +23,22 @@ import opengdc.util.GDCData;
  */
 public class CreateMethFreqTable {
     
-    private static final String ROOT = "/galaxy/home/fabio/meth/";
+    private static final String ROOT = "/galaxy/home/fabio/gdc-meth/meth/";
     
     public static void main(String[] args) {
         ArrayList<String> diseases = new ArrayList<>(GDCData.getBigGDCDataMap().get("TCGA").keySet());
-        for (String disease: diseases) {
-            System.err.println("processing "+disease);
-            disease = disease.toLowerCase().split("-")[1];
-            File data_folder = new File(ROOT+disease+"/original/");
-            if (data_folder.exists()) {
+        File data_folder = new File(ROOT);
+        if (data_folder.exists()) {
+            for (String disease: diseases) {
+                System.err.println("processing "+disease);
+                disease = disease.toUpperCase().split("-")[1];    
                 try {
                     System.err.println("retrieving site2gene map");
                     //HashMap<String, String> site2gene = getSite2GeneMap(data_folder);
                     //ArrayList<String> sites = new ArrayList<>(site2gene.keySet());
-                    ArrayList<String> sites = getSites(data_folder);
+                    ArrayList<String> sites = getSites(data_folder, disease);
                     System.err.println("retrieving aliquots");
-                    ArrayList<String> aliquots = getAliquots(data_folder);
+                    ArrayList<String> aliquots = getAliquots(data_folder, disease);
                     System.err.println("retrieving beta values");
                     double[][] beta_values = getBetaValues(data_folder, sites, aliquots);
                     if (beta_values != null) {
@@ -56,12 +56,12 @@ public class CreateMethFreqTable {
         }
     }
     
-    private static ArrayList<String> getSites(File data_folder) {
+    private static ArrayList<String> getSites(File data_folder, String disease) {
     //private static HashMap<String, String> getSite2GeneMap(File data_folder) {
         //HashMap<String, String> site2gene = new HashMap<>();
         ArrayList<String> sites = new ArrayList<>();
         for (File f: data_folder.listFiles()) {
-            if (f.getName().toLowerCase().endsWith("txt")) {
+            if (f.getName().toLowerCase().endsWith("txt") && f.getName().toUpperCase().contains("_"+disease+".")) {
                 try {
                     InputStream fstream = new FileInputStream(f.getAbsolutePath());
                     DataInputStream in = new DataInputStream(fstream);
@@ -70,7 +70,7 @@ public class CreateMethFreqTable {
                     while ((line = br.readLine()) != null) {
                         if (!line.trim().equals("")) {
                             String[] line_split = line.split("\t");
-                            String site = line_split[4];
+                            String site = line_split[0];
                             //String gene_symbol = line_split[6];
                             //site2gene.put(site, gene_symbol);
                             sites.add(site);
@@ -89,12 +89,12 @@ public class CreateMethFreqTable {
         return sites;
     }
 
-    private static ArrayList<String> getAliquots(File data_folder) {
+    private static ArrayList<String> getAliquots(File data_folder, String disease) {
         ArrayList<String> aliquots = new ArrayList<>();
         for (File f: data_folder.listFiles()) {
-            if (f.getName().toLowerCase().endsWith("bed")) {
+            if (f.getName().toLowerCase().endsWith("txt") && f.getName().toUpperCase().contains("_"+disease+".")) {
                 String[] f_name_split = f.getName().split("\\.");
-                String aliquot = f_name_split[0];
+                String aliquot = f_name_split[5];
                 aliquots.add(aliquot);
             }
         }
@@ -107,25 +107,33 @@ public class CreateMethFreqTable {
         double[][] beta_values = new double[sites.size()][aliquots.size()];
         for (int i=0; i<aliquots.size(); i++) {
             String aliquot = aliquots.get(i);
-            String bed_file_path = data_folder.getAbsolutePath()+"/"+aliquot+".bed";
-            if ((new File(bed_file_path)).exists()) {
+            String file_path = "";
+            for (String fileName: data_folder.list()) {
+                if (fileName.toLowerCase().contains(aliquot.toLowerCase()))
+                    file_path = data_folder.getAbsolutePath()+"/"+fileName;
+            }
+            if ((new File(file_path)).exists()) {
                 try {
-                    InputStream fstream = new FileInputStream(bed_file_path);
+                    InputStream fstream = new FileInputStream(file_path);
                     DataInputStream in = new DataInputStream(fstream);
                     BufferedReader br = new BufferedReader(new InputStreamReader(in));
                     String line;
+                    boolean skipHeader = true;
                     while ((line = br.readLine()) != null) {
-                        if (!line.trim().equals("")) {
-                            String[] line_split = line.split("\t");
-                            String site = line_split[4];
-                            String beta_value_str = line_split[5];
-                            double beta_value = Double.NaN;
-                            if (!beta_value_str.toLowerCase().trim().equals("null"))
-                                beta_value = Double.valueOf(beta_value_str);
-                            int row = sites.indexOf(site);
-                            int column = i;
-                            beta_values[row][column] = beta_value;
+                        if (!skipHeader) {
+                            if (!line.trim().equals("")) {
+                                String[] line_split = line.split("\t");
+                                String site = line_split[0];
+                                String beta_value_str = line_split[1];
+                                double beta_value = Double.NaN;
+                                if (!beta_value_str.toLowerCase().trim().equals("null") && !beta_value_str.toLowerCase().trim().equals("") && !beta_value_str.toLowerCase().trim().equals("na"))
+                                    beta_value = Double.valueOf(beta_value_str);
+                                int row = sites.indexOf(site);
+                                int column = i;
+                                beta_values[row][column] = beta_value;
+                            }
                         }
+                        skipHeader = false;
                     }
                     br.close();
                     in.close();
