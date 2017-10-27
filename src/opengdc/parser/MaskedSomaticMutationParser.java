@@ -196,6 +196,7 @@ public class MaskedSomaticMutationParser extends BioParser {
                                         dataList.add(values);
                                     dataMapStart.put(start_id, dataList);
                                     dataMapChr.put(chr_id, dataMapStart);
+                                    uuid_dataMap.put(aliquot_uuid, dataMapChr);
                                     /**********************************************************************/
                                     
                                     // decomment this line to print entries without sorting genomic coordinates

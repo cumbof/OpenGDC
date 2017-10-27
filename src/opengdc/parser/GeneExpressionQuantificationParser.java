@@ -137,7 +137,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                         
                                         /**********************************************************************/
                                         /** populate dataMap then sort genomic coordinates and print entries **/
-                                        int chr_id = Integer.parseInt(parseValue(chr, 0).replaceAll("chr", "").replaceAll("X", "23").replaceAll("Y", "24"));
+                                        int chr_id = Integer.parseInt(parseValue(chr, 0).replaceAll("chr", "").replaceAll("X", "23").replaceAll("Y", "24").replaceAll("M", "25"));
                                         int start_id = Integer.parseInt(parseValue(start, 1));
                                         HashMap<Integer, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
                                         ArrayList<ArrayList<String>> dataList = new ArrayList<>();
