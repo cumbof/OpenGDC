@@ -70,17 +70,17 @@ public abstract class BioParser {
         return value;
     }
     
-    public void printData(Path outFilePath, HashMap<String, HashMap<String, ArrayList<ArrayList<String>>>> dataMap, String format, String[] header) {
+    public void printData(Path outFilePath, HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMap, String format, String[] header) {
         if (!dataMap.isEmpty()) {
-            ArrayList<String> chrs = new ArrayList<>(dataMap.keySet());
+            ArrayList<Integer> chrs = new ArrayList<>(dataMap.keySet());
             // sort by chr
             Collections.sort(chrs);
-            for (String chr: chrs) {
-                HashMap<String, ArrayList<ArrayList<String>>> dataList = dataMap.get(chr);
+            for (Integer chr: chrs) {
+                HashMap<Integer, ArrayList<ArrayList<String>>> dataList = dataMap.get(chr);
                 // sort by start position
-                ArrayList<String> starts = new ArrayList<>(dataList.keySet());
+                ArrayList<Integer> starts = new ArrayList<>(dataList.keySet());
                 Collections.sort(starts);
-                for (String start: starts) {
+                for (Integer start: starts) {
                     ArrayList<ArrayList<String>> dataArray = dataList.get(start);
                     for (ArrayList<String> data: dataArray) {
                         try {
