@@ -64,7 +64,7 @@ public class CopyNumberSegmentParser extends BioParser {
                         try {
                             Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
                             /** store entries **/
-                            HashMap<String, HashMap<String, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
+                            HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
                             
                             InputStream fstream = new FileInputStream(f.getAbsolutePath());
                             DataInputStream in = new DataInputStream(fstream);
@@ -94,9 +94,9 @@ public class CopyNumberSegmentParser extends BioParser {
                                     
                                     /**********************************************************************/
                                     /** populate dataMap then sort genomic coordinates and print entries **/
-                                    String chr_id = parseValue(chr, 0).replaceAll("chr", "");
-                                    String start_id = parseValue(start, 1);
-                                    HashMap<String, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
+                                    int chr_id = Integer.parseInt(parseValue(chr, 0).replaceAll("chr", "").replaceAll("X", "23").replaceAll("Y", "24"));
+                                    int start_id = Integer.parseInt(parseValue(start, 1));
+                                    HashMap<Integer, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
                                     ArrayList<ArrayList<String>> dataList = new ArrayList<>();
                                     if (dataMapChr.containsKey(chr_id)) {
                                         dataMapStart = dataMapChr.get(chr_id);                                        
