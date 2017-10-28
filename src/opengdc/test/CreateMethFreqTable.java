@@ -40,7 +40,7 @@ public class CreateMethFreqTable {
                     System.err.println("retrieving aliquots");
                     ArrayList<String> aliquots = getAliquots(data_folder, disease);
                     System.err.println("retrieving beta values");
-                    double[][] beta_values = getBetaValues(data_folder, sites, aliquots);
+                    double[][] beta_values = getBetaValues(data_folder, sites.size(), aliquots);
                     if (beta_values != null) {
                         String matrixFilePath = ROOT+disease+"_beta_matrix.tsv";
                         System.err.println("printing matrix");
@@ -67,14 +67,18 @@ public class CreateMethFreqTable {
                     DataInputStream in = new DataInputStream(fstream);
                     BufferedReader br = new BufferedReader(new InputStreamReader(in));
                     String line;
+                    boolean skipHeader = true;
                     while ((line = br.readLine()) != null) {
-                        if (!line.trim().equals("")) {
-                            String[] line_split = line.split("\t");
-                            String site = line_split[0];
-                            //String gene_symbol = line_split[6];
-                            //site2gene.put(site, gene_symbol);
-                            sites.add(site);
+                        if (!skipHeader) {
+                            if (!line.trim().equals("")) {
+                                String[] line_split = line.split("\t");
+                                String site = line_split[0];
+                                //String gene_symbol = line_split[6];
+                                //site2gene.put(site, gene_symbol);
+                                sites.add(site);
+                            }
                         }
+                        skipHeader = false;
                     }
                     br.close();
                     in.close();
@@ -100,11 +104,11 @@ public class CreateMethFreqTable {
         }
         return aliquots;
     }
-
-    private static double[][] getBetaValues(File data_folder, ArrayList<String> sites, ArrayList<String> aliquots) throws Exception {
-        // +2 for key: aliquot+tissue_type
-        // +2 for value: site+gene
-        double[][] beta_values = new double[sites.size()][aliquots.size()];
+    
+    private static double[][] getBetaValues(File data_folder, int sites, ArrayList<String> aliquots) throws Exception {
+    //private static double[][] getBetaValues(File data_folder, ArrayList<String> sites, ArrayList<String> aliquots) throws Exception {
+        //double[][] beta_values = new double[sites.size()][aliquots.size()];
+        double[][] beta_values = new double[sites][aliquots.size()];
         for (int i=0; i<aliquots.size(); i++) {
             String aliquot = aliquots.get(i);
             String file_path = "";
@@ -118,6 +122,7 @@ public class CreateMethFreqTable {
                     DataInputStream in = new DataInputStream(fstream);
                     BufferedReader br = new BufferedReader(new InputStreamReader(in));
                     String line;
+                    int line_count = 0;
                     boolean skipHeader = true;
                     while ((line = br.readLine()) != null) {
                         if (!skipHeader) {
@@ -128,9 +133,11 @@ public class CreateMethFreqTable {
                                 double beta_value = Double.NaN;
                                 if (!beta_value_str.toLowerCase().trim().equals("null") && !beta_value_str.toLowerCase().trim().equals("") && !beta_value_str.toLowerCase().trim().equals("na"))
                                     beta_value = Double.valueOf(beta_value_str);
-                                int row = sites.indexOf(site);
+                                //int row = sites.indexOf(site);
+                                int row = line_count;
                                 int column = i;
                                 beta_values[row][column] = beta_value;
+                                line_count++;
                             }
                         }
                         skipHeader = false;

@@ -31,11 +31,13 @@ public class Main {
     }
     
     private static void initSkipDataTypes() {
-        skip_datatypes = new HashSet<>();
-        /*skip_datatypes.add("clinical supplement");
+        /*skip_datatypes = new HashSet<>();
+        skip_datatypes.add("clinical supplement");
         skip_datatypes.add("biospecimen supplement");
         skip_datatypes.add("gene expression quantification");
-        skip_datatypes.add("methylation beta value");*/
+        skip_datatypes.add("methylation beta value");
+        skip_datatypes.add("copy number segment");
+        skip_datatypes.add("isoform expression quantification");*/
     }
 
     /**
@@ -49,7 +51,7 @@ public class Main {
             inputDiseaseAbbreviation = args[1];
         }
         else {
-            System.err.println("Usage example: java -jar app.jar tcga acc");
+            System.err.println("Usage example: java -jar app.jar 'program' 'disease'");
             System.exit(1);
         }
         
