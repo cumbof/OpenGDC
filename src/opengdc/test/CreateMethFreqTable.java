@@ -30,38 +30,38 @@ public class CreateMethFreqTable {
         File data_folder = new File(ROOT);
         if (data_folder.exists()) {
             for (String disease: diseases) {
-                System.err.println("processing "+disease);
-                disease = disease.toUpperCase().split("-")[1];    
-                try {
-                    System.err.println("retrieving site2gene map");
-                    //HashMap<String, String> site2gene = getSite2GeneMap(data_folder);
-                    //ArrayList<String> sites = new ArrayList<>(site2gene.keySet());
-                    ArrayList<String> sites = getSites(data_folder, disease);
-                    System.err.println("retrieving aliquots");
-                    ArrayList<String> aliquots = getAliquots(data_folder, disease);
-                    System.err.println("retrieving beta values");
-                    double[][] beta_values = getBetaValues(data_folder, sites.size(), aliquots);
-                    if (beta_values != null) {
-                        String matrixFilePath = ROOT+disease+"_beta_matrix.tsv";
-                        System.err.println("printing matrix");
-                        //printBetaValues(matrixFilePath, site2gene, sites, aliquots, beta_values);
-                        printBetaValues(matrixFilePath, null, sites, aliquots, beta_values);
+                ArrayList<String> platforms = new ArrayList<>();
+                platforms.add("HumanMethylation27");
+                platforms.add("HumanMethylation450");
+                for (String platform: platforms) {
+                    System.err.println("processing "+disease+" - platform: "+platform);
+                    String disease_abbr = disease.toUpperCase().split("-")[1];
+                    try {
+                        System.err.println("retrieving sites");
+                        ArrayList<String> sites = getSites(data_folder, disease_abbr, platform);
+                        System.err.println("retrieving aliquots");
+                        ArrayList<String> aliquots = getAliquots(data_folder, disease_abbr, platform);
+                        System.err.println("retrieving beta values");
+                        double[][] beta_values = getBetaValues(data_folder, sites.size(), aliquots, platform);
+                        if (beta_values != null) {
+                            String matrixFilePath = ROOT+disease+"_"+platform+"_beta_matrix.tsv";
+                            System.err.println("printing matrix");
+                            printBetaValues(matrixFilePath, sites, aliquots, beta_values);
+                        }
                     }
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             System.err.println("--------------");
         }
     }
     
-    private static ArrayList<String> getSites(File data_folder, String disease) {
-    //private static HashMap<String, String> getSite2GeneMap(File data_folder) {
-        //HashMap<String, String> site2gene = new HashMap<>();
+    private static ArrayList<String> getSites(File data_folder, String disease, String platform) {
         ArrayList<String> sites = new ArrayList<>();
         for (File f: data_folder.listFiles()) {
-            if (f.getName().toLowerCase().endsWith("txt") && f.getName().toUpperCase().contains("_"+disease+".")) {
+            if (f.getName().toLowerCase().endsWith("txt") && f.getName().toUpperCase().contains("_"+disease+"."+platform.toUpperCase())) {
                 try {
                     InputStream fstream = new FileInputStream(f.getAbsolutePath());
                     DataInputStream in = new DataInputStream(fstream);
@@ -73,8 +73,6 @@ public class CreateMethFreqTable {
                             if (!line.trim().equals("")) {
                                 String[] line_split = line.split("\t");
                                 String site = line_split[0];
-                                //String gene_symbol = line_split[6];
-                                //site2gene.put(site, gene_symbol);
                                 sites.add(site);
                             }
                         }
@@ -89,14 +87,13 @@ public class CreateMethFreqTable {
                 break;
             }
         }
-        //return site2gene;
         return sites;
     }
 
-    private static ArrayList<String> getAliquots(File data_folder, String disease) {
+    private static ArrayList<String> getAliquots(File data_folder, String disease, String platform) {
         ArrayList<String> aliquots = new ArrayList<>();
         for (File f: data_folder.listFiles()) {
-            if (f.getName().toLowerCase().endsWith("txt") && f.getName().toUpperCase().contains("_"+disease+".")) {
+            if (f.getName().toLowerCase().endsWith("txt") && f.getName().toUpperCase().contains("_"+disease+"."+platform.toUpperCase())) {
                 String[] f_name_split = f.getName().split("\\.");
                 String aliquot = f_name_split[5];
                 aliquots.add(aliquot);
@@ -105,15 +102,13 @@ public class CreateMethFreqTable {
         return aliquots;
     }
     
-    private static double[][] getBetaValues(File data_folder, int sites, ArrayList<String> aliquots) throws Exception {
-    //private static double[][] getBetaValues(File data_folder, ArrayList<String> sites, ArrayList<String> aliquots) throws Exception {
-        //double[][] beta_values = new double[sites.size()][aliquots.size()];
+    private static double[][] getBetaValues(File data_folder, int sites, ArrayList<String> aliquots, String platform) throws Exception {
         double[][] beta_values = new double[sites][aliquots.size()];
         for (int i=0; i<aliquots.size(); i++) {
             String aliquot = aliquots.get(i);
             String file_path = "";
             for (String fileName: data_folder.list()) {
-                if (fileName.toLowerCase().contains(aliquot.toLowerCase()))
+                if (fileName.toLowerCase().contains(aliquot.toLowerCase()) && fileName.toLowerCase().contains(platform.toLowerCase()))
                     file_path = data_folder.getAbsolutePath()+"/"+fileName;
             }
             if ((new File(file_path)).exists()) {
@@ -133,7 +128,6 @@ public class CreateMethFreqTable {
                                 double beta_value = Double.NaN;
                                 if (!beta_value_str.toLowerCase().trim().equals("null") && !beta_value_str.toLowerCase().trim().equals("") && !beta_value_str.toLowerCase().trim().equals("na"))
                                     beta_value = Double.valueOf(beta_value_str);
-                                //int row = sites.indexOf(site);
                                 int row = line_count;
                                 int column = i;
                                 beta_values[row][column] = beta_value;
@@ -154,7 +148,7 @@ public class CreateMethFreqTable {
         return beta_values;
     }
 
-    private static void printBetaValues(String matrixFilePath, HashMap<String, String> site2gene, ArrayList<String> sites, ArrayList<String> aliquots, double[][] beta_values) {
+    private static void printBetaValues(String matrixFilePath, ArrayList<String> sites, ArrayList<String> aliquots, double[][] beta_values) {
         try {
             FileOutputStream fos = new FileOutputStream(matrixFilePath);
             PrintStream out = new PrintStream(fos);
