@@ -93,8 +93,7 @@ public class MetadataParser extends BioParser {
                 try {
                     //FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "." + this.getFormat());
                     //PrintStream out = new PrintStream(fos);
-                    
-                    
+                                        
                     // print biospecimen info
                     String patient_uuid = "";
                     for (String attribute: biospecimenBigMap.get(aliquot_uuid).keySet()) {
@@ -360,7 +359,7 @@ public class MetadataParser extends BioParser {
         else return metaValue;
     }
     
-    private HashMap<String, HashMap<String, Boolean>> getAdditionalAttributes() {
+    public static HashMap<String, HashMap<String, Boolean>> getAdditionalAttributes() {
         HashMap<String, HashMap<String, Boolean>> additionalAttributes = new HashMap<>();
         // <'attribute:string', 'required:boolean'>
         HashMap<String, Boolean> attributes = new HashMap<>();

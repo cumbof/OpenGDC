@@ -292,30 +292,22 @@ public class GDCQuery {
                     JSONTokener tokener = new JSONTokener(uri.toURL().openStream());
                     JSONObject root = new JSONObject(tokener);
                     HashMap<String, Object> json_data = new HashMap<>(JSONUtils.jsonToMap(root));
-                    //Object data_node_obj = json_data.get("data");
-                    Object data_node_obj = json_data.get("hits");
                     
-                    if (data_node_obj instanceof List) {
-                        List<Object> hits = (List<Object>)data_node_obj;
-                        for (Object node: hits) {
-                            HashMap<String, String> data_node = new HashMap<>();
-                            for (String attribute: attributes) {
-                                String[] attribute_split = attribute.split("\\.");
-                                String searchForKey = attribute_split[attribute_split.length-1];
-                                String val = searchFor(searchForKey, data_node_obj);
-                                //info.put(attribute, val!=null ? val : "");
-                                data_node.put(attribute, val!=null ? val : "");
-                            }
-                            info.add(data_node);
+                    Object data_node_obj = json_data.get("data");
+                    HashMap<String, Object> root_node = (HashMap<String, Object>)data_node_obj;
+                    ArrayList<Object> hits_node = (ArrayList<Object>)root_node.get("hits");
+
+                    for (Object node: hits_node) {
+                        HashMap<String, String> data_node = new HashMap<>();
+                        for (String attribute: attributes) {
+                            String[] attribute_split = attribute.split("\\.");
+                            String searchForKey = attribute_split[attribute_split.length-1];
+                            String val = searchFor(searchForKey, node);
+                            //info.put(attribute, val!=null ? val : "");
+                            data_node.put(attribute, val!=null ? val : "");
                         }
+                        info.add(data_node);
                     }
-                    
-                    /*for (String attribute: attributes) {
-                        String[] attribute_split = attribute.split("\\.");
-                        String searchForKey = attribute_split[attribute_split.length-1];
-                        String val = searchFor(searchForKey, data_node_obj);
-                        info.put(attribute, val!=null ? val : "");
-                    }*/
 
                     conn.disconnect();
                     return info;
