@@ -59,9 +59,10 @@ public class MaskedSomaticMutationParser extends BioParser {
                             try {
                                 HashSet<String> filePaths = new HashSet<>(filesPathConverted.values());
                                 if (!filePaths.contains(outPath + aliquot_uuid + "." + this.getFormat())) {
-                                    String suffix_id = this.getOpenGDCSuffix(dataType);
-                                    Files.write((new File(outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
-                                    filesPathConverted.put(aliquot_uuid, outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat());
+                                    String suffix_id = this.getOpenGDCSuffix(dataType, false);
+                                    String filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
+                                    Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                                    filesPathConverted.put(aliquot_uuid, filePath);
                                 }
                             
                                 for (int entry: uuidData.keySet()) {

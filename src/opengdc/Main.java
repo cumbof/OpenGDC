@@ -24,7 +24,8 @@ public class Main {
     private static HashSet<String> skip_datatypes = new HashSet<>();
     //private static final String CMD = "download and convert";
     private static final String CMD = "download and convert";
-    private static final String ROOT = "/DATA/ftp-root/";
+    //private static final String ROOT = "/DATA/ftp-root/";
+    private static final String ROOT = "/Users/fabio/Downloads/test_gdc_download/";
     
     private static void initSkipDiseases() {
         skip_diseases = new HashSet<>();
@@ -55,6 +56,9 @@ public class Main {
             System.exit(1);
         }
         
+        //String inputProgram = "TCGA";
+        //String inputDiseaseAbbreviation = "ACC";
+        
         String inputDisease = (inputProgram+"-"+inputDiseaseAbbreviation).toLowerCase();
         
         initSkipDiseases();
@@ -72,7 +76,7 @@ public class Main {
                             //for (String dataType: dataTypes) {
                                 if (dataType.toLowerCase().contains("clinical"))
                                     dataType = "Clinical and Biospecimen Supplements";
-                                if (dataType.toLowerCase().contains("biospecimen"))
+                                else if (dataType.toLowerCase().contains("biospecimen"))
                                     dataType = null;
                                 if (dataType != null) {
                                     if (!skip_datatypes.contains(dataType.toLowerCase())) {

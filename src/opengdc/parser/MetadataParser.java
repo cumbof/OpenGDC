@@ -198,7 +198,7 @@ public class MetadataParser extends BioParser {
                                     }
                                     
                                     if (!manually_curated_data_type.equals("")) {
-                                        String suffix_id = this.getOpenGDCSuffix(manually_curated_data_type);
+                                        String suffix_id = this.getOpenGDCSuffix(manually_curated_data_type, false);
                                         
                                         FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
                                         PrintStream out = new PrintStream(fos);

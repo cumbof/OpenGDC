@@ -66,8 +66,9 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                     
                     if (!aliquot_uuid.trim().equals("")) {
                         try {
-                            String suffix_id = this.getOpenGDCSuffix(dataType);
-                            Files.write((new File(outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                            String suffix_id = this.getOpenGDCSuffix(dataType, false);
+                            String filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
+                            Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
                             /** store entries **/
                             HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
                             
@@ -147,10 +148,10 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                             fstream.close();
 
                             // sort genomic coordinates and print data
-                            this.printData((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), dataMapChr, this.getFormat(), getHeader());
+                            this.printData((new File(filePath)).toPath(), dataMapChr, this.getFormat(), getHeader());
                             
-                            Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
-                            filesPathConverted.add(outPath + file_uuid + "." + this.getFormat());
+                            Files.write((new File(filePath)).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                            filesPathConverted.add(filePath);
                         }
                         catch (Exception e) {
                             e.printStackTrace();

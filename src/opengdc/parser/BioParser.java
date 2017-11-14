@@ -12,10 +12,12 @@ package opengdc.parser;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import javax.xml.bind.DatatypeConverter;
 import opengdc.util.FormatUtils;
 
 /**
@@ -95,12 +97,28 @@ public abstract class BioParser {
         }
     }
     
-    public String getOpenGDCSuffix(String dataType) {
-        String suffix_id = "";
-        String[] dataType_split = dataType.trim().toLowerCase().split(" ");
-        for (String w: dataType_split)
-            suffix_id += w.substring(0, 1);
-        return suffix_id;
+    public String getOpenGDCSuffix(String dataType, boolean hash) {
+        if (!hash) {
+            String suffix_id = "";
+            String[] dataType_split = dataType.trim().toLowerCase().split(" ");
+            for (String w: dataType_split)
+                suffix_id += w.substring(0, 1);
+            return suffix_id;
+        }
+        else {
+            try {         
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                md.update(dataType.getBytes());
+                byte[] digest = md.digest();
+                String suffix_id = DatatypeConverter.printHexBinary(digest).toLowerCase();
+                // make the hash string shorter (first 12 chars)
+                return suffix_id.substring(0, 12);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
     
 }
