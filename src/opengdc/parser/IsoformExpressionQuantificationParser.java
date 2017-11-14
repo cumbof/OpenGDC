@@ -55,7 +55,7 @@ public class IsoformExpressionQuantificationParser extends BioParser {
                     HashSet<String> attributes = new HashSet<>();
                     String aliquot_id_path = "cases.samples.portions.analytes.aliquots.aliquot_id";
                     attributes.add(aliquot_id_path);
-                    HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("files.file_id", file_uuid, attributes, 0);
+                    HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("files.file_id", file_uuid, attributes, 0).get(0);
                     String aliquot_uuid = "";
                     if (file_info != null)
                         if (file_info.containsKey(aliquot_id_path))
@@ -63,7 +63,8 @@ public class IsoformExpressionQuantificationParser extends BioParser {
                     
                     if (!aliquot_uuid.trim().equals("")) {
                         try {
-                            Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                            String suffix_id = this.getOpenGDCSuffix(dataType);
+                            Files.write((new File(outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat())).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
                             /** store entries **/
                             HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
                             

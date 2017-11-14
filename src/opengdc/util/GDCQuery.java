@@ -243,11 +243,11 @@ public class GDCQuery {
             - files.file_id
             - cases.samples.portions.analytes.aliquots.aliquot_id
     */
-    public static HashMap<String, String> retrieveExpInfoFromAttribute(String field, String value, HashSet<String> attributes, int recursive_iteration) {
+    public static ArrayList<HashMap<String, String>> retrieveExpInfoFromAttribute(String field, String value, HashSet<String> attributes, int recursive_iteration) {
         if (attributes!=null) {
             if (!attributes.isEmpty()) {
                 try {
-                    HashMap<String, String> info = new HashMap<>();
+                    ArrayList<HashMap<String, String>> info = new ArrayList<>();
                     //String fields = "\"file_id,file_name,cases.submitter_id,cases.case_id,data_category,data_type,cases.samples.tumor_descriptor,cases.samples.tissue_type,cases.samples.sample_type,cases.samples.submitter_id,cases.samples.sample_id,cases.samples.portions.analytes.aliquots.aliquot_id,cases.samples.portions.analytes.aliquots.submitter_id,experimental_strategy,platform,analysis.workflow_link,data_format,file_size\"";
                     //String fields = "\"";
                     String fields = "\",";
@@ -292,14 +292,30 @@ public class GDCQuery {
                     JSONTokener tokener = new JSONTokener(uri.toURL().openStream());
                     JSONObject root = new JSONObject(tokener);
                     HashMap<String, Object> json_data = new HashMap<>(JSONUtils.jsonToMap(root));
-                    Object data_node_obj = json_data.get("data");
-
-                    for (String attribute: attributes) {
+                    //Object data_node_obj = json_data.get("data");
+                    Object data_node_obj = json_data.get("hits");
+                    
+                    if (data_node_obj instanceof List) {
+                        List<Object> hits = (List<Object>)data_node_obj;
+                        for (Object node: hits) {
+                            HashMap<String, String> data_node = new HashMap<>();
+                            for (String attribute: attributes) {
+                                String[] attribute_split = attribute.split("\\.");
+                                String searchForKey = attribute_split[attribute_split.length-1];
+                                String val = searchFor(searchForKey, data_node_obj);
+                                //info.put(attribute, val!=null ? val : "");
+                                data_node.put(attribute, val!=null ? val : "");
+                            }
+                            info.add(data_node);
+                        }
+                    }
+                    
+                    /*for (String attribute: attributes) {
                         String[] attribute_split = attribute.split("\\.");
                         String searchForKey = attribute_split[attribute_split.length-1];
                         String val = searchFor(searchForKey, data_node_obj);
                         info.put(attribute, val!=null ? val : "");
-                    }
+                    }*/
 
                     conn.disconnect();
                     return info;

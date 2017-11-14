@@ -95,4 +95,12 @@ public abstract class BioParser {
         }
     }
     
+    public String getOpenGDCSuffix(String dataType) {
+        String suffix_id = "";
+        String[] dataType_split = dataType.trim().toLowerCase().split(" ");
+        for (String w: dataType_split)
+            suffix_id += w.substring(0, 1);
+        return suffix_id;
+    }
+    
 }

@@ -91,10 +91,10 @@ public class MetadataParser extends BioParser {
             HashMap<String, HashMap<String, Boolean>> additional_attributes = getAdditionalAttributes();
             for (String aliquot_uuid: biospecimenBigMap.keySet()) {
                 try {
-                    FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "." + this.getFormat());
-                    PrintStream out = new PrintStream(fos);
-                    // handle missing required attributes
-                    HashSet<String> missing_required_attributes = new HashSet<>();
+                    //FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "." + this.getFormat());
+                    //PrintStream out = new PrintStream(fos);
+                    
+                    
                     // print biospecimen info
                     String patient_uuid = "";
                     for (String attribute: biospecimenBigMap.get(aliquot_uuid).keySet()) {
@@ -108,100 +108,141 @@ public class MetadataParser extends BioParser {
                         biospecimen_map.put(MetadataHandler.getAttributeFromKey(attr).replaceAll(":","__"), biospecimenBigMap.get(aliquot_uuid).get(attr));
                     ArrayList<String> biospecimen_sorted = new ArrayList<>(biospecimen_map.keySet());
                     Collections.sort(biospecimen_sorted);
-                    for (String attribute: biospecimen_sorted) {
+                    /*for (String attribute: biospecimen_sorted) {
                         String attribute_parsed = FSUtils.stringToValidJavaIdentifier("biospecimen__" + attribute);
                         String value_parsed = checkForNAs(biospecimen_map.get(attribute));
                         if (!value_parsed.trim().equals(""))
                             out.println(attribute_parsed + "\t" + value_parsed);
-                    }
+                    }*/
                     // print clinical info
+                    ArrayList<String> clinical_sorted = new ArrayList<>();
+                    HashMap<String, String> clinical_map = new HashMap<>();
                     if (!patient_uuid.equals("")) {
                         if (clinicalBigMap.containsKey(patient_uuid)) {
-                            HashMap<String, String> clinical_map = new HashMap<>();
                             for (String attr: clinicalBigMap.get(patient_uuid).keySet())
                                 clinical_map.put(MetadataHandler.getAttributeFromKey(attr).replaceAll(":","__"), clinicalBigMap.get(patient_uuid).get(attr));
-                            ArrayList<String> clinical_sorted = new ArrayList<>(clinical_map.keySet());
+                            clinical_sorted = new ArrayList<>(clinical_map.keySet());
                             Collections.sort(clinical_sorted);
-                            for (String attribute: clinical_sorted) {
+                            /*for (String attribute: clinical_sorted) {
                                 String attribute_parsed = FSUtils.stringToValidJavaIdentifier("clinical__" + attribute);
                                 String value_parsed = checkForNAs(clinical_map.get(attribute));
                                 if (!value_parsed.trim().equals(""))
                                     out.println(attribute_parsed + "\t" + value_parsed);
-                            }
+                            }*/
                         }
                     }
                     
-                    HashMap<String, String> manually_curated = new HashMap<>();
                     // generate manually curated metadata
                     if (!additional_attributes.isEmpty()) {
                         ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes.keySet());
                         Collections.sort(additional_attributes_sorted);
                         for (String metakey: additional_attributes_sorted) {
-                            HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0);
-                            if (file_info != null) {
-                                HashMap<String, Boolean> attribute2required = additional_attributes.get(metakey);
-                                ArrayList<String> file_info_sorted = new ArrayList<>(file_info.keySet());
-                                Collections.sort(file_info_sorted);
-                                for (String attribute: file_info_sorted) {
-                                    String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
-                                    /*************************************************************/
-                                    /** patch for the attribute 'manually_curated__data_format' **/
-                                    if (attribute_parsed.trim().toLowerCase().equals("manually_curated__data_format"))
-                                        attribute_parsed = "manually_curated__source_data_format";
-                                    /*************************************************************/
-                                    String value_parsed = checkForNAs(file_info.get(attribute));
-                                    if (!value_parsed.trim().equals("")) {
-                                        //out.println(attribute_parsed + "\t" + value_parsed);
-                                        manually_curated.put(attribute_parsed, value_parsed);
-                                    }
-                                    else {
-                                        for (String attr: attribute2required.keySet()) {
-                                            if (attr.toLowerCase().equals(attribute.toLowerCase())) {
-                                                if (attribute2required.get(attr)) { // if attribute is required
-                                                    missing_required_attributes.add(attribute_parsed);
+                            ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0);
+                            //HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0);
+                            for (HashMap<String, String> file_info: files_info) {
+                                if (file_info != null) {
+                                    // handle missing required attributes
+                                    HashSet<String> missing_required_attributes = new HashSet<>();
+                                    HashMap<String, String> manually_curated = new HashMap<>();
+                                    HashMap<String, Boolean> attribute2required = additional_attributes.get(metakey);
+                                    ArrayList<String> file_info_sorted = new ArrayList<>(file_info.keySet());
+                                    Collections.sort(file_info_sorted);
+                                    for (String attribute: file_info_sorted) {
+                                        String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
+                                        /*************************************************************/
+                                        /** patch for the attribute 'manually_curated__data_format' **/
+                                        if (attribute_parsed.trim().toLowerCase().equals("manually_curated__data_format"))
+                                            attribute_parsed = "manually_curated__source_data_format";
+                                        /*************************************************************/
+                                        String value_parsed = checkForNAs(file_info.get(attribute));
+                                        if (!value_parsed.trim().equals("")) {
+                                            //out.println(attribute_parsed + "\t" + value_parsed);
+                                            manually_curated.put(attribute_parsed, value_parsed);
+                                        }
+                                        else {
+                                            for (String attr: attribute2required.keySet()) {
+                                                if (attr.toLowerCase().equals(attribute.toLowerCase())) {
+                                                    if (attribute2required.get(attr)) { // if attribute is required
+                                                        missing_required_attributes.add(attribute_parsed);
+                                                    }
                                                 }
                                             }
                                         }
                                     }
+                                    
+                                    // generate additional manually curated metadata
+                                    HashMap<String, HashMap<String, Object>> additional_manually_curated = getAdditionalManuallyCuratedAttributes(program, disease, dataType, aliquot_uuid, biospecimenBigMap.get(aliquot_uuid), clinicalBigMap.get(patient_uuid), manually_curated);
+                                    if (!additional_manually_curated.isEmpty()) {
+                                        for (String attr: additional_manually_curated.keySet()) {
+                                            String attribute_parsed = FSUtils.stringToValidJavaIdentifier(attr);
+                                            HashMap<String, Object> values = additional_manually_curated.get(attr);
+                                            if (!values.isEmpty()) {
+                                                String value_parsed = checkForNAs((String)additional_manually_curated.get(attr).get("value"));
+                                                if (!value_parsed.trim().equals("")) {
+                                                    //out.println(attribute_parsed + "\t" + value_parsed);
+                                                    manually_curated.put(attribute_parsed, value_parsed);
+                                                }
+                                                else {
+                                                    if ((Boolean)additional_manually_curated.get(attr).get("required")) // if attribute is required
+                                                        missing_required_attributes.add(attr);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    String manually_curated_data_type = "";
+                                    for (String mcattr: manually_curated.keySet()) {
+                                        if (mcattr.toLowerCase().contains("data_type")) {
+                                            manually_curated_data_type = manually_curated.get(mcattr);
+                                            break;
+                                        }
+                                    }
+                                    
+                                    if (!manually_curated_data_type.equals("")) {
+                                        String suffix_id = this.getOpenGDCSuffix(manually_curated_data_type);
+                                        
+                                        FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
+                                        PrintStream out = new PrintStream(fos);
+
+                                        // biospecimen
+                                        for (String attribute: biospecimen_sorted) {
+                                            String attribute_parsed = FSUtils.stringToValidJavaIdentifier("biospecimen__" + attribute);
+                                            String value_parsed = checkForNAs(biospecimen_map.get(attribute));
+                                            if (!value_parsed.trim().equals(""))
+                                                out.println(attribute_parsed + "\t" + value_parsed);
+                                        }
+
+                                        // clinical
+                                        for (String attribute: clinical_sorted) {
+                                            String attribute_parsed = FSUtils.stringToValidJavaIdentifier("clinical__" + attribute);
+                                            String value_parsed = checkForNAs(clinical_map.get(attribute));
+                                            if (!value_parsed.trim().equals(""))
+                                                out.println(attribute_parsed + "\t" + value_parsed);
+                                        }
+
+                                        // generate audit_warning
+                                        if (!missing_required_attributes.isEmpty()) {
+                                            String missed_attributes_list = "";
+                                            for (String ma: missing_required_attributes)
+                                                missed_attributes_list += ma+", ";
+                                            manually_curated.put("manually_curated__audit_warning", "missed the following required metadata: ["+missed_attributes_list.substring(0, missed_attributes_list.length()-2)+"]");
+                                        }
+                                        // sort and print manually_curated attributes
+                                        ArrayList<String> manually_curated_attributes_sorted = new ArrayList<>(manually_curated.keySet());
+                                        Collections.sort(manually_curated_attributes_sorted);
+                                        for (String attr: manually_curated_attributes_sorted) {
+                                            out.println(attr + "\t" + manually_curated.get(attr));
+                                        }
+
+                                        out.close();
+                                        fos.close();
+                                    }
+                                    
                                 }
                             }
                         }
-                    }
-                    // generate additional manually curated metadata
-                    HashMap<String, HashMap<String, Object>> additional_manually_curated = getAdditionalManuallyCuratedAttributes(program, disease, dataType, aliquot_uuid, biospecimenBigMap.get(aliquot_uuid), clinicalBigMap.get(patient_uuid), manually_curated);
-                    if (!additional_manually_curated.isEmpty()) {
-                        for (String attr: additional_manually_curated.keySet()) {
-                            String attribute_parsed = FSUtils.stringToValidJavaIdentifier(attr);
-                            HashMap<String, Object> values = additional_manually_curated.get(attr);
-                            if (!values.isEmpty()) {
-                                String value_parsed = checkForNAs((String)additional_manually_curated.get(attr).get("value"));
-                                if (!value_parsed.trim().equals("")) {
-                                    //out.println(attribute_parsed + "\t" + value_parsed);
-                                    manually_curated.put(attribute_parsed, value_parsed);
-                                }
-                                else {
-                                    if ((Boolean)additional_manually_curated.get(attr).get("required")) // if attribute is required
-                                        missing_required_attributes.add(attr);
-                                }
-                            }
-                        }
-                    }
-                    // generate audit_warning
-                    if (!missing_required_attributes.isEmpty()) {
-                        String missed_attributes_list = "";
-                        for (String ma: missing_required_attributes)
-                            missed_attributes_list += ma+", ";
-                        manually_curated.put("manually_curated__audit_warning", "missed the following required metadata: ["+missed_attributes_list.substring(0, missed_attributes_list.length()-2)+"]");
-                    }
-                    // sort and print manually_curated attributes
-                    ArrayList<String> manually_curated_attributes_sorted = new ArrayList<>(manually_curated.keySet());
-                    Collections.sort(manually_curated_attributes_sorted);
-                    for (String attr: manually_curated_attributes_sorted) {
-                        out.println(attr + "\t" + manually_curated.get(attr));
                     }
                     
-                    out.close();
-                    fos.close();
                 }
                 catch (Exception e) {
                     e.printStackTrace();
