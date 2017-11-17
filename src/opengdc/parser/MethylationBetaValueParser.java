@@ -298,9 +298,9 @@ public class MethylationBetaValueParser extends BioParser {
             transcript = transcript.substring(1); 
             position_to_TSS = position_to_TSS.substring(1);
             gene_type = gene_type_comp.split(";")[index_start];
-            //ArrayList<HashMap<String, String>> gencode_info = Gencode.extractGencodeInfo("symbol", gene_symbol, "gene");
-            //HashMap<String, String> gene_info = gencode_info.get(0);
-            //strand = gene_info.get("STRAND");
+            ArrayList<HashMap<String, String>> gencode_info = Gencode.extractGencodeInfo("symbol", gene_symbol, "gene");
+            HashMap<String, String> gene_info = gencode_info.get(0);
+            strand = gene_info.get("STRAND");
             entrez = start_endentrezId.get(1);
         }
 
