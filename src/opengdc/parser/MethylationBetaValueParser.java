@@ -107,6 +107,7 @@ public class MethylationBetaValueParser extends BioParser {
                                     String position_to_tss = ""; //11
                                     
                                     if (!chr.equals("*")) {
+                                      if(!beta_value.toLowerCase().equals("na")){
                                         if (!gene_symbols_comp.isEmpty()) {
                                             HashMap<String, String> fields = extractFields(chr, gene_symbols_comp, start,end , gene_types_comp, transcript_ids_comp, positions_to_tss_comp);
                                             strand = fields.get("STRAND");
@@ -165,6 +166,7 @@ public class MethylationBetaValueParser extends BioParser {
                                     }
                                 }
                             }
+                        }
                             br.close();
                             in.close();
                             fstream.close();
