@@ -107,60 +107,62 @@ public class MethylationBetaValueParser extends BioParser {
                                     String position_to_tss = ""; //11
                                     
                                     if (!chr.equals("*")) {
-                                        if (!gene_symbols_comp.isEmpty()) {
-                                            HashMap<String, String> fields = extractFields(chr, gene_symbols_comp, start,end , gene_types_comp, transcript_ids_comp, positions_to_tss_comp);
-                                            strand = fields.get("STRAND");
-                                            gene_symbol = fields.get("SYMBOL");
-                                            gene_type = fields.get("GENE_TYPE");
-                                            transcript_id = fields.get("TRANSCRIPT_ID");
-                                            position_to_tss = fields.get("POSITION_TO_TSS");
-                                            entrez_id = fields.get("ENTREZ");
-                                            all_entrez_ids = fields.get("ENTREZ_IDs");
-                                            all_gene_symbols = fields.get("GENE_SYMBOLS");
-                                            all_gene_types = fields.get("GENE_TYPES");
-                                            all_transcript_ids = fields.get("TRANSCRIPT_IDS");
-                                            all_positions_to_tss = fields.get("POSITIONS_TO_TSS");
+                                        if (!beta_value.toLowerCase().equals("na")){
+                                            if (!gene_symbols_comp.isEmpty()) {
+                                                HashMap<String, String> fields = extractFields(chr, gene_symbols_comp, start,end , gene_types_comp, transcript_ids_comp, positions_to_tss_comp);
+                                                strand = fields.get("STRAND");
+                                                gene_symbol = fields.get("SYMBOL");
+                                                gene_type = fields.get("GENE_TYPE");
+                                                transcript_id = fields.get("TRANSCRIPT_ID");
+                                                position_to_tss = fields.get("POSITION_TO_TSS");
+                                                entrez_id = fields.get("ENTREZ");
+                                                all_entrez_ids = fields.get("ENTREZ_IDs");
+                                                all_gene_symbols = fields.get("GENE_SYMBOLS");
+                                                all_gene_types = fields.get("GENE_TYPES");
+                                                all_transcript_ids = fields.get("TRANSCRIPT_IDS");
+                                                all_positions_to_tss = fields.get("POSITIONS_TO_TSS");
 
-                                            ArrayList<String> values = new ArrayList<>();
-                                            values.add(parseValue(chr, 0));
-                                            values.add(parseValue(start, 1));
-                                            values.add(parseValue(end, 2));
-                                            values.add(parseValue(strand, 3));
-                                            values.add(parseValue(composite_element_ref, 4));
-                                            values.add(parseValue(beta_value, 5));
-                                            values.add(parseValue(gene_symbol, 6));
-                                            values.add(parseValue(entrez_id, 7));
-                                            values.add(parseValue(gene_type, 8));
-                                            values.add(parseValue(transcript_id, 9));
-                                            values.add(parseValue(position_to_tss, 10));
-                                            values.add(parseValue(all_gene_symbols, 11));
-                                            values.add(parseValue(all_entrez_ids, 12));
-                                            values.add(parseValue(all_gene_types, 13));
-                                            values.add(parseValue(all_transcript_ids, 14));
-                                            values.add(parseValue(all_positions_to_tss, 15));
-                                            values.add(parseValue(cgi_coordinate, 16));
-                                            values.add(parseValue(feature_type, 17));
-                                            
-                                            /**********************************************************************/
-                                            /** populate dataMap then sort genomic coordinates and print entries **/
-                                            int chr_id = Integer.parseInt(parseValue(chr, 0).replaceAll("chr", "").replaceAll("X", "23").replaceAll("Y", "24"));
-											int start_id = Integer.parseInt(parseValue(start, 1));
-                                            HashMap<Integer, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
-                                            ArrayList<ArrayList<String>> dataList = new ArrayList<>();
-                                            if (dataMapChr.containsKey(chr_id)) {
-                                                dataMapStart = dataMapChr.get(chr_id);                                        
-                                                if (dataMapStart.containsKey(start_id))
-                                                    dataList = dataMapStart.get(start_id);
-                                                dataList.add(values);
+                                                ArrayList<String> values = new ArrayList<>();
+                                                values.add(parseValue(chr, 0));
+                                                values.add(parseValue(start, 1));
+                                                values.add(parseValue(end, 2));
+                                                values.add(parseValue(strand, 3));
+                                                values.add(parseValue(composite_element_ref, 4));
+                                                values.add(parseValue(beta_value, 5));
+                                                values.add(parseValue(gene_symbol, 6));
+                                                values.add(parseValue(entrez_id, 7));
+                                                values.add(parseValue(gene_type, 8));
+                                                values.add(parseValue(transcript_id, 9));
+                                                values.add(parseValue(position_to_tss, 10));
+                                                values.add(parseValue(all_gene_symbols, 11));
+                                                values.add(parseValue(all_entrez_ids, 12));
+                                                values.add(parseValue(all_gene_types, 13));
+                                                values.add(parseValue(all_transcript_ids, 14));
+                                                values.add(parseValue(all_positions_to_tss, 15));
+                                                values.add(parseValue(cgi_coordinate, 16));
+                                                values.add(parseValue(feature_type, 17));
+                                                
+                                                /**********************************************************************/
+                                                /** populate dataMap then sort genomic coordinates and print entries **/
+                                                int chr_id = Integer.parseInt(parseValue(chr, 0).replaceAll("chr", "").replaceAll("X", "23").replaceAll("Y", "24"));
+                                                int start_id = Integer.parseInt(parseValue(start, 1));
+                                                HashMap<Integer, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
+                                                ArrayList<ArrayList<String>> dataList = new ArrayList<>();
+                                                if (dataMapChr.containsKey(chr_id)) {
+                                                    dataMapStart = dataMapChr.get(chr_id);                                        
+                                                    if (dataMapStart.containsKey(start_id))
+                                                        dataList = dataMapStart.get(start_id);
+                                                    dataList.add(values);
+                                                }
+                                                else
+                                                    dataList.add(values);
+                                                dataMapStart.put(start_id, dataList);
+                                                dataMapChr.put(chr_id, dataMapStart);
+                                                /**********************************************************************/
+
+                                                // decomment this line to print entries without sorting genomic coordinates
+                                                //Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                             }
-                                            else
-                                                dataList.add(values);
-                                            dataMapStart.put(start_id, dataList);
-                                            dataMapChr.put(chr_id, dataMapStart);
-                                            /**********************************************************************/
-
-                                            // decomment this line to print entries without sorting genomic coordinates
-                                            //Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                         }
                                     }
                                 }
