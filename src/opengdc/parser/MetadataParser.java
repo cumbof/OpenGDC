@@ -417,26 +417,26 @@ public class MetadataParser extends BioParser {
         HashMap<String, HashMap<String, Boolean>> additionalAttributes = new HashMap<>();
         // <'attribute:string', 'required:boolean'>
         HashMap<String, Boolean> attributes = new HashMap<>();
-        attributes.put("data_category", false);
-        attributes.put("data_format", false);
+        attributes.put("data_category", true);
+        attributes.put("data_format", true);
         attributes.put("data_type", true);
-        attributes.put("experimental_strategy", false);
+        attributes.put("experimental_strategy", true);
         attributes.put("file_id", true);
-        attributes.put("file_name", false);
-        attributes.put("file_size", false);
-        attributes.put("platform", false);
-        attributes.put("analysis.analysis_id", false);
-        attributes.put("analysis.workflow_link", false);
-        attributes.put("analysis.workflow_type", false);
-        attributes.put("cases.case_id", false);
+        attributes.put("file_name", true);
+        attributes.put("file_size", true);
+        attributes.put("platform", true);
+        attributes.put("analysis.analysis_id", true);
+        attributes.put("analysis.workflow_link", true);
+        attributes.put("analysis.workflow_type", true);
+        attributes.put("cases.case_id", true);
         attributes.put("cases.disease_type", true);
-        attributes.put("cases.primary_site", false);
-        attributes.put("cases.demographic.year_of_birth", false);
-        attributes.put("cases.project.program.program_id", false);
-        attributes.put("cases.project.program.name", false);
+        attributes.put("cases.primary_site", true);
+        attributes.put("cases.demographic.year_of_birth", true);
+        attributes.put("cases.project.program.program_id", true);
+        attributes.put("cases.project.program.name", true);
                 
         // other gdc attributes
-        attributes.put("cases.submitter_id", false);
+        attributes.put("cases.submitter_id", true);
         attributes.put("cases.samples.tumor_descriptor", false);
         attributes.put("cases.samples.tissue_type", false);
         //attributes.put("cases.samples.sample_type", false);
