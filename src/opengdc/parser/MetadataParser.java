@@ -235,6 +235,7 @@ public class MetadataParser extends BioParser {
 
     private ArrayList<HashMap<String, String>> aggregateSameDataTypeInfo(ArrayList<HashMap<String, String>> files_info, ArrayList<String> aggregatedAdditionalAttributes) {
         HashMap<String, ArrayList<HashMap<String, String>>> aggregated = new HashMap<>();
+        String platform_tmp = "";
         for (HashMap<String, String> file_info: files_info) {
             if (file_info != null) {
                 if (file_info.containsKey("data_type")) {
@@ -244,6 +245,10 @@ public class MetadataParser extends BioParser {
                         values = aggregated.get(data_type);
                     values.add(file_info);
                     aggregated.put(data_type, values);
+                    if (data_type.trim().toLowerCase().equals("aligned reads")) {
+                        if (file_info.containsKey("platform"))
+                            platform_tmp = file_info.get("platform");
+                    }
                 }
             }
         }
@@ -265,6 +270,18 @@ public class MetadataParser extends BioParser {
                     }
                 }
             }
+
+            // platform control
+            // if platform does not exist or is empty
+            // set the same platform of the Aligned Reads
+            if (!tmp.containsKey("platform"))
+                tmp.put("platform", platform_tmp);
+            else {
+                if (tmp.get("platform").trim().equals(""))
+                    tmp.put("platform", platform_tmp);
+            }
+            
+            // populate compressedMap
             compressedMap.add(tmp);
         }
 

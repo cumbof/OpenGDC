@@ -174,6 +174,9 @@ public class CreateMethFreqTable {
                 line = line.substring(0, line.length()-1);
                 out.println(line);
             }
+            
+            out.close();
+            fos.close();
         }
         catch (Exception e) {
             e.printStackTrace();
