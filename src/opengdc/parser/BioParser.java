@@ -100,12 +100,14 @@ public abstract class BioParser {
     public String getOpenGDCSuffix(String dataType, boolean hash) {
         if (!hash) {
             String suffix_id = "";
-            if(dataType.equals("Aggregated Somatic Mutation")) suffix_id= "agsm";
-            else if(dataType.equals("Annotated Somatic Mutation")) suffix_id= "ansm";
+            if (dataType.equals("Aggregated Somatic Mutation")) 
+                suffix_id= "agsm";
+            else if (dataType.equals("Annotated Somatic Mutation")) 
+                suffix_id= "ansm";
             else{
-            String[] dataType_split = dataType.trim().toLowerCase().split(" ");
-            for (String w: dataType_split)
-                suffix_id += w.substring(0, 1);
+                String[] dataType_split = dataType.trim().toLowerCase().split(" ");
+                for (String w: dataType_split)
+                    suffix_id += w.substring(0, 1);
             }
             return suffix_id;
         }
