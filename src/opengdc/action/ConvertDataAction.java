@@ -46,6 +46,7 @@ public class ConvertDataAction extends Action {
         switch (dataType.toLowerCase()) {
             case "clinical and biospecimen supplements":
                 parser = new MetadataParser();
+                format = "bed."+format;
                 break;
             /*case "clinical supplement":
                 parser = new MetadataParser();
