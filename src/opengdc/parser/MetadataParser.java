@@ -350,7 +350,7 @@ public class MetadataParser extends BioParser {
         
         /******* exp_metadata_url *******/
         values = new HashMap<>();
-        values.put("value", Settings.getOpenGDCFTPRepoProgram(program, false)+disease.trim().toLowerCase()+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.trim().toLowerCase())+"/"+aliquot_uuid.trim().toLowerCase()+"-"+suffix_id+"."+this.getFormat());
+        values.put("value", Settings.getOpenGDCFTPRepoProgram(program, false)+disease.trim().toLowerCase()+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.trim().toLowerCase())+"/"+aliquot_uuid.trim().toLowerCase()+"-"+suffix_id+"."+Settings.getOpenGDCFTPConvertedDataFormat()+"."+this.getFormat());
         values.put("required", true);
         additional_attributes.put(attributes_prefix+category_separator+"exp_metadata_url", values);
                 
@@ -437,8 +437,8 @@ public class MetadataParser extends BioParser {
                 
         // other gdc attributes
         attributes.put("cases.submitter_id", true);
-        attributes.put("cases.samples.tumor_descriptor", false);
-        attributes.put("cases.samples.tissue_type", false);
+        //attributes.put("cases.samples.tumor_descriptor", false);
+        //attributes.put("cases.samples.tissue_type", false);
         //attributes.put("cases.samples.sample_type", false);
         //attributes.put("cases.samples.submitter_id", false);
         //attributes.put("cases.samples.sample_id", false);
@@ -467,11 +467,12 @@ public class MetadataParser extends BioParser {
     
     private String getTissueStatus(String tissue_id) {
         try {
-            if (tissue_id.startsWith("0"))
+            int tissue_id_int = Integer.parseInt(tissue_id);
+            if ((tissue_id_int>0 && tissue_id_int<10) || tissue_id_int==40)
                 return "tumoral";
-            else if (tissue_id.startsWith("1"))
+            else if ( tissue_id_int>9 && tissue_id_int<15)
                 return "normal";
-            else if (tissue_id.startsWith("2"))
+            else if (tissue_id_int == 20)
                 return "control";
             else
                 return "undefined";
