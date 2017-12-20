@@ -65,6 +65,8 @@ public class MetadataParser extends BioParser {
                         root.setRoot();
                         root = convertMapToIndexedTree(metadata_from_xml, root);
                         searchForAliquots(root);
+                        HashMap<String, String> admin_metadata_map = extractAdminInfo(MetadataHandler.getDataMap(metadata_from_xml, null));
+
                         
                         HashMap<String, HashMap<String, String>> aliquot2attributes = new HashMap<>();
                         for (XMLNode aliquot: aliquotNodes) {
@@ -73,6 +75,7 @@ public class MetadataParser extends BioParser {
                                 HashMap<String, String> aliquotMeta = aliquot.getAttributes();
                                 HashMap<String, String> parentMeta = extractParentMetadata(aliquot.getParent(), new HashMap<>());
                                 aliquotMeta.putAll(parentMeta);
+                                aliquotMeta.putAll(admin_metadata_map);
                                 aliquot2attributes.put(aliquot_uuid, aliquotMeta);
                             }
                         }
@@ -231,6 +234,17 @@ public class MetadataParser extends BioParser {
         }
         
         return 0;
+    }
+
+    private HashMap<String, String> extractAdminInfo(HashMap<String, String> dataMap) {
+        HashMap<String, String> admin_map = new HashMap<String, String>();
+
+        for(String key: dataMap.keySet()){
+            if(key.contains("admin"))
+                admin_map.put(key, dataMap.get(key));
+        }
+
+        return admin_map;
     }
 
     private ArrayList<HashMap<String, String>> aggregateSameDataTypeInfo(ArrayList<HashMap<String, String>> files_info, ArrayList<String> aggregatedAdditionalAttributes) {
