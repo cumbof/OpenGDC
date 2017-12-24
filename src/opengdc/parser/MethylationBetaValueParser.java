@@ -58,7 +58,7 @@ public class MethylationBetaValueParser extends BioParser {
                     HashSet<String> attributes = new HashSet<>();
                     String aliquot_id_path = "cases.samples.portions.analytes.aliquots.aliquot_id";
                     attributes.add(aliquot_id_path);
-                    HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("files.file_id", file_uuid, attributes, 0).get(0);
+                    HashMap<String, String> file_info = GDCQuery.retrieveExpInfoFromAttribute("files.file_id", file_uuid, attributes, 0, 0, null).get(0);
                     String aliquot_uuid = "";
                     if (file_info != null)
                         if (file_info.containsKey(aliquot_id_path))

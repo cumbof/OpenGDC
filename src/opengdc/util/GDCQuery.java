@@ -41,12 +41,12 @@ public class GDCQuery {
     
     
     /*
-        Result window is too large, from + size must be less than or equal to: [100000000] but was [2147483648]. 
+        Result window is too large, from + size must be less than or equal to: [10000] but was [2147483648]. 
         See the scroll api for a more efficient way to request large data sets. 
         This limit can be set by changing the [index.max_result_window] index level setting.
     */
     //private static final int SIZE_LIMIT = Integer.MAX_VALUE;
-    private static final int SIZE_LIMIT = 99999999; // 100000000 starting from 0 -> 99999999
+    private static final int SIZE_LIMIT = 10000; // 10000 starting from 0 -> 9999
     //private static final String FIELDS = "\"file_id,file_name,cases.submitter_id,cases.case_id,data_category,data_type,cases.samples.tumor_descriptor,cases.samples.tissue_type,cases.samples.sample_type,cases.samples.submitter_id,cases.samples.sample_id,cases.samples.portions.analytes.aliquots.aliquot_id,cases.samples.portions.analytes.aliquots.submitter_id\"";
     //private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&fields="+FIELDS+"&filters=";
     private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&filters=";
@@ -243,11 +243,12 @@ public class GDCQuery {
             - files.file_id
             - cases.samples.portions.analytes.aliquots.aliquot_id
     */
-    public static ArrayList<HashMap<String, String>> retrieveExpInfoFromAttribute(String field, String value, HashSet<String> attributes, int recursive_iteration) {
+    public static ArrayList<HashMap<String, String>> retrieveExpInfoFromAttribute(String field, String value, HashSet<String> attributes, int recursive_iteration, int from, ArrayList<HashMap<String, String>> info) {
         if (attributes!=null) {
             if (!attributes.isEmpty()) {
                 try {
-                    ArrayList<HashMap<String, String>> info = new ArrayList<>();
+                    if (info == null)
+                        info = new ArrayList<>();
                     //String fields = "\"file_id,file_name,cases.submitter_id,cases.case_id,data_category,data_type,cases.samples.tumor_descriptor,cases.samples.tissue_type,cases.samples.sample_type,cases.samples.submitter_id,cases.samples.sample_id,cases.samples.portions.analytes.aliquots.aliquot_id,cases.samples.portions.analytes.aliquots.submitter_id,experimental_strategy,platform,analysis.workflow_link,data_format,file_size\"";
                     //String fields = "\"";
                     String fields = "\",";
@@ -296,7 +297,11 @@ public class GDCQuery {
                     Object data_node_obj = json_data.get("data");
                     HashMap<String, Object> root_node = (HashMap<String, Object>)data_node_obj;
                     ArrayList<Object> hits_node = (ArrayList<Object>)root_node.get("hits");
-
+                    
+                    HashMap<String, Object> pagination_node = (HashMap<String, Object>)root_node.get("pagination");
+                    int total = (int)pagination_node.get("total");
+                    System.err.println("pagination.total: "+total);
+                    
                     for (Object node: hits_node) {
                         HashMap<String, String> data_node = new HashMap<>();
                         for (String attribute: attributes) {
@@ -304,18 +309,23 @@ public class GDCQuery {
                             String searchForKey = attribute_split[attribute_split.length-1];
                             String val = searchFor(searchForKey, node);
                             //info.put(attribute, val!=null ? val : "");
-                            data_node.put(attribute, val!=null ? val : "");
+                            data_node.put(attribute, val!=null ? val : "");  
                         }
                         info.add(data_node);
                     }
 
                     conn.disconnect();
-                    return info;
+                    
+                    if ((total - ((recursive_iteration+1)*SIZE_LIMIT)) > 0) {
+                        from = ((recursive_iteration+1)*SIZE_LIMIT)+1;
+                        return retrieveExpInfoFromAttribute(field, value, attributes, recursive_iteration, from, info);
+                    }
+                    else return info;
                 }
                 catch (IOException e) {
                     recursive_iteration++;
                     if (recursive_iteration < recursive_limit)
-                        return retrieveExpInfoFromAttribute(field, value, attributes, recursive_iteration);
+                        return retrieveExpInfoFromAttribute(field, value, attributes, recursive_iteration, from, info);
                     else
                         e.printStackTrace();
                 }
