@@ -117,6 +117,16 @@ public class MetadataHandler {
         return result;
     }
     
+    public static HashMap<String, String> extractAdminInfo(HashMap<String, Object> xml_map) {
+        HashMap<String, String> admin_map = new HashMap<>();
+        HashMap<String, String> dataMap = getDataMap(xml_map, null);
+        for (String key: dataMap.keySet()){
+            if (key.contains("admin"))
+                admin_map.put(key, dataMap.get(key));
+        }
+        return admin_map;
+    }
+    
     public static HashMap<String, String> getDataMap(HashMap<String, Object> map, HashMap<String, String> dataMap) {
         if (dataMap == null)
             dataMap = new HashMap<>();

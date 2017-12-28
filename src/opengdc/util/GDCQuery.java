@@ -52,7 +52,7 @@ public class GDCQuery {
     private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&filters=";
     private static final String BASE_DOWNLOAD_URL = "https://gdc-api.nci.nih.gov/data/";
     private static String last_query_file_path = "NA";
-    private static final int recursive_limit = 10;
+    private static final int RECURSIVE_LIMIT = 10;
     
     public static String getLastQueryFilePath() {
         return last_query_file_path;
@@ -120,7 +120,7 @@ public class GDCQuery {
         }
         catch (IOException e) {
             recursive_iteration++;
-            if (recursive_iteration < recursive_limit)
+            if (recursive_iteration < RECURSIVE_LIMIT)
                 query(disease, dataType, recursive_iteration++);
             else
                 e.printStackTrace();
@@ -228,7 +228,7 @@ public class GDCQuery {
         }
         catch (IOException e) {
             recursive_iteration++;
-            if (recursive_iteration < recursive_limit)
+            if (recursive_iteration < RECURSIVE_LIMIT)
                 downloadFile(uuid, outFolderPath, fileName, requestRelated, recursive_iteration);
             else
                 e.printStackTrace();
@@ -300,7 +300,7 @@ public class GDCQuery {
                     
                     HashMap<String, Object> pagination_node = (HashMap<String, Object>)root_node.get("pagination");
                     int total = (int)pagination_node.get("total");
-                    System.err.println("pagination.total: "+total);
+                    //System.err.println("pagination.total: "+total);
                     
                     for (Object node: hits_node) {
                         HashMap<String, String> data_node = new HashMap<>();
@@ -324,7 +324,7 @@ public class GDCQuery {
                 }
                 catch (IOException e) {
                     recursive_iteration++;
-                    if (recursive_iteration < recursive_limit)
+                    if (recursive_iteration < RECURSIVE_LIMIT)
                         return retrieveExpInfoFromAttribute(field, value, attributes, recursive_iteration, from, info);
                     else
                         e.printStackTrace();

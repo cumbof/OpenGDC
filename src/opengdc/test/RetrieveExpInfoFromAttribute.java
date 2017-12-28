@@ -24,7 +24,7 @@ public class RetrieveExpInfoFromAttribute {
         ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes.keySet());
         Collections.sort(additional_attributes_sorted);
         for (String metakey: additional_attributes_sorted) {
-            ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0);
+            ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
             System.err.println("files_info: "+files_info.size());
             if (!files_info.isEmpty()) {
                 for (HashMap<String, String> file_info: files_info) {
