@@ -14,7 +14,6 @@ import opengdc.Settings;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
@@ -29,7 +28,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -51,8 +49,8 @@ public class GDCQuery {
     //private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&fields="+FIELDS+"&filters=";
     private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&filters=";
     private static final String BASE_DOWNLOAD_URL = "https://gdc-api.nci.nih.gov/data/";
-    private static String last_query_file_path = "NA";
-    private static final int RECURSIVE_LIMIT = 10;
+    private static String last_query_file_path = null;
+    private static final int RECURSIVE_LIMIT = 100;
     
     public static String getLastQueryFilePath() {
         return last_query_file_path;
@@ -118,15 +116,12 @@ public class GDCQuery {
             
             last_query_file_path = Settings.getTmpDir() + query_file_name;
         }
-        catch (IOException e) {
+        catch (Exception e) {
             recursive_iteration++;
             if (recursive_iteration < RECURSIVE_LIMIT)
                 query(disease, dataType, recursive_iteration++);
             else
                 e.printStackTrace();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
         }
     }
     
@@ -200,7 +195,7 @@ public class GDCQuery {
                 data.put(key, values);
             }
         }
-        catch (IOException | JSONException e) {
+        catch (Exception e) {
             e.printStackTrace();
         }
         return data;
@@ -226,15 +221,12 @@ public class GDCQuery {
             fos.close();
             rbc.close();
         }
-        catch (IOException e) {
+        catch (Exception e) {
             recursive_iteration++;
             if (recursive_iteration < RECURSIVE_LIMIT)
                 downloadFile(uuid, outFolderPath, fileName, requestRelated, recursive_iteration);
             else
                 e.printStackTrace();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
         }
     }
     
@@ -322,20 +314,18 @@ public class GDCQuery {
                     }
                     else return info;
                 }
-                catch (IOException e) {
+                catch (Exception e) {
                     recursive_iteration++;
                     if (recursive_iteration < RECURSIVE_LIMIT)
                         return retrieveExpInfoFromAttribute(field, value, attributes, recursive_iteration, from, info);
-                    else
+                    else {
                         e.printStackTrace();
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
+                        return new ArrayList<>();
+                    }
                 }
             }
         }
-        return null;
+        return new ArrayList<>();
     }
     
     //public static void main(String[] args) {
