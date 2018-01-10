@@ -43,14 +43,27 @@ public class GDCData {
         program2tumor2datatype = new HashMap<>();
         program2tumor2datatype.put("TARGET", new HashMap<>());
         program2tumor2datatype.put("TCGA", new HashMap<>());
+        program2tumor2datatype.put("FM", new HashMap<>());
+        
+        HashSet<String> dataTypes;
+        HashMap<String, HashSet<String>> tumor2dataType;
+        
+        /** FM **/
+        
+        dataTypes = new HashSet<>();
+        dataTypes.add("Biospecimen Supplement");
+        dataTypes.add("Clinical Supplement");        
+        tumor2dataType = program2tumor2datatype.get("FM");
+        tumor2dataType.put("FM-AD", dataTypes);
+        program2tumor2datatype.put("FM", tumor2dataType);
         
         /** TARGET **/
         
-        HashSet<String> dataTypes = new HashSet<>();
+        dataTypes = new HashSet<>();
         dataTypes.add("Gene Expression Quantification");
         dataTypes.add("Biospecimen Supplement");
         dataTypes.add("Clinical Supplement");        
-        HashMap<String, HashSet<String>> tumor2dataType = program2tumor2datatype.get("TARGET");
+        tumor2dataType = program2tumor2datatype.get("TARGET");
         tumor2dataType.put("TARGET-NBL", dataTypes);
         program2tumor2datatype.put("TARGET", tumor2dataType);
         

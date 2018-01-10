@@ -636,10 +636,6 @@ public class GUI extends javax.swing.JFrame {
                         args[5] = String.valueOf(jCheckBox2.isSelected());
                     }
 
-                    // auto focus on Log tab
-                    int tab_index = jTabbedPane1.indexOfTab("Log");
-                    jTabbedPane1.setSelectedIndex(tab_index);
-                    
                     CONTROLLER.execute(args);
                 }
             };
@@ -898,10 +894,6 @@ public class GUI extends javax.swing.JFrame {
                     args[2] = jComboBox6.getSelectedItem().toString();  // Disease
                     args[3] = jComboBox7.getSelectedItem().toString();  // Data type
                     args[4] = jComboBox8.getSelectedItem().toString();  // Format
-                    
-                    // auto focus on Log tab
-                    int tab_index = jTabbedPane1.indexOfTab("Log");
-                    jTabbedPane1.setSelectedIndex(tab_index);
                     
                     CONTROLLER.execute(args);
                 }

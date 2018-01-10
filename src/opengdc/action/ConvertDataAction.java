@@ -17,7 +17,9 @@ import opengdc.parser.CopyNumberSegmentParser;
 import opengdc.parser.GeneExpressionQuantificationParser;
 import opengdc.parser.IsoformExpressionQuantificationParser;
 import opengdc.parser.MaskedSomaticMutationParser;
-import opengdc.parser.MetadataParser;
+import opengdc.parser.MetadataParserTSV;
+import opengdc.parser.MetadataParserXLSX;
+import opengdc.parser.MetadataParserXML;
 import opengdc.parser.MethylationBetaValueParser;
 import opengdc.parser.MiRNAExpressionQuantificationParser;
 
@@ -51,7 +53,19 @@ public class ConvertDataAction extends Action {
         BioParser parser;
         switch (dataType.toLowerCase()) {
             case "clinical and biospecimen supplements":
-                parser = new MetadataParser();
+                switch (program.toLowerCase().trim()) {
+                    case "tcga":
+                        parser = new MetadataParserXML();
+                        break;
+                    case "target":
+                        parser = new MetadataParserXLSX();
+                        break;
+                    case "fm":
+                        parser = new MetadataParserTSV();
+                        break;
+                    default:
+                        parser = null;
+                }
                 break;
             /*case "clinical supplement":
                 parser = new MetadataParser();
@@ -84,9 +98,14 @@ public class ConvertDataAction extends Action {
                 parser = null;
                 break;
         }
-        parser.setFormat(format.toLowerCase());
-        parser.setLogger(logPane);
-        int exit_code = parser.convert(program, disease, dataType, input_path, output_path);
+        
+        int exit_code = -1;
+        
+        if (parser != null) {
+            parser.setFormat(format.toLowerCase());
+            parser.setLogger(logPane);
+            exit_code = parser.convert(program, disease, dataType, input_path, output_path);
+        }
         
         System.err.println("\n" + "done with exit code " + exit_code + "\n\n" + "#####################" + "\n\n");
         GUI.appendLog(logPane, "\n" + "done with exit code " + exit_code + "\n\n" + "#####################" + "\n\n");

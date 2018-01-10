@@ -9,8 +9,13 @@
  */
 package opengdc.util;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -114,6 +119,51 @@ public class MetadataHandler {
             t.printStackTrace();
         }
 
+        return result;
+    }
+    
+    public static HashMap<String, HashMap<String, String>> getTSVMap(String file_path, String indexBy) {
+        HashMap<String, HashMap<String, String>> result = new HashMap<>();
+        
+        try {
+            InputStream fstream = new FileInputStream(file_path);
+            DataInputStream in = new DataInputStream(fstream);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            int line_count = 0;
+            int index_position = 0;
+            String[] header = null;
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (!line.trim().equals("")) {
+                    String[] line_split = line.split("\t");
+                    if (line_count == 0) { // header
+                        header = line_split;
+                        for (int i=0; i<header.length; i++) {
+                            if (header[i].toLowerCase().trim().equals(indexBy)) {
+                                index_position = i;
+                                break;
+                            }
+                        }
+                    }
+                    else { // content
+                        String key = line_split[index_position];
+                        HashMap<String, String> values = new HashMap<>();
+                        for (int i=0; i<line_split.length; i++) {
+                            if (i != index_position)
+                                values.put(header[i], line_split[i]);
+                        }
+                        result.put(key, values);
+                    }
+                    line_count++;
+                }
+            }
+            br.close();
+            in.close();
+            fstream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
         return result;
     }
     

@@ -28,7 +28,9 @@ import opengdc.util.XMLNode;
  *
  * @author fabio
  */
-public class MetadataParser extends BioParser {
+public class MetadataParserXML extends BioParser {
+    
+    /** TCGA **/
 
     private ArrayList<XMLNode> aliquotNodes = new ArrayList<>();
     
@@ -98,7 +100,7 @@ public class MetadataParser extends BioParser {
     private ArrayList<String> convertProcedure(String program, String disease, String dataType, String outPath, HashMap<String, HashMap<String, String>> clinicalBigMap, HashMap<String, HashMap<String, String>> biospecimenBigMap, ArrayList<String> skippedAliquots) {
         ArrayList<String> currentSkippedAliquots = new ArrayList<>();
         // merge clinical and biospecimen info (plus additional metadata)
-        if (!clinicalBigMap.isEmpty() || !biospecimenBigMap.isEmpty()) {
+        if (!biospecimenBigMap.isEmpty()) {
             HashMap<String, HashMap<String, Boolean>> additional_attributes = getAdditionalAttributes();
             for (String aliquot_uuid: biospecimenBigMap.keySet()) {
                 try {
@@ -136,10 +138,6 @@ public class MetadataParser extends BioParser {
                             for (String metakey: additional_attributes_sorted) {
                                 ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
                                 ArrayList<HashMap<String, String>> aggregated_files_info = aggregateSameDataTypeInfo(files_info, getAggregatedAdditionalAttributes());
-
-                                if (files_info.isEmpty()) {
-
-                                }
 
                                 for (HashMap<String, String> file_info: aggregated_files_info) {
                                     if (file_info != null) {
@@ -467,7 +465,7 @@ public class MetadataParser extends BioParser {
         //attributes.put("cases.samples.sample_type", false);
         //attributes.put("cases.samples.submitter_id", false);
         //attributes.put("cases.samples.sample_id", false);
-        //attributes.put("cases.samples.portions.analytes.aliquots.aliquot_id", false);
+        attributes.put("cases.samples.portions.analytes.aliquots.aliquot_id", false);
         //attributes.put("cases.samples.portions.analytes.aliquots.submitter_id", false);
         
         additionalAttributes.put("manually_curated", attributes);

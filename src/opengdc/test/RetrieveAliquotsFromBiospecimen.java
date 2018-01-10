@@ -6,7 +6,7 @@
 package opengdc.test;
 
 import java.util.HashMap;
-import opengdc.parser.MetadataParser;
+import opengdc.parser.MetadataParserXML;
 import opengdc.util.MetadataHandler;
 import opengdc.util.XMLNode;
 
@@ -21,7 +21,7 @@ public class RetrieveAliquotsFromBiospecimen {
         HashMap<String, Object> metadata_from_xml = MetadataHandler.getXMLMap(biospecimen_absolute_path);
         XMLNode root = new XMLNode();
         root.setRoot();
-        root = MetadataParser.convertMapToIndexedTree(metadata_from_xml, root);
+        root = MetadataParserXML.convertMapToIndexedTree(metadata_from_xml, root);
         
         searchUUIDs(root);
     }
