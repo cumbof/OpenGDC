@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import opengdc.parser.MetadataParserXML;
 import opengdc.util.GDCQuery;
+import opengdc.util.MetadataHandler;
 
 /**
  *
@@ -20,7 +20,7 @@ public class RetrieveExpInfoFromAttribute {
     
     public static void main(String[] args) {
         String aliquot_uuid = "0AAB0660-F928-4EE0-86FB-583E0F3F42D2";
-        HashMap<String, HashMap<String, Boolean>> additional_attributes = MetadataParserXML.getAdditionalAttributes();
+        HashMap<String, HashMap<String, Boolean>> additional_attributes = MetadataHandler.getAdditionalAttributes();
         ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes.keySet());
         Collections.sort(additional_attributes_sorted);
         for (String metakey: additional_attributes_sorted) {

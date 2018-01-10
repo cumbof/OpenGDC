@@ -136,4 +136,26 @@ public abstract class BioParser {
         return null;
     }
     
+    public static String getTissueStatus(String tissue_id) {
+        try {
+            int tissue_id_int = Integer.parseInt(tissue_id);
+            if ((tissue_id_int>0 && tissue_id_int<10) || tissue_id_int==40)
+                return "tumoral";
+            else if ( tissue_id_int>9 && tissue_id_int<15)
+                return "normal";
+            else if (tissue_id_int == 20)
+                return "control";
+            else
+                return "undefined";
+        } catch (Exception e) {
+            return "undefined";
+        }
+    }
+    
+    public String checkForNAs(String metaValue) {
+        if (metaValue.trim().toLowerCase().equals("na") || metaValue.trim().toLowerCase().equals("null"))
+            return "";
+        else return metaValue;
+    }
+    
 }

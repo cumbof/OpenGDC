@@ -31,8 +31,6 @@ import opengdc.util.XMLNode;
 public class MetadataParserXML extends BioParser {
     
     /** TCGA **/
-
-    private ArrayList<XMLNode> aliquotNodes = new ArrayList<>();
     
     @Override
     public int convert(String program, String disease, String dataType, String inPath, String outPath) {
@@ -49,7 +47,7 @@ public class MetadataParserXML extends BioParser {
         File[] files = (new File(inPath)).listFiles();
         for (File f: files) {
             // remove all elements in aliquotNodes from previous iterations
-            aliquotNodes = new ArrayList<>();
+            MetadataHandler.emptyAliquotNodes();
             if (f.isFile()) {
                 String extension = FSUtils.getFileExtension(f);
                 if (getAcceptedInputFileFormats().contains(extension)) {
@@ -65,16 +63,16 @@ public class MetadataParserXML extends BioParser {
                     else if (f.getName().toLowerCase().contains("biospecimen")) {                        
                         XMLNode root = new XMLNode();
                         root.setRoot();
-                        root = convertMapToIndexedTree(metadata_from_xml, root);
-                        searchForAliquots(root);
+                        root = MetadataHandler.convertMapToIndexedTree(metadata_from_xml, root);
+                        MetadataHandler.searchForAliquots(root);
                         HashMap<String, String> admin_metadata_map = MetadataHandler.extractAdminInfo(metadata_from_xml);
                         
                         HashMap<String, HashMap<String, String>> aliquot2attributes = new HashMap<>();
-                        for (XMLNode aliquot: aliquotNodes) {
+                        for (XMLNode aliquot: MetadataHandler.getAliquotNodes()) {
                             String aliquot_uuid = MetadataHandler.findKey(aliquot.getAttributes(), "endsWith", "bcr_aliquot_uuid");
                             if (!aliquot_uuid.equals("")) {
                                 HashMap<String, String> aliquotMeta = aliquot.getAttributes();
-                                HashMap<String, String> parentMeta = extractParentMetadata(aliquot.getParent(), new HashMap<>());
+                                HashMap<String, String> parentMeta = MetadataHandler.extractParentMetadata(aliquot.getParent(), new HashMap<>());
                                 aliquotMeta.putAll(parentMeta);
                                 aliquotMeta.putAll(admin_metadata_map);
                                 aliquot2attributes.put(aliquot_uuid, aliquotMeta);
@@ -101,7 +99,7 @@ public class MetadataParserXML extends BioParser {
         ArrayList<String> currentSkippedAliquots = new ArrayList<>();
         // merge clinical and biospecimen info (plus additional metadata)
         if (!biospecimenBigMap.isEmpty()) {
-            HashMap<String, HashMap<String, Boolean>> additional_attributes = getAdditionalAttributes();
+            HashMap<String, HashMap<String, Boolean>> additional_attributes = MetadataHandler.getAdditionalAttributes();
             for (String aliquot_uuid: biospecimenBigMap.keySet()) {
                 try {
                     if (skippedAliquots.isEmpty() || skippedAliquots.contains(aliquot_uuid)) {
@@ -137,7 +135,7 @@ public class MetadataParserXML extends BioParser {
                             Collections.sort(additional_attributes_sorted);
                             for (String metakey: additional_attributes_sorted) {
                                 ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
-                                ArrayList<HashMap<String, String>> aggregated_files_info = aggregateSameDataTypeInfo(files_info, getAggregatedAdditionalAttributes());
+                                ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
 
                                 for (HashMap<String, String> file_info: aggregated_files_info) {
                                     if (file_info != null) {
@@ -178,7 +176,7 @@ public class MetadataParserXML extends BioParser {
                                         // create a suffix to append to the aliquot id
                                         String suffix_id = this.getOpenGDCSuffix(manually_curated_data_type, false);
 
-                                        HashMap<String, HashMap<String, Object>> additional_manually_curated = getAdditionalManuallyCuratedAttributes(program, disease, dataType, aliquot_uuid, biospecimenBigMap.get(aliquot_uuid), clinicalBigMap.get(patient_uuid), manually_curated, suffix_id);
+                                        HashMap<String, HashMap<String, Object>> additional_manually_curated = MetadataHandler.getAdditionalManuallyCuratedAttributes(program, disease, dataType, this.getFormat(), aliquot_uuid, biospecimenBigMap.get(aliquot_uuid), clinicalBigMap.get(patient_uuid), manually_curated, suffix_id);
                                         if (!additional_manually_curated.isEmpty()) {
                                             for (String attr: additional_manually_curated.keySet()) {
                                                 String attribute_parsed = FSUtils.stringToValidJavaIdentifier(attr);
@@ -255,223 +253,7 @@ public class MetadataParserXML extends BioParser {
         }
         return currentSkippedAliquots;
     }
-
-    private ArrayList<HashMap<String, String>> aggregateSameDataTypeInfo(ArrayList<HashMap<String, String>> files_info, ArrayList<String> aggregatedAdditionalAttributes) {
-        HashMap<String, ArrayList<HashMap<String, String>>> aggregated = new HashMap<>();
-        String platform_tmp = "";
-        for (HashMap<String, String> file_info: files_info) {
-            if (file_info != null) {
-                if (file_info.containsKey("data_type")) {
-                    String data_type = file_info.get("data_type");
-                    ArrayList<HashMap<String, String>> values = new ArrayList<>();
-                    if (aggregated.containsKey(data_type))
-                        values = aggregated.get(data_type);
-                    values.add(file_info);
-                    aggregated.put(data_type, values);
-                    if (data_type.trim().toLowerCase().equals("aligned reads")) {
-                        if (file_info.containsKey("platform"))
-                            platform_tmp = file_info.get("platform");
-                    }
-                }
-            }
-        }
-
-        ArrayList<HashMap<String,String>> compressedMap = new ArrayList<>();
-        for(String key: aggregated.keySet()){
-            HashMap<String, String> tmp = new HashMap<>();
-            ArrayList<HashMap<String, String>> mapList = aggregated.get(key);
-            for (HashMap<String, String> map: mapList){
-                for (String attribute: map.keySet()){
-                    if (!tmp.containsKey(attribute))
-                        tmp.put(attribute, map.get(attribute));
-                    else {
-                        if (aggregatedAdditionalAttributes.contains(attribute)) {
-                            String value = tmp.get(attribute);
-                            value = value + "," + map.get(attribute);
-                            tmp.put(attribute, value);
-                        }
-                    }
-                }
-            }
-
-            // platform control
-            // if platform does not exist or is empty
-            // set the same platform of the Aligned Reads
-            if (!tmp.containsKey("platform"))
-                tmp.put("platform", platform_tmp);
-            else {
-                if (tmp.get("platform").trim().equals(""))
-                    tmp.put("platform", platform_tmp);
-            }
-            
-            // populate compressedMap
-            compressedMap.add(tmp);
-        }
-
-        return compressedMap;
-    }
     
-    // the attributes in this methods are all required 
-    private HashMap<String, HashMap<String, Object>> getAdditionalManuallyCuratedAttributes(String program, String disease, String dataType, String aliquot_uuid, HashMap<String, String> biospecimen_attributes, HashMap<String, String> clinical_attributes, HashMap<String, String> manually_curated, String suffix_id) {
-        String attributes_prefix = "manually_curated";
-        String category_separator = "__";
-        
-        /******* tissue_status *******/
-        // retrieve 'manually_curated__tissue_status' from 'biospecimen__bio__sample_type_id'
-        HashMap<String, HashMap<String, Object>> additional_attributes = new HashMap<>();
-        String tissue_id = "";
-        for (String bio_attr: biospecimen_attributes.keySet()) {
-            if (bio_attr.trim().toLowerCase().contains("sample_type_id")) {
-                tissue_id = biospecimen_attributes.get(bio_attr);
-                break;
-            }
-        }
-        HashMap<String, Object> values = new HashMap<>();
-        String tissue_status = "";
-        if (!tissue_id.trim().equals(""))
-            tissue_status = getTissueStatus(tissue_id);
-        values.put("value", tissue_status);
-        values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"tissue_status", values);
-        
-        /******* exp_data_bed_url *******/
-        values = new HashMap<>();
-        String expDataType = "";
-        for (String man_attr: manually_curated.keySet()) {
-            if (man_attr.trim().toLowerCase().contains("data_type")) {
-                expDataType = manually_curated.get(man_attr);
-                break;
-            }
-        }
-        if (!expDataType.trim().equals("")) {
-            if (GDCData.getGDCData2FTPFolderName().containsKey(expDataType.trim().toLowerCase())) {
-                String opengdc_data_folder_name = GDCData.getGDCData2FTPFolderName().get(expDataType.trim().toLowerCase());
-                expDataType = Settings.getOpenGDCFTPRepoProgram(program, false)+disease.trim().toLowerCase()+"/"+opengdc_data_folder_name+"/"+aliquot_uuid.trim().toLowerCase()+"-"+suffix_id+"."+Settings.getOpenGDCFTPConvertedDataFormat();
-            }
-            else expDataType = "";
-        }
-        values.put("value", expDataType);
-        values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"exp_data_"+Settings.getOpenGDCFTPConvertedDataFormat()+"_url", values);
-        
-        /******* opengdc_id *******/
-        values = new HashMap<>();
-        String opengdcId = "";
-        opengdcId = aliquot_uuid.trim().toLowerCase()+"-"+suffix_id;
-        values.put("value", opengdcId);
-        values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"opengdc_id", values);
-
-        /******* data_format *******/
-        values = new HashMap<>();
-        String data_format = "";
-        if (!expDataType.trim().equals(""))
-            data_format = Settings.getOpenGDCFTPConvertedDataFormat().toUpperCase();
-        values.put("value", data_format);
-        values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"data_format", values);
-        
-        /******* exp_metadata_url *******/
-        values = new HashMap<>();
-        values.put("value", Settings.getOpenGDCFTPRepoProgram(program, false)+disease.trim().toLowerCase()+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.trim().toLowerCase())+"/"+aliquot_uuid.trim().toLowerCase()+"-"+suffix_id+"."+Settings.getOpenGDCFTPConvertedDataFormat()+"."+this.getFormat());
-        values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"exp_metadata_url", values);
-                
-        return additional_attributes;
-    }
-    
-    private HashMap<String, String> extractParentMetadata(XMLNode node, HashMap<String, String> meta) {
-        if (meta == null)
-            meta = new HashMap<>();
-        meta.putAll(node.getAttributes());
-        
-        if (node.getParent() == null)
-            return meta;
-        return extractParentMetadata(node.getParent(), meta);
-    }
-    
-    private void searchForAliquots(XMLNode root) {
-        if (root.getLabel().toLowerCase().trim().endsWith("bio:aliquot") && root.getAttributes().size()>0) {
-            aliquotNodes.add(root);
-            //System.err.println(root.getLabel() + "\t" + "attributes: " + root.getAttributes().size());
-        }
-        else {
-            if (root.hasChilds()) {
-                for (XMLNode child: root.getChilds())
-                    searchForAliquots(child);
-            }
-        }
-    }
-    
-    public static XMLNode convertMapToIndexedTree(HashMap<String, Object> map, XMLNode root) {
-        for (String k: map.keySet()) {
-            if (map.get(k) instanceof HashMap) {
-                XMLNode child = new XMLNode();
-                child.setLabel(k);
-                child.setParent(root);
-                root.addChild(convertMapToIndexedTree((HashMap<String, Object>)map.get(k), child));
-            }
-            else if (map.get(k) instanceof String) {
-                String value = (String)map.get(k);
-                root.addAttribute(k, value);
-            }
-        }
-        return root;
-    }
-    
-    private String checkForNAs(String metaValue) {
-        if (metaValue.trim().toLowerCase().equals("na") || metaValue.trim().toLowerCase().equals("null"))
-            return "";
-        else return metaValue;
-    }
-
-    public static ArrayList<String> getAggregatedAdditionalAttributes() {
-        ArrayList<String> attributes = new ArrayList<>();
-        attributes.add("file_id");
-        attributes.add("file_name");
-        attributes.add("file_size");
-        attributes.add("analysis.analysis_id");
-        attributes.add("analysis.workflow_type");
-
-        return attributes;
-    }
-    
-    public static HashMap<String, HashMap<String, Boolean>> getAdditionalAttributes() {
-        HashMap<String, HashMap<String, Boolean>> additionalAttributes = new HashMap<>();
-        // <'attribute:string', 'required:boolean'>
-        HashMap<String, Boolean> attributes = new HashMap<>();
-        attributes.put("data_category", true);
-        attributes.put("data_format", true);
-        attributes.put("data_type", true);
-        attributes.put("experimental_strategy", true);
-        attributes.put("file_id", true);
-        attributes.put("file_name", true);
-        attributes.put("file_size", true);
-        attributes.put("platform", true);
-        attributes.put("analysis.analysis_id", true);
-        attributes.put("analysis.workflow_link", true);
-        attributes.put("analysis.workflow_type", true);
-        attributes.put("cases.case_id", true);
-        attributes.put("cases.disease_type", true);
-        attributes.put("cases.primary_site", true);
-        attributes.put("cases.demographic.year_of_birth", true);
-        attributes.put("cases.project.program.program_id", true);
-        attributes.put("cases.project.program.name", true);
-                
-        // other gdc attributes
-        attributes.put("cases.submitter_id", true);
-        //attributes.put("cases.samples.tumor_descriptor", false);
-        //attributes.put("cases.samples.tissue_type", false);
-        //attributes.put("cases.samples.sample_type", false);
-        //attributes.put("cases.samples.submitter_id", false);
-        //attributes.put("cases.samples.sample_id", false);
-        attributes.put("cases.samples.portions.analytes.aliquots.aliquot_id", false);
-        //attributes.put("cases.samples.portions.analytes.aliquots.submitter_id", false);
-        
-        additionalAttributes.put("manually_curated", attributes);
-        return additionalAttributes;
-    }
-
     @Override
     public String[] getHeader() {
         return null;
@@ -486,22 +268,6 @@ public class MetadataParserXML extends BioParser {
     public void initAcceptedInputFileFormats() {
         this.acceptedInputFileFormats = new HashSet<>();
         this.acceptedInputFileFormats.add(".xml");
-    }
-    
-    private String getTissueStatus(String tissue_id) {
-        try {
-            int tissue_id_int = Integer.parseInt(tissue_id);
-            if ((tissue_id_int>0 && tissue_id_int<10) || tissue_id_int==40)
-                return "tumoral";
-            else if ( tissue_id_int>9 && tissue_id_int<15)
-                return "normal";
-            else if (tissue_id_int == 20)
-                return "control";
-            else
-                return "undefined";
-        } catch (Exception e) {
-            return "undefined";
-        }
     }
     
 }
