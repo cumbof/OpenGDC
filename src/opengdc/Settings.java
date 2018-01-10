@@ -20,6 +20,11 @@ public class Settings {
     // debug flag
     private static final boolean DEBUG = true;
     
+    // build number
+    private static final String BUILD_NUMBER = "0001";
+    public static String getBuildNumber() {
+        return BUILD_NUMBER;
+    }
     
     // ****************** tmp dir ******************
     private static final String TMP_DIR = "./appdata/tmp/";

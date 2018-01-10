@@ -36,7 +36,7 @@ public class MetadataParser extends BioParser {
     public int convert(String program, String disease, String dataType, String inPath, String outPath) {
         int acceptedFiles = FSUtils.acceptedFilesInFolder(inPath, getAcceptedInputFileFormats());
         System.err.println("Data Amount: " + acceptedFiles + " files" + "\n\n");
-        GUI.appendLog("Data Amount: " + acceptedFiles + " files" + "\n\n");
+        GUI.appendLog(this.getLogger(), "Data Amount: " + acceptedFiles + " files" + "\n\n");
         
         if (acceptedFiles == 0)
             return 1;
@@ -52,7 +52,7 @@ public class MetadataParser extends BioParser {
                 String extension = FSUtils.getFileExtension(f);
                 if (getAcceptedInputFileFormats().contains(extension)) {
                     System.err.println("Processing " + f.getName());
-                    GUI.appendLog("Processing " + f.getName() + "\n");
+                    GUI.appendLog(this.getLogger(), "Processing " + f.getName() + "\n");
                     
                     HashMap<String, Object> metadata_from_xml = MetadataHandler.getXMLMap(f.getAbsolutePath());
                     if (f.getName().toLowerCase().contains("clinical")) {                        

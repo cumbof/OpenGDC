@@ -33,7 +33,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
     public int convert(String program, String disease, String dataType, String inPath, String outPath) {
         int acceptedFiles = FSUtils.acceptedFilesInFolder(inPath, getAcceptedInputFileFormats());
         System.err.println("Data Amount: " + acceptedFiles + " files" + "\n\n");
-        GUI.appendLog("Data Amount: " + acceptedFiles + " files" + "\n\n");
+        GUI.appendLog(this.getLogger(), "Data Amount: " + acceptedFiles + " files" + "\n\n");
         
         if (acceptedFiles == 0)
             return 1;
@@ -75,7 +75,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
                         File fpkmuq_file = getRelatedFile(files, aliquot_uuid, fileUUID2aliquotUUID, "fpkm-uq.txt");
 
                         System.err.println("Processing " + aliquot_uuid + " (counts, FPKM, FPKM-UQ)");
-                        GUI.appendLog("Processing " + aliquot_uuid + " (counts, FPKM, FPKM-UQ)" + "\n");
+                        GUI.appendLog(this.getLogger(), "Processing " + aliquot_uuid + " (counts, FPKM, FPKM-UQ)" + "\n");
 
                         HashMap<String, String> ensembl2count = GeneExpressionQuantificationReader.getEnsembl2Value(f);
                         HashMap<String, String> ensembl2fpkm = GeneExpressionQuantificationReader.getEnsembl2Value(fpkm_file);
@@ -172,7 +172,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
                     }
                     else {
                         System.err.println("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
-                        GUI.appendLog("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
+                        GUI.appendLog(this.getLogger(), "ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
                     }
                 }
             }
@@ -182,7 +182,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
             // write header.schema
             try {
                 System.err.println("\n" + "Generating header.schema");
-                GUI.appendLog("\n" + "Generating header.schema" + "\n");
+                GUI.appendLog(this.getLogger(), "\n" + "Generating header.schema" + "\n");
                 Files.write((new File(outPath + "header.schema")).toPath(), (FormatUtils.generateDataSchema(this.getHeader(), this.getAttributesType())).getBytes("UTF-8"), StandardOpenOption.CREATE);
             }
             catch (Exception e) {

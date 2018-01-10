@@ -30,7 +30,7 @@ public class MaskedSomaticMutationParser extends BioParser {
     public int convert(String program, String disease, String dataType, String inPath, String outPath) {
         int acceptedFiles = FSUtils.acceptedFilesInFolder(inPath, getAcceptedInputFileFormats());
         System.err.println("Data Amount: " + acceptedFiles + " files" + "\n\n");
-        GUI.appendLog("Data Amount: " + acceptedFiles + " files" + "\n\n");
+        GUI.appendLog(this.getLogger(), "Data Amount: " + acceptedFiles + " files" + "\n\n");
         
         if (acceptedFiles == 0)
             return 1;
@@ -44,7 +44,7 @@ public class MaskedSomaticMutationParser extends BioParser {
                 String extension = FSUtils.getFileExtension(f);
                 if (getAcceptedInputFileFormats().contains(extension)) {
                     System.err.println("Processing " + f.getName());
-                    GUI.appendLog("Processing " + f.getName() + "\n");
+                    GUI.appendLog(this.getLogger(), "Processing " + f.getName() + "\n");
                     
                     HashSet<String> aliquot_uuids = MaskedSomaticMutationReader.getUUIDsFromMaf(f.getAbsolutePath());
                     for (String aliquot_uuid: aliquot_uuids) {
@@ -231,7 +231,7 @@ public class MaskedSomaticMutationParser extends BioParser {
             // write header.schema
             try {
                 System.err.println("\n" + "Generating header.schema");
-                GUI.appendLog("\n" + "Generating header.schema" + "\n");
+                GUI.appendLog(this.getLogger(), "\n" + "Generating header.schema" + "\n");
                 Files.write((new File(outPath + "header.schema")).toPath(), (FormatUtils.generateDataSchema(this.getHeader(), this.getAttributesType())).getBytes("UTF-8"), StandardOpenOption.CREATE);
             }
             catch (Exception e) {

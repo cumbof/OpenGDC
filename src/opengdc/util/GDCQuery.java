@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import javax.swing.JTextPane;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -201,14 +202,14 @@ public class GDCQuery {
         return data;
     }
     
-    public static void downloadFile(String uuid, String outFolderPath, String fileName, boolean requestRelated, int recursive_iteration) {
+    public static void downloadFile(String uuid, String outFolderPath, String fileName, boolean requestRelated, int recursive_iteration, JTextPane logPane) {
         try {
             String url = BASE_DOWNLOAD_URL + uuid;
             if (requestRelated)
                 url += "?related_files=true"; // why it does not always work?
             //System.err.println(url);
             System.err.println(uuid + "\t" + fileName);
-            GUI.appendLog(uuid + "\t" + fileName + "\n");
+            GUI.appendLog(logPane, uuid + "\t" + fileName + "\n");
             
             File outFile = new File(outFolderPath + fileName);
             if (outFile.exists())
@@ -224,7 +225,7 @@ public class GDCQuery {
         catch (Exception e) {
             recursive_iteration++;
             if (recursive_iteration < RECURSIVE_LIMIT)
-                downloadFile(uuid, outFolderPath, fileName, requestRelated, recursive_iteration);
+                downloadFile(uuid, outFolderPath, fileName, requestRelated, recursive_iteration, logPane);
             else
                 e.printStackTrace();
         }

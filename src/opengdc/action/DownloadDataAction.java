@@ -19,12 +19,15 @@ import java.nio.file.Files;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.HashMap;
 import java.util.HashSet;
+import javax.swing.JTextPane;
 
 /**
  *
  * @author fabio
  */
 public class DownloadDataAction extends Action {
+    
+    private JTextPane logPane = null;
 
     @Override
     public void execute(String[] args) {
@@ -37,8 +40,11 @@ public class DownloadDataAction extends Action {
         boolean autoremove = Boolean.valueOf(args[5]);
         String gdc_path = Settings.getOutputGDCFolder();
         
+        // create log window
+        logPane = GUI.createLogWindow();
+        
         System.err.println("Downloading GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Output Folder Path: " + gdc_path + "\n" + "Auto-extract: " + autoextract + "\n" + "Auto-remove: " + autoremove + "\n");
-        GUI.appendLog("Downloading GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Output Folder Path: " + gdc_path + "\n" + "Auto-extract: " + autoextract + "\n" + "Auto-remove: " + autoremove + "\n");
+        GUI.appendLog(logPane, "Downloading GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Output Folder Path: " + gdc_path + "\n" + "Auto-extract: " + autoextract + "\n" + "Auto-remove: " + autoremove + "\n");
         
         if (dataType.trim().toLowerCase().contains("clinical") || dataType.trim().toLowerCase().contains("biospecimen")) {
             if (dataType.trim().toLowerCase().contains("clinical"))
@@ -50,13 +56,13 @@ public class DownloadDataAction extends Action {
             retrieveData(disease, dataType, gdc_path, autoextract, autoremove);
         
         System.err.println("\n" + "done" + "\n\n" + "#####################" + "\n\n");
-        GUI.appendLog("\n" + "done" + "\n\n" + "#####################" + "\n\n");
+        GUI.appendLog(logPane, "\n" + "done" + "\n\n" + "#####################" + "\n\n");
     }
     
     private void retrieveData(String disease, String dataType, String gdc_path, boolean autoextract, boolean autoremove) {
         GDCQuery.query(disease, dataType, 0);
         HashMap<String, HashMap<String, String>> dataMap = GDCQuery.extractInfo(GDCQuery.getLastQueryFilePath());
-        GUI.appendLog("Data Amount: " + dataMap.size() + " files" + "\n\n");
+        GUI.appendLog(logPane, "Data Amount: " + dataMap.size() + " files" + "\n\n");
         
         // TODO activate progress bar
         
@@ -67,7 +73,7 @@ public class DownloadDataAction extends Action {
             for (String s: dataMap.get(uuid).keySet())
                 System.err.println(s + "\t" + dataMap.get(uuid).get(s));
             
-            GDCQuery.downloadFile(uuid, gdc_path, fileName, false, 0);
+            GDCQuery.downloadFile(uuid, gdc_path, fileName, false, 0, logPane);
             if (autoextract) {
                 HashSet<String> uncompressed_folders_path = new HashSet<>();
                 HashSet<String> experiments_path = new HashSet<>();

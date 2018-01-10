@@ -37,7 +37,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
     public int convert(String program, String disease, String dataType, String inPath, String outPath) {
         int acceptedFiles = FSUtils.acceptedFilesInFolder(inPath, getAcceptedInputFileFormats());
         System.err.println("Data Amount: " + acceptedFiles + " files" + "\n\n");
-        GUI.appendLog("Data Amount: " + acceptedFiles + " files" + "\n\n");
+        GUI.appendLog(this.getLogger(), "Data Amount: " + acceptedFiles + " files" + "\n\n");
         
         if (acceptedFiles == 0)
             return 1;
@@ -52,7 +52,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                 String extension = FSUtils.getFileExtension(f);
                 if (getAcceptedInputFileFormats().contains(extension)) {
                     System.err.println("Processing " + f.getName());
-                    GUI.appendLog("Processing " + f.getName() + "\n");
+                    GUI.appendLog(this.getLogger(), "Processing " + f.getName() + "\n");
                     
                     String file_uuid = f.getName().split("_")[0];
                     HashSet<String> attributes = new HashSet<>();
@@ -159,7 +159,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                     }
                     else {
                         System.err.println("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
-                        GUI.appendLog("ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
+                        GUI.appendLog(this.getLogger(), "ERROR: an error has occurred while retrieving the aliquot UUID for :" + file_uuid);
                     }
                 }
             }
@@ -169,7 +169,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
             // write header.schema
             try {
                 System.err.println("\n" + "Generating header.schema");
-                GUI.appendLog("\n" + "Generating header.schema" + "\n");
+                GUI.appendLog(this.getLogger(), "\n" + "Generating header.schema" + "\n");
                 Files.write((new File(outPath + "header.schema")).toPath(), (FormatUtils.generateDataSchema(this.getHeader(), this.getAttributesType())).getBytes("UTF-8"), StandardOpenOption.CREATE);
             }
             catch (Exception e) {

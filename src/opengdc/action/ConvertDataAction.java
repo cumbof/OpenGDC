@@ -9,6 +9,7 @@
  */
 package opengdc.action;
 
+import javax.swing.JTextPane;
 import opengdc.GUI;
 import opengdc.Settings;
 import opengdc.parser.BioParser;
@@ -26,6 +27,8 @@ import opengdc.parser.MiRNAExpressionQuantificationParser;
  */
 public class ConvertDataAction extends Action {
 
+    private JTextPane logPane = null;
+    
     @Override
     public void execute(String[] args) {
         // skip the first entry -> convert
@@ -37,8 +40,11 @@ public class ConvertDataAction extends Action {
         String input_path = Settings.getInputGDCFolder();
         String output_path = Settings.getOutputConvertedFolder();
         
+        // create log window
+        logPane = GUI.createLogWindow();
+        
         System.err.println("Converting GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Format: " + format + "\n" + "Input Folder Path: " + input_path + "\n" + "Output Folder Path: " + output_path + "\n");
-        GUI.appendLog("Converting GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Format: " + format + "\n" + "Input Folder Path: " + input_path + "\n" + "Output Folder Path: " + output_path + "\n");
+        GUI.appendLog(logPane, "Converting GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Format: " + format + "\n" + "Input Folder Path: " + input_path + "\n" + "Output Folder Path: " + output_path + "\n");
         
         // TODO activate progress bar
         
@@ -79,10 +85,11 @@ public class ConvertDataAction extends Action {
                 break;
         }
         parser.setFormat(format.toLowerCase());
+        parser.setLogger(logPane);
         int exit_code = parser.convert(program, disease, dataType, input_path, output_path);
         
         System.err.println("\n" + "done with exit code " + exit_code + "\n\n" + "#####################" + "\n\n");
-        GUI.appendLog("\n" + "done with exit code " + exit_code + "\n\n" + "#####################" + "\n\n");
+        GUI.appendLog(logPane, "\n" + "done with exit code " + exit_code + "\n\n" + "#####################" + "\n\n");
     }
     
 }

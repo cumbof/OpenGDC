@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import javax.swing.JTextPane;
 import javax.xml.bind.DatatypeConverter;
 import opengdc.util.FormatUtils;
 
@@ -27,6 +28,14 @@ import opengdc.util.FormatUtils;
 public abstract class BioParser {
     
     public HashSet<String> acceptedInputFileFormats = new HashSet<>();
+    
+    public JTextPane logPane = null;
+    public void setLogger(JTextPane pane) {
+        logPane = pane;
+    }
+    public JTextPane getLogger() {
+        return logPane;
+    }
     
     private String defaultFormat = "bed";
     public String getFormat() {
