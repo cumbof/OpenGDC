@@ -203,9 +203,10 @@ public class MetadataHandler {
 
                     ArrayList<String> header = new ArrayList<>();
                     int indexBy_position = 0;
-                    
+                                        
                     while (rows.hasNext()) {
-                        row= (XSSFRow)rows.next();
+                        row = (XSSFRow)rows.next();
+                                                
                         Iterator cells = row.cellIterator();
                         //String row_str = "";
                         HashMap<String, String> content_map = new HashMap<>();
@@ -231,8 +232,9 @@ public class MetadataHandler {
                                 for (CellRangeAddress mergedRegion: sheet.getMergedRegions()) {
                                     if (mergedRegion.isInRange(cell)) {
                                         cellIterations = mergedRegion.getNumberOfCells();
-                                        if (mergedRegion.containsRow(current_row-1))
-                                            cellIterations = cellIterations/2;
+                                        //if (mergedRegion.containsRow(current_row-1))
+                                            //cellIterations = cellIterations/2;
+                                        cellIterations = cellIterations / (((mergedRegion.getLastRow()+1) - (mergedRegion.getFirstRow()+1)) + 1);
                                         break;
                                     }
                                 }
@@ -240,12 +242,8 @@ public class MetadataHandler {
                                 if (current_row < header_rows) { //header
                                     for (int cell_iter=0; cell_iter<cellIterations; cell_iter++) {
                                         String prefix_header = "";
-                                        try { prefix_header = header.get(cell_index); }
-                                        catch (Exception e) { 
-                                            if (current_row == 1)
-                                                e.printStackTrace();
-                                            /* first line - prefix_header does not yet exist */ 
-                                        };
+                                        try { prefix_header = header.get(cell_index + cell_iter); }
+                                        catch (Exception e) { /* first line - prefix_header does not yet exist */ };
                                         String suffix_header = cellValue;
 
                                         String header_str = "";
@@ -261,17 +259,20 @@ public class MetadataHandler {
                                         //System.err.println(header_str + "\t" + cellIterations);
 
                                         if (header_str.toLowerCase().trim().equals(indexBy))
-                                            indexBy_position = cell_index;
+                                            indexBy_position = cell_index + cell_iter;
 
                                         try {
-                                            header.remove(cell_index);
-                                            header.add(cell_index, header_str);
+                                            header.remove(cell_index + cell_iter);
+                                            header.add(cell_index + cell_iter, header_str);
+                                            /*if (current_row == 1)
+                                                System.err.println(header_str);*/
                                         }
                                         catch (Exception e) {
                                             header.add(header_str);
                                         }
 
-                                        cell_index++;
+                                        //cell_index++;
+                                        cell_index += cellIterations;
                                     }
                                 }
                                 else { // content
@@ -281,10 +282,14 @@ public class MetadataHandler {
                                     cell_index++;
                                 }
                             }
+                            else
+                                cell_index++;
                         }
                         
-                        if (current_row >= header_rows) // content
-                            result.put(indexBy_value, content_map);
+                        if (current_row >= header_rows) { // content
+                            if (!indexBy_value.trim().equals(""))
+                                result.put(indexBy_value, content_map);
+                        }
                         //criteria_str += row_str;
                         current_row++;
                         //System.out.println();
@@ -514,7 +519,7 @@ public class MetadataHandler {
         //attributes.put("cases.samples.sample_type", false);
         //attributes.put("cases.samples.submitter_id", false);
         //attributes.put("cases.samples.sample_id", false);
-        attributes.put("cases.samples.portions.analytes.aliquots.aliquot_id", false);
+        //attributes.put("cases.samples.portions.analytes.aliquots.aliquot_id", false);
         //attributes.put("cases.samples.portions.analytes.aliquots.submitter_id", false);
         
         additionalAttributes.put("manually_curated", attributes);
