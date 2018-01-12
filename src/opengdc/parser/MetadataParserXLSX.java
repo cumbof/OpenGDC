@@ -51,11 +51,11 @@ public class MetadataParserXLSX extends BioParser {
                     
                     
                     if (f.getName().toLowerCase().contains("clinical")) {                        
-                        HashMap<String, HashMap<String, String>> metadata_from_tsv = MetadataHandler.getXLSXMap(f.getAbsolutePath(), ???);
+                        HashMap<String, HashMap<String, String>> metadata_from_tsv = MetadataHandler.getXLSXMap(f.getAbsolutePath(), "case usi");
                         clinicalBigMap.putAll(metadata_from_tsv);
                     }
                     else if (f.getName().toLowerCase().contains("biospecimen")) {                        
-                        HashMap<String, HashMap<String, String>> metadata_from_tsv = MetadataHandler.getXLSXMap(f.getAbsolutePath(), ???);
+                        HashMap<String, HashMap<String, String>> metadata_from_tsv = MetadataHandler.getXLSXMap(f.getAbsolutePath(), "case usi");
                         biospecimenBigMap.putAll(metadata_from_tsv);
                     }
                 }

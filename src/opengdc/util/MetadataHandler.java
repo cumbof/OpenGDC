@@ -18,11 +18,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import opengdc.Settings;
 import opengdc.parser.BioParser;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -174,29 +181,128 @@ public class MetadataHandler {
         // TO-DO
         // https://gist.github.com/madan712/3912272
         
-        /*InputStream ExcelFileToRead = new FileInputStream("C:/Test.xlsx");
-        XSSFWorkbook  wb = new XSSFWorkbook(ExcelFileToRead);
+        HashMap<String, HashMap<String, String>> result = new HashMap<>();
         
-        XSSFWorkbook test = new XSSFWorkbook(); 
-        XSSFSheet sheet = wb.getSheetAt(0);
-        XSSFRow row; 
-        XSSFCell cell;
-        
-        Iterator rows = sheet.rowIterator();
-        while (rows.hasNext()) {
-            row=(XSSFRow) rows.next();
-            Iterator cells = row.cellIterator();
-            while (cells.hasNext()) {
-                cell=(XSSFCell) cells.next();
-                if (cell.getCellType() == XSSFCell.CELL_TYPE_STRING)
-                    System.out.print(cell.getStringCellValue()+" ");
-                else if(cell.getCellType() == XSSFCell.CELL_TYPE_NUMERIC)
-                    System.out.print(cell.getNumericCellValue()+" ");
-                //else
-                    //U Can Handel Boolean, Formula, Errors
+        try {
+            InputStream ExcelFileToRead = new FileInputStream(file_path);
+            XSSFWorkbook wb = new XSSFWorkbook(ExcelFileToRead);
+
+            int sheets = wb.getNumberOfSheets();
+            for (int sheet_index=0; sheet_index<sheets; sheet_index++) {
+                XSSFSheet sheet = wb.getSheetAt(sheet_index);
+                
+                String sheet_name = sheet.getSheetName();
+                if (!sheet_name.toLowerCase().trim().contains("criteria")) { // skip criteria sheet
+                    XSSFRow row; 
+                    XSSFCell cell;
+                    Iterator rows = sheet.rowIterator();
+
+                    //String criteria_str = "";
+                    int header_rows = 2;
+                    int current_row = 0;
+
+                    ArrayList<String> header = new ArrayList<>();
+                    int indexBy_position = 0;
+                    
+                    while (rows.hasNext()) {
+                        row= (XSSFRow)rows.next();
+                        Iterator cells = row.cellIterator();
+                        //String row_str = "";
+                        HashMap<String, String> content_map = new HashMap<>();
+                        String indexBy_value = "";
+
+                        int cell_index = 0;
+                        while (cells.hasNext()) {
+                            cell = (XSSFCell)cells.next();
+                            
+                            String cellValue = "";
+                            if (cell.getCellTypeEnum() == CellType.STRING)
+                                cellValue = cell.getStringCellValue();
+                            else if (cell.getCellTypeEnum() == CellType.NUMERIC)
+                                cellValue = String.valueOf(cell.getNumericCellValue());
+                            
+                            if (!cellValue.equals("")) {
+                            
+                                //String cellValue = cell.getRawValue();
+                                //System.err.println(cellValue);
+
+                                // cell is in merged region?
+                                int cellIterations = 1;
+                                for (CellRangeAddress mergedRegion: sheet.getMergedRegions()) {
+                                    if (mergedRegion.isInRange(cell)) {
+                                        cellIterations = mergedRegion.getNumberOfCells();
+                                        if (mergedRegion.containsRow(current_row-1))
+                                            cellIterations = cellIterations/2;
+                                        break;
+                                    }
+                                }
+                                
+                                if (current_row < header_rows) { //header
+                                    for (int cell_iter=0; cell_iter<cellIterations; cell_iter++) {
+                                        String prefix_header = "";
+                                        try { prefix_header = header.get(cell_index); }
+                                        catch (Exception e) { 
+                                            if (current_row == 1)
+                                                e.printStackTrace();
+                                            /* first line - prefix_header does not yet exist */ 
+                                        };
+                                        String suffix_header = cellValue;
+
+                                        String header_str = "";
+                                        if (prefix_header.trim().equals("") && !suffix_header.trim().equals(""))
+                                            header_str = suffix_header;
+                                        else if (!prefix_header.trim().equals("") && suffix_header.trim().equals(""))
+                                            header_str = prefix_header;
+                                        else if (prefix_header.trim().equals(suffix_header.trim()))
+                                            header_str = prefix_header;
+                                        else if (!prefix_header.trim().equals("") && !suffix_header.trim().equals(""))
+                                            header_str = prefix_header+" "+suffix_header;
+
+                                        //System.err.println(header_str + "\t" + cellIterations);
+
+                                        if (header_str.toLowerCase().trim().equals(indexBy))
+                                            indexBy_position = cell_index;
+
+                                        try {
+                                            header.remove(cell_index);
+                                            header.add(cell_index, header_str);
+                                        }
+                                        catch (Exception e) {
+                                            header.add(header_str);
+                                        }
+
+                                        cell_index++;
+                                    }
+                                }
+                                else { // content
+                                    content_map.put(header.get(cell_index), cellValue);
+                                    if (cell_index == indexBy_position)
+                                        indexBy_value = cellValue;
+                                    cell_index++;
+                                }
+                            }
+                        }
+                        
+                        if (current_row >= header_rows) // content
+                            result.put(indexBy_value, content_map);
+                        //criteria_str += row_str;
+                        current_row++;
+                        //System.out.println();
+                    }
+
+                    /*if (!criteria_str.trim().equals("")) {
+                        HashMap<String, String> criteria_sheet = new HashMap<>();
+                        criteria_sheet.put("criteria", criteria_str);
+                        result.put(sheet_name, criteria_sheet);
+                    }*/
+                }
             }
-            System.out.println();
-        }*/
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return result;
     }
     
     public static HashMap<String, String> extractAdminInfo(HashMap<String, Object> xml_map) {
