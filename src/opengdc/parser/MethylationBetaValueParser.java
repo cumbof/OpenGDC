@@ -24,7 +24,6 @@ import java.util.List;
 import opengdc.GUI;
 import opengdc.integration.GeneNames;
 import opengdc.integration.Gencode;
-import opengdc.integration.IlluminaHumanMethylation;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
 import opengdc.util.GDCQuery;

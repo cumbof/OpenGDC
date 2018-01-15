@@ -100,18 +100,20 @@ public class FormatUtils {
     private static String strBED(ArrayList<String> values) {
         if (!values.isEmpty()) {
             String line = "";
-            for (String val: values)
-                line = line + val + BED_SEPARATOR;
+            for (int i=0; i<values.size()-1; i++)
+                line = line + values.get(i) + BED_SEPARATOR;
+            line = line + values.get(values.size()-1);
             return line + END_OF_LINE;
         }
         return "";
     }
-
+    
     private static String strCSV(ArrayList<String> values) {
         if (!values.isEmpty()) {
             String line = "";
-            for (String val: values)
-                line = line + val + CSV_SEPARATOR;
+            for (int i=0; i<values.size()-1; i++)
+                line = line + values.get(i) + CSV_SEPARATOR;
+            line = line + values.get(values.size()-1);
             return line + END_OF_LINE;
         }
         return "";
