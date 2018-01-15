@@ -1,5 +1,5 @@
 # OpenGDC
-OpenGDC is a Java tool for the automatic extraction and conversion in BED, GTF, CSV, and JSON format of all genomic experiments and clinical information from the Genomic Data Commons (GDC) portal [https://gdc.cancer.gov/](https://gdc.cancer.gov/).
+OpenGDC is an open-source Java tool for the automatic extraction and conversion in BED, GTF, CSV, and JSON format of all genomic experiments and clinical information from the Genomic Data Commons (GDC) portal [https://gdc.cancer.gov/](https://gdc.cancer.gov/).
 
 ## Notes for Contributors
 - Import OpenGDC in your IDE (NetBeans is recommended);
