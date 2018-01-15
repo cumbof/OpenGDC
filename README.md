@@ -1,23 +1,16 @@
 # OpenGDC
-OpenGDC is a Java tool for the automatic extraction and conversion in BED, GTF, CSV, and JSON format of all genomic experiments and clinical information from the Genomic Data Commons portal [https://gdc.cancer.gov/](https://gdc.cancer.gov/)
+OpenGDC is a Java tool for the automatic extraction and conversion in BED, GTF, CSV, and JSON format of all genomic experiments and clinical information from the Genomic Data Commons (GDC) portal [https://gdc.cancer.gov/](https://gdc.cancer.gov/).
 
-## Notes
-- Import OpenGDC as a NetBeans Project;
-- Remove ```Homo_sapiens.GRCh38.88.gff3.gz``` from package/ensembl/ folder
-- Remove ```GRCh38_data.txt``` from package/ncbi/ folder
-- Extract ```Homo_sapiens.GRCh38.77.gtf.gz``` inside package/ensembl/ folder before running the application;
-- Extract ```ref_GRCh38_top_level.gff3.gz``` inside package/ncbi/ folder before running the application;
-- Extract ```gencode.v22.annotation.gtf.zip``` inside package/gencode/ folder before running the application;
-- Set the "DEBUG" boolean variable to "false" in Settings class before exporting the project to the final JAR;
-- This project will be open source. Take it clean and comment the code in English.
+## Notes for Contributors
+- Import OpenGDC in your IDE (NetBeans is recommended);
+- Import all the libraries under the `libs` folder and subfolders;
+- Open a pull request with a description of your contribution;
+- Open an issue to highlight a problem or to propose a software improvement or a feature that has not been submitted as a pull request;
+- Please use the search feature before submitting an issue;
+- Remember that the project is open source. Take it clean and comment your contributions in English.
 
 ## Software web-page
 [http://bioinf.iasi.cnr.it/opengdc/](http://bioinf.iasi.cnr.it/opengdc/)
 
 ## Public data repository
 [ftp://bioinf.iasi.cnr.it/opengdc/](ftp://bioinf.iasi.cnr.it/opengdc/)
-
-## Team
-* Fabio Cumbo
-* Eleonora Cappelli
-* Emanuel Weitschek
