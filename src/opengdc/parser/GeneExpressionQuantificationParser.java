@@ -37,7 +37,8 @@ public class GeneExpressionQuantificationParser extends BioParser {
         
         if (acceptedFiles == 0)
             return 1;
-        
+
+        HashMap<File,File> error_outputFile2inputFile = new HashMap<File,File>();
         HashSet<String> filesPathConverted = new HashSet<>();
         
         // retrive all aliquot IDs
@@ -81,16 +82,35 @@ public class GeneExpressionQuantificationParser extends BioParser {
                         HashMap<String, String> ensembl2fpkm = GeneExpressionQuantificationReader.getEnsembl2Value(fpkm_file);
                         HashMap<String, String> ensembl2fpkmuq = GeneExpressionQuantificationReader.getEnsembl2Value(fpkmuq_file);
 
+                        ArrayList<File> filesInput_exception = new ArrayList<File>() ;
+                        if(ensembl2count.containsKey("error")){
+                            filesInput_exception.add(f);
+                            ensembl2count.remove("error");
+                        }
+                        if (ensembl2fpkm.containsKey("error")){
+                            filesInput_exception.add(fpkm_file);
+                            ensembl2fpkm.remove("error");
+                        }
+                        if (ensembl2fpkmuq.containsKey("error")){
+                            filesInput_exception.add(fpkmuq_file);
+                            ensembl2fpkmuq.remove("error");
+                        }
+
                         HashSet<String> ensembls = new HashSet<>();
                         ensembls.addAll(ensembl2count.keySet());
                         ensembls.addAll(ensembl2fpkm.keySet());
                         ensembls.addAll(ensembl2fpkmuq.keySet());
 
                         if (!ensembls.isEmpty()) {
+                            String filePath = "";
                             try {
                                 String suffix_id = this.getOpenGDCSuffix(dataType, false);
-                                String filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
+                                filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
                                 Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                                if(!filesInput_exception.isEmpty()){
+                                    for(File filewitherror: filesInput_exception)
+                                        error_outputFile2inputFile.put(filewitherror, new File(filePath));
+                                }
                                 /** store entries **/
                                 HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
                                 
@@ -177,6 +197,8 @@ public class GeneExpressionQuantificationParser extends BioParser {
                 }
             }
         }
+
+        printErrorFile(error_outputFile2inputFile);
         
         if (!filesPathConverted.isEmpty()) {
             // write header.schema

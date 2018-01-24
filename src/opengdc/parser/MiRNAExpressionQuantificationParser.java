@@ -42,6 +42,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
+        HashMap<File,File> error_inputFile2outputFile = new HashMap<File,File>();
         HashSet<String> filesPathConverted = new HashSet<>();
         
         HashMap<String, HashMap<String, String>> mirnaid2coordinates = MIRBase.getMirnaid2coordinates();
@@ -65,9 +66,10 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                             aliquot_uuid = file_info.get(aliquot_id_path);
                     
                     if (!aliquot_uuid.trim().equals("")) {
+                        String filePath = "";
                         try {
                             String suffix_id = this.getOpenGDCSuffix(dataType, false);
-                            String filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
+                            filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
                             Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
                             /** store entries **/
                             HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
@@ -154,6 +156,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                             filesPathConverted.add(filePath);
                         }
                         catch (Exception e) {
+                            error_inputFile2outputFile.put(f, new File(filePath));
                             e.printStackTrace();
                         }
                     }
@@ -164,6 +167,8 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
                 }
             }
         }
+        
+        printErrorFile(error_inputFile2outputFile);
         
         if (!filesPathConverted.isEmpty()) {
             // write header.schema

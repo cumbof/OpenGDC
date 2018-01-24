@@ -157,5 +157,21 @@ public abstract class BioParser {
             return "";
         else return metaValue;
     }
+
+    public void printErrorFile(HashMap<File,File> error_inputFile2outputFile){
+        for(File f : error_inputFile2outputFile.keySet())   {
+            File outputFile = error_inputFile2outputFile.get(f);
+            if(outputFile.length()== 0){
+                outputFile.delete();
+                GUI.appendLog(this.getLogger(),
+                        "\n The file "+ outputFile.getPath() + " has been deleted because it is empty.\n Check the input file "+f.getPath()+" because it could be corrupted");  
+            }
+            else{
+
+                GUI.appendLog(this.getLogger(),
+                        "\n The file "+ outputFile.getPath() + " has missing values.\n Check the input file "+f.getPath()+" because it could be corrupted");    
+            }
+        }
+    }
     
 }
