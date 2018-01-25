@@ -83,7 +83,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
                         HashMap<String, String> ensembl2fpkmuq = GeneExpressionQuantificationReader.getEnsembl2Value(fpkmuq_file);
 
                         ArrayList<File> filesInput_exception = new ArrayList<File>() ;
-                        if(ensembl2count.containsKey("error")){
+                        if (ensembl2count.containsKey("error")){
                             filesInput_exception.add(f);
                             ensembl2count.remove("error");
                         }
@@ -95,97 +95,101 @@ public class GeneExpressionQuantificationParser extends BioParser {
                             filesInput_exception.add(fpkmuq_file);
                             ensembl2fpkmuq.remove("error");
                         }
+                        
+                        String suffix_id = this.getOpenGDCSuffix(dataType, false);
+                        String filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
+                        
+                        if (!filesInput_exception.isEmpty()) {
+                            for (File filewitherror: filesInput_exception)
+                                error_outputFile2inputFile.put(filewitherror, new File(filePath));
+                        }
 
-                        HashSet<String> ensembls = new HashSet<>();
-                        ensembls.addAll(ensembl2count.keySet());
-                        ensembls.addAll(ensembl2fpkm.keySet());
-                        ensembls.addAll(ensembl2fpkmuq.keySet());
+                        if (filesInput_exception.size() < 3) { // the number of input files is always 3 (count, fpkm, fpkmuq)
+                            HashSet<String> ensembls = new HashSet<>();
+                            ensembls.addAll(ensembl2count.keySet());
+                            ensembls.addAll(ensembl2fpkm.keySet());
+                            ensembls.addAll(ensembl2fpkmuq.keySet());
 
-                        if (!ensembls.isEmpty()) {
-                            String suffix_id = this.getOpenGDCSuffix(dataType, false);
-                            String filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
-                            try {
-                                Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
-                                if (!filesInput_exception.isEmpty()) {
-                                    for (File filewitherror: filesInput_exception)
-                                        error_outputFile2inputFile.put(filewitherror, new File(filePath));
-                                }
-                                /** store entries **/
-                                HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
-                                
-                                for (String ensembl_id: ensembls) {
-                                    /** convert ensembl_id to symbol and retrieve chromosome, start and end position, strand, and other relevant info **/
-                                    // remove ensembl version from id
-                                    String ensembl_id_noversion = ensembl_id.split("\\.")[0];
-                                    ArrayList<HashMap<String, String>> gencode_data = Gencode.extractGencodeInfo("ensembl_id", ensembl_id_noversion, "gene");
-                                    if (!gencode_data.isEmpty()) {
-                                        // get first entry
-                                        HashMap<String, String> gene_info = gencode_data.get(0);
+                            if (!ensembls.isEmpty()) {
+                                try {
+                                    Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                                    /** store entries **/
+                                    HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
 
-                                        String chr = gene_info.get("CHR");
-                                        if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
-                                        String start = gene_info.get("START");
-                                        String end = gene_info.get("END");
-                                        String strand = gene_info.get("STRAND");
-                                        String gene_symbol = gene_info.get("SYMBOL");
-                                        String type = gene_info.get("TYPE");
+                                    for (String ensembl_id: ensembls) {
+                                        /** convert ensembl_id to symbol and retrieve chromosome, start and end position, strand, and other relevant info **/
+                                        // remove ensembl version from id
+                                        String ensembl_id_noversion = ensembl_id.split("\\.")[0];
+                                        ArrayList<HashMap<String, String>> gencode_data = Gencode.extractGencodeInfo("ensembl_id", ensembl_id_noversion, "gene");
+                                        if (!gencode_data.isEmpty()) {
+                                            // get first entry
+                                            HashMap<String, String> gene_info = gencode_data.get(0);
 
-                                        // trying to retrive the entrez_id starting with the symbol from GeneNames (HUGO)
-                                        String entrez = "NA";
-                                        String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
-                                        if (entrez_tmp != null)
-                                            entrez = entrez_tmp;
-                                        else
-                                            entrez = GeneNames.getEntrezFromEnsemblID(ensembl_id_noversion);
-                                        
-                                        /***************************************************************************************************/
-                                        String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
-                                        String fpkm_uq = (ensembl2fpkmuq.containsKey(ensembl_id)) ? ensembl2fpkmuq.get(ensembl_id) : "NA";
-                                        String fpkm = (ensembl2fpkm.containsKey(ensembl_id)) ? ensembl2fpkm.get(ensembl_id) : "NA";
+                                            String chr = gene_info.get("CHR");
+                                            if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
+                                            String start = gene_info.get("START");
+                                            String end = gene_info.get("END");
+                                            String strand = gene_info.get("STRAND");
+                                            String gene_symbol = gene_info.get("SYMBOL");
+                                            String type = gene_info.get("TYPE");
 
-                                        ArrayList<String> values = new ArrayList<>();
-                                        values.add(parseValue(chr, 0));
-                                        values.add(parseValue(start, 1));
-                                        values.add(parseValue(end, 2));
-                                        values.add(parseValue(strand, 3));
-                                        values.add(parseValue(ensembl_id, 4));
-                                        values.add(parseValue(entrez, 5));
-                                        values.add(parseValue(gene_symbol, 6));
-                                        values.add(parseValue(type, 7));
-                                        values.add(parseValue(htseq_count, 8));
-                                        values.add(parseValue(fpkm_uq, 9));
-                                        values.add(parseValue(fpkm, 10));
-                                        
-                                        /**********************************************************************/
-                                        /** populate dataMap then sort genomic coordinates and print entries **/
-                                        int chr_id = Integer.parseInt(parseValue(chr, 0).replaceAll("chr", "").replaceAll("X", "23").replaceAll("Y", "24").replaceAll("M", "25"));
-                                        int start_id = Integer.parseInt(parseValue(start, 1));
-                                        HashMap<Integer, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
-                                        ArrayList<ArrayList<String>> dataList = new ArrayList<>();
-                                        if (dataMapChr.containsKey(chr_id)) {
-                                            dataMapStart = dataMapChr.get(chr_id);                                        
-                                            if (dataMapStart.containsKey(start_id))
-                                                dataList = dataMapStart.get(start_id);
-                                            dataList.add(values);
+                                            // trying to retrive the entrez_id starting with the symbol from GeneNames (HUGO)
+                                            String entrez = "NA";
+                                            String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
+                                            if (entrez_tmp != null)
+                                                entrez = entrez_tmp;
+                                            else
+                                                entrez = GeneNames.getEntrezFromEnsemblID(ensembl_id_noversion);
+
+                                            /***************************************************************************************************/
+                                            String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
+                                            String fpkm_uq = (ensembl2fpkmuq.containsKey(ensembl_id)) ? ensembl2fpkmuq.get(ensembl_id) : "NA";
+                                            String fpkm = (ensembl2fpkm.containsKey(ensembl_id)) ? ensembl2fpkm.get(ensembl_id) : "NA";
+
+                                            ArrayList<String> values = new ArrayList<>();
+                                            values.add(parseValue(chr, 0));
+                                            values.add(parseValue(start, 1));
+                                            values.add(parseValue(end, 2));
+                                            values.add(parseValue(strand, 3));
+                                            values.add(parseValue(ensembl_id, 4));
+                                            values.add(parseValue(entrez, 5));
+                                            values.add(parseValue(gene_symbol, 6));
+                                            values.add(parseValue(type, 7));
+                                            values.add(parseValue(htseq_count, 8));
+                                            values.add(parseValue(fpkm_uq, 9));
+                                            values.add(parseValue(fpkm, 10));
+
+                                            /**********************************************************************/
+                                            /** populate dataMap then sort genomic coordinates and print entries **/
+                                            int chr_id = Integer.parseInt(parseValue(chr, 0).replaceAll("chr", "").replaceAll("X", "23").replaceAll("Y", "24").replaceAll("M", "25"));
+                                            int start_id = Integer.parseInt(parseValue(start, 1));
+                                            HashMap<Integer, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
+                                            ArrayList<ArrayList<String>> dataList = new ArrayList<>();
+                                            if (dataMapChr.containsKey(chr_id)) {
+                                                dataMapStart = dataMapChr.get(chr_id);                                        
+                                                if (dataMapStart.containsKey(start_id))
+                                                    dataList = dataMapStart.get(start_id);
+                                                dataList.add(values);
+                                            }
+                                            else
+                                                dataList.add(values);
+                                            dataMapStart.put(start_id, dataList);
+                                            dataMapChr.put(chr_id, dataMapStart);
+                                            /**********************************************************************/
+
+                                            // decomment this line to print entries without sorting genomic coordinates
+                                            //Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                         }
-                                        else
-                                            dataList.add(values);
-                                        dataMapStart.put(start_id, dataList);
-                                        dataMapChr.put(chr_id, dataMapStart);
-                                        /**********************************************************************/
-                                        
-                                        // decomment this line to print entries without sorting genomic coordinates
-                                        //Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                     }
+                                    // sort genomic coordinates and print data
+                                    this.printData((new File(filePath)).toPath(), dataMapChr, this.getFormat(), getHeader());
+
+                                    Files.write((new File(filePath)).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                    filesPathConverted.add(filePath);
                                 }
-                                // sort genomic coordinates and print data
-                                this.printData((new File(filePath)).toPath(), dataMapChr, this.getFormat(), getHeader());
-                                
-                                Files.write((new File(filePath)).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
-                                filesPathConverted.add(filePath);
-                            }
-                            catch (Exception e) {
-                                e.printStackTrace();
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }
