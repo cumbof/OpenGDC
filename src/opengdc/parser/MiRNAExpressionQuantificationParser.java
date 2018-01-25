@@ -42,7 +42,7 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
-        HashMap<File,File> error_inputFile2outputFile = new HashMap<File,File>();
+        HashMap<File,File> error_inputFile2outputFile = new HashMap<>();
         HashSet<String> filesPathConverted = new HashSet<>();
         
         HashMap<String, HashMap<String, String>> mirnaid2coordinates = MIRBase.getMirnaid2coordinates();
