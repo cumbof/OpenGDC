@@ -168,7 +168,7 @@ public class IsoformExpressionQuantificationParser extends BioParser {
             }
         }
         
-        printErrorFile(error_inputFile2outputFile);
+        printErrorFileLog(error_inputFile2outputFile);
         
         if (!filesPathConverted.isEmpty()) {
             // write header.schema
