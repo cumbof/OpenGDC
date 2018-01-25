@@ -163,10 +163,10 @@ public abstract class BioParser {
             File outputFile = error_inputFile2outputFile.get(f);
             if (outputFile.length() == 0) { // return length in bytes
                 outputFile.delete();
-                GUI.appendLog(this.getLogger(), "\n The file " + outputFile.getPath() + " has been deleted because it is empty.\n Check the input file " + f.getPath() + " because it could be corrupted");  
+                GUI.appendLog(this.getLogger(), "\n WARNING [empty file]: " + outputFile.getAbsolutePath() + " has been deleted. The input file " + f.getAbsolutePath() + " could be corrupted");  
             }
             else
-                GUI.appendLog(this.getLogger(), "\n The file " + outputFile.getPath() + " has missing values.\n Check the input file " + f.getPath() + " because it could be corrupted");    
+                GUI.appendLog(this.getLogger(), "\n WARNING [missing values]: " + outputFile.getAbsolutePath() + " has missing values. The input file " + f.getAbsolutePath() + " could be corrupted");    
         }
     }
     
