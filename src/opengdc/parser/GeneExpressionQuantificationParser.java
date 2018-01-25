@@ -106,8 +106,8 @@ public class GeneExpressionQuantificationParser extends BioParser {
                             String filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
                             try {
                                 Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
-                                if(!filesInput_exception.isEmpty()){
-                                    for(File filewitherror: filesInput_exception)
+                                if (!filesInput_exception.isEmpty()) {
+                                    for (File filewitherror: filesInput_exception)
                                         error_outputFile2inputFile.put(filewitherror, new File(filePath));
                                 }
                                 /** store entries **/
