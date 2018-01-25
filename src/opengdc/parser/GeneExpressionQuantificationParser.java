@@ -102,10 +102,9 @@ public class GeneExpressionQuantificationParser extends BioParser {
                         ensembls.addAll(ensembl2fpkmuq.keySet());
 
                         if (!ensembls.isEmpty()) {
-                            String filePath = "";
+                            String suffix_id = this.getOpenGDCSuffix(dataType, false);
+                            String filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
                             try {
-                                String suffix_id = this.getOpenGDCSuffix(dataType, false);
-                                filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
                                 Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
                                 if(!filesInput_exception.isEmpty()){
                                     for(File filewitherror: filesInput_exception)
@@ -198,7 +197,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
             }
         }
 
-        printErrorFile(error_outputFile2inputFile);
+        printErrorFileLog(error_outputFile2inputFile);
         
         if (!filesPathConverted.isEmpty()) {
             // write header.schema
