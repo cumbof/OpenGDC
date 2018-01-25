@@ -38,7 +38,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
 
-        HashMap<File,File> error_outputFile2inputFile = new HashMap<File,File>();
+        HashMap<File,File> error_outputFile2inputFile = new HashMap<>();
         HashSet<String> filesPathConverted = new HashSet<>();
         
         // retrive all aliquot IDs
