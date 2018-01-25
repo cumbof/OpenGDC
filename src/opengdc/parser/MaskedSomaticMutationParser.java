@@ -35,7 +35,7 @@ public class MaskedSomaticMutationParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
-        HashMap<File,File> error_inputFile2outputFile = new HashMap<File,File>();
+        HashMap<File,File> error_inputFile2outputFile = new HashMap<>();
         HashMap<String, String> filesPathConverted = new HashMap<>();
         HashMap<String, Object> uuid_dataMap = new HashMap<>();
         
