@@ -57,12 +57,12 @@ public class MaskedSomaticMutationParser extends BioParser {
                             HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
                             if (uuid_dataMap.containsKey(aliquot_uuid))
                                 dataMapChr = (HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>>)uuid_dataMap.get(aliquot_uuid);
-                            String filePath = "";
+                            
+                            String suffix_id = this.getOpenGDCSuffix(dataType, false);
+                            String filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
                             try {
                                 HashSet<String> filePaths = new HashSet<>(filesPathConverted.values());
                                 if (!filePaths.contains(outPath + aliquot_uuid + "." + this.getFormat())) {
-                                    String suffix_id = this.getOpenGDCSuffix(dataType, false);
-                                    filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
                                     Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
                                     filesPathConverted.put(aliquot_uuid, filePath);
                                 }
@@ -218,7 +218,7 @@ public class MaskedSomaticMutationParser extends BioParser {
             }
         }
         
-        printErrorFile(error_inputFile2outputFile);
+        printErrorFileLog(error_inputFile2outputFile);
         
         if (!filesPathConverted.isEmpty()) {
             // close documents
