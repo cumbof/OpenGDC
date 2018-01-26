@@ -18,6 +18,7 @@ import java.util.HashSet;
 import opengdc.GUI;
 import opengdc.integration.Gencode;
 import opengdc.integration.GeneNames;
+import opengdc.integration.NCBI;
 import opengdc.reader.GeneExpressionQuantificationReader;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
@@ -150,13 +151,15 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                         String gene_symbol = gene_info.get("SYMBOL");
                                         String type = gene_info.get("TYPE");
 
-                                        // trying to retrive the entrez_id starting with the symbol from GeneNames (HUGO)
                                         String entrez;
-                                        String entrez_tmp = GeneNames.getEntrezFromSymbol(gene_symbol);
+                                        // trying to retrive the entrez_id starting with the symbol from NCBI
+                                        String entrez_tmp = NCBI.getEntrezFromSymbol(gene_symbol);
                                         if (entrez_tmp != null)
                                             entrez = entrez_tmp;
-                                        else
-                                            entrez = GeneNames.getEntrezFromEnsemblID(ensembl_id_noversion);
+                                        else {
+                                            // trying to retrive the entrez_id starting with the symbol from GeneNames (HUGO)
+                                            entrez = GeneNames.getEntrezFromSymbol(gene_symbol);
+                                        }
 
                                         /***************************************************************************************************/
                                         String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
