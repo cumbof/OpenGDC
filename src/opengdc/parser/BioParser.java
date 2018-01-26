@@ -9,6 +9,7 @@
  */
 package opengdc.parser;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.JTextPane;
 import javax.xml.bind.DatatypeConverter;
+import opengdc.GUI;
 import opengdc.util.FormatUtils;
 
 /**
@@ -161,7 +163,7 @@ public abstract class BioParser {
     public void printErrorFileLog(HashMap<File,File> error_inputFile2outputFile){
         for (File f: error_inputFile2outputFile.keySet())   {
             File outputFile = error_inputFile2outputFile.get(f);
-            if (outputFile.exists() {
+            if (outputFile.exists()) {
                 if (outputFile.length() == 0) { // return length in bytes
                     outputFile.delete();
                     GUI.appendLog(this.getLogger(), "\n WARNING [empty file]: " + outputFile.getAbsolutePath() + " has been deleted. The input file " + f.getAbsolutePath() + " could be corrupted");  
