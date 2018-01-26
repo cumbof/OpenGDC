@@ -15,7 +15,7 @@ public class NCBI {
 	private static String ncbi_table_path = Settings.getNCBIDataPath();
 	private static HashMap<String, String> symbol2entrez = new HashMap<>();
 	private static HashMap<String, String> deprecatesymbol2entrez = new HashMap<>();
-	//	private static HashMap<String, String> mirnaid2entrez = new HashMap<>();
+	//private static HashMap<String, String> mirnaid2entrez = new HashMap<>();
 
 	public static String getEntrezFromSymbol(String symbol_from_gencode){
 		HashMap<String, String> data_symbol2entrez = getSymbol2Entrez();
@@ -36,14 +36,14 @@ public class NCBI {
 		return null;
 
 	}
-
-	/*qui tiro fuori i geni deprecati che:
-	 * - hanno un loro id, e anche un id nuovo ( al quale però corrisponde anche un symbol nuovo);
-	 * - hanno un loro id, e non hanno il riferimento a un nuovo id (quindi nuovo symbol)
-	 * 
-	 * Tutti i geni che non sono in queto file sono ancora usati con lo stesso id, ma in versioni del genoma successive, hanno cambiato simbolo (non id)
-	 */
-
+	
+	/*
+	* retrieving deprecated genes that:
+	* - have a own id and also a new id (corresponding to a new symbol)
+	* - have a own id and do not refer to a new id (and a new symbol)
+	*
+	* The genes in this file are still used with the same id but in the new genome version their symbols are changed (but the id is the same)
+	*/
 	public static HashMap<String, String> getDeprecatedSymbol2Entrez() {
 		if (deprecatesymbol2entrez.isEmpty()) {
 			try {
@@ -60,7 +60,7 @@ public class NCBI {
 							String old_symbol = arr[3];
 							String entrez = arr[2];
 							//String new_entrez = arr[1];
-							if(taxonomy_id.equals("9606")){// Homo Sapiens
+							if (taxonomy_id.equals("9606")){ // Homo Sapiens
 								String old_symbol_lower = old_symbol.trim().toLowerCase();
 								deprecatesymbol2entrez.put(old_symbol_lower, entrez);
 							}
@@ -81,7 +81,7 @@ public class NCBI {
 	}
 
 	public static HashMap<String, String> getSymbol2Entrez() {
-		if(symbol2entrez.isEmpty()){
+		if (symbol2entrez.isEmpty()) {
 			try {
 				InputStream fstream = new FileInputStream(ncbi_table_path);
 				DataInputStream in = new DataInputStream(fstream);
@@ -92,12 +92,10 @@ public class NCBI {
 						if (!line.startsWith("#") && !line.equals("")) {
 							String[] arr = line.split("\t");
 							//if (arr[2].trim().toLowerCase().equals(type.trim().toLowerCase())) {
-
 							String extendedInfo = arr[8];
 							if (extendedInfo.contains("Name=")) {
 								String[] extendedInfo_arr = extendedInfo.split(";");
 								for (String data: extendedInfo_arr) {
-
 									if (data.toLowerCase().trim().startsWith("name")) {
 										String[] name_split = data.split("=");
 
