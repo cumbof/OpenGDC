@@ -45,8 +45,6 @@ public class GeneNames {
                             String entrez = arr[18];
                             String symbol_lower = symbol.trim().toLowerCase();
                             symbol2entrez.put(symbol_lower, entrez);
-                            
-                            }
                         }
                         else
                             firstLine = false;
