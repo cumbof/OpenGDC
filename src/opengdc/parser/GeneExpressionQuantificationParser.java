@@ -156,9 +156,10 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                         String entrez_tmp = NCBI.getEntrezFromSymbol(gene_symbol);
                                         if (entrez_tmp != null)
                                             entrez = entrez_tmp;
-                                        else
-                                        // trying to retrive the entrez_id starting with the symbol from GeneNames (HUGO)
+                                        else {
+                                            // trying to retrive the entrez_id starting with the symbol from GeneNames (HUGO)
                                             entrez = GeneNames.getEntrezFromSymbol(gene_symbol);
+                                        }
 
                                         /***************************************************************************************************/
                                         String htseq_count = (ensembl2count.containsKey(ensembl_id)) ? ensembl2count.get(ensembl_id) : "NA";
