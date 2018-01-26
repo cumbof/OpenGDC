@@ -156,7 +156,7 @@ public class GeneNames {
     public static String getSymbolFromEnsemblID(String ensembl_id) {
         HashMap<String, String> data = getEnsemblId2Symbol();
         if (!data.isEmpty()) {
-            if(data.containsKey(ensembl_id)) 
+            if (data.containsKey(ensembl_id)) 
                 return data.get(ensembl_id);
         }
         return null;
