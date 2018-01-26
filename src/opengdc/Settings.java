@@ -128,10 +128,16 @@ public class Settings {
         return NCBI_DATA;
     }*/
     /*************************************************************************************************************/
-    private static final String NCBI_DATA = "./appdata/ncbi/ref_GRCh38_top_level.gff3";
+    private static final String NCBI_DATA = "./appdata/ncbi/ref_GRCh38.p2_top_level.gff3";
     public static String getNCBIDataPath() {
-        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/ncbi/ref_GRCh38_top_level.gff3";
+        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/ncbi/ref_GRCh38.p2_top_level.gff3";
         return NCBI_DATA;
+    }
+    
+    private static final String HISTORY_NCBI_DATA = "./appdata/ncbi/gene_history.txt";
+    public static String getHistoryNCBIDataPath() {
+        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/ncbi/gene_history.txt";
+        return HISTORY_NCBI_DATA;
     }
     
     private static final String GENENAMES_DATA = "./appdata/genenames/hgnc_complete_set.txt";

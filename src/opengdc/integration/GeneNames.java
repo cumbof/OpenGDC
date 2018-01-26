@@ -45,12 +45,6 @@ public class GeneNames {
                             String entrez = arr[18];
                             String symbol_lower = symbol.trim().toLowerCase();
                             symbol2entrez.put(symbol_lower, entrez);
-                            
-                            String[] synonyms = arr[10].replaceAll("\"", "").split("\\|");
-                            for (String syn: synonyms){
-                                String synl_lower = syn.trim().toLowerCase();
-                                symbol2entrez.put(synl_lower, entrez);
-                            }
                         }
                         else
                             firstLine = false;
@@ -160,7 +154,7 @@ public class GeneNames {
     public static String getSymbolFromEnsemblID(String ensembl_id) {
         HashMap<String, String> data = getEnsemblId2Symbol();
         if (!data.isEmpty()) {
-            if(data.containsKey(ensembl_id)) 
+            if (data.containsKey(ensembl_id)) 
                 return data.get(ensembl_id);
         }
         return null;
