@@ -46,10 +46,6 @@ public class GeneNames {
                             String symbol_lower = symbol.trim().toLowerCase();
                             symbol2entrez.put(symbol_lower, entrez);
                             
-                            String[] synonyms = arr[10].replaceAll("\"", "").split("\\|");
-                            for (String syn: synonyms){
-                                String synl_lower = syn.trim().toLowerCase();
-                                symbol2entrez.put(synl_lower, entrez);
                             }
                         }
                         else
