@@ -41,8 +41,8 @@ public class GeneExpressionQuantificationReader {
             in.close();
             fstream.close();
         } catch (Exception e) {
-            e.printStackTrace();
             ensembl2value.put("error", e.getMessage());
+            //e.printStackTrace();
         }
         
         return ensembl2value;
