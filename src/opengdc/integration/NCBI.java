@@ -128,7 +128,6 @@ public class NCBI {
 		for (String data: arr.split(";")) {
 			if (data.toLowerCase().trim().contains("geneid")) {
 				for (String data1: data.split(",")) {
-
 					if (data1.toLowerCase().trim().contains("geneid")) {
 						String[] name_split = data1.split(":");
 						entrez = name_split[name_split.length-1];
