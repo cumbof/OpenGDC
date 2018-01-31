@@ -24,16 +24,21 @@ public class Main {
     private static HashSet<String> skip_datatypes = new HashSet<>();
     //private static final String CMD = "download and convert";
     private static final String CMD = "download and convert";
-    //private static final String ROOT = "/DATA/ftp-root/";
-    private static final String ROOT = "/Users/fabio/Downloads/test_gdc_download/";
+    private static final String ROOT = "/FTP/ftp-root/";
+    //private static final String ROOT = "/Users/fabio/Downloads/test_gdc_download/";
     
     private static void initSkipDiseases() {
         skip_diseases = new HashSet<>();
+        skip_diseases.add("tcga-acc");
+        skip_diseases.add("tcga-brca");
+        skip_diseases.add("tcga-kirc");
+        skip_diseases.add("tcga-ov");
+        skip_diseases.add("tcga-thca");
     }
     
     private static void initSkipDataTypes() {
-        /*skip_datatypes = new HashSet<>();
-        skip_datatypes.add("clinical supplement");
+        skip_datatypes = new HashSet<>();
+        /*skip_datatypes.add("clinical supplement");
         skip_datatypes.add("biospecimen supplement");
         skip_datatypes.add("gene expression quantification");
         skip_datatypes.add("methylation beta value");
@@ -45,7 +50,7 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        String inputProgram = null;
+        /*String inputProgram = null;
         String inputDiseaseAbbreviation = null;
         if (args.length == 2) {
             inputProgram = args[0];
@@ -54,12 +59,12 @@ public class Main {
         else {
             System.err.println("Usage example: java -jar app.jar 'program' 'disease'");
             System.exit(1);
-        }
+        }*/
         
         //String inputProgram = "TCGA";
         //String inputDiseaseAbbreviation = "ACC";
         
-        String inputDisease = (inputProgram+"-"+inputDiseaseAbbreviation).toLowerCase();
+        //String inputDisease = (inputProgram+"-"+inputDiseaseAbbreviation).toLowerCase();
         
         initSkipDiseases();
         initSkipDataTypes();
@@ -68,8 +73,8 @@ public class Main {
         for (String program: gdcDataMap.keySet()) {
             if (program.toLowerCase().trim().equals("tcga")) {
                 for (String disease: gdcDataMap.get(program).keySet()) {
-                    if (disease.toLowerCase().equals(inputDisease.toLowerCase())) {
-                        if (!skip_diseases.contains(disease)) {
+                    //if (disease.toLowerCase().equals(inputDisease.toLowerCase())) {
+                        if (!skip_diseases.contains(disease.toLowerCase())) {
                             //HashSet<String> dataTypes = new HashSet<>();
                             //dataTypes.add("Clinical and Biospecimen Supplements");
                             for (String dataType: gdcDataMap.get(program).get(disease)) {
@@ -85,7 +90,7 @@ public class Main {
                                             if (CMD.trim().toLowerCase().contains("download")) {
                                                 /** DOWNLOAD DATA **/
                                                 //String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease+"/gdc/";
-                                                String outDirStr = ROOT+"opengdc/original/"+program.toLowerCase()+"/"+disease.toLowerCase().split("-")[1]+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.toLowerCase())+"/";
+                                                String outDirStr = ROOT+"opengdc/original/"+program.toLowerCase()+"/"+disease.toLowerCase()+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.toLowerCase())+"/";
                                                 //String outDirStr = ROOT+disease.toLowerCase().split("-")[1]+"/original/";
                                                 //String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
 
@@ -106,12 +111,12 @@ public class Main {
                                             }
                                             if (CMD.trim().toLowerCase().contains("convert")) {
                                                 /** CONVERT DATA **/
-                                                String inDirStr = ROOT+"opengdc/original/"+program.toLowerCase()+"/"+disease.toLowerCase().split("-")[1]+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.toLowerCase())+"/";
+                                                String inDirStr = ROOT+"opengdc/original/"+program.toLowerCase()+"/"+disease.toLowerCase()+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.toLowerCase())+"/";
                                                 //String inDirStr = ROOT+disease.toLowerCase().split("-")[1]+"/original/";
                                                 //String inDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease.split("-")[1]+"/gdc/";
                                                 //String inDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/gdc/";
                                                 //String outDirStr = "/DATA/ftp-root/opengdc/bed/"+program.toLowerCase()+"/"+disease.toLowerCase()+"/clinical_and_biospecimen_supplements/";
-                                                String outDirStr = ROOT+"opengdc/bed/"+program.toLowerCase()+"/"+disease.toLowerCase().split("-")[1]+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.toLowerCase())+"/";
+                                                String outDirStr = ROOT+"opengdc/bed/"+program.toLowerCase()+"/"+disease.toLowerCase()+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.toLowerCase())+"/";
                                                 //String outDirStr = "/Users/fabio/Downloads/test_gdc_download/"+program+"/"+disease.split("-")[1]+"/meta/";
                                                 //String outDirStr = "D:/htdocs/gdcwebapp/assets/metadata/"+disease+"/meta/";
 
@@ -142,7 +147,7 @@ public class Main {
                                 }
                             }
                         }
-                    }
+                    //}
                 }
             }
         }
