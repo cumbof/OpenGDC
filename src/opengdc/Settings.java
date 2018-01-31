@@ -20,6 +20,10 @@ public class Settings {
     // debug flag
     private static final boolean DEBUG = true;
     
+    // debug references
+    private static final String DEBUG_TMP = "/Users/fabio/Downloads/test_gdc_download/tmp/";
+    private static final String DEBUG_APPDATA = "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/";
+    
     // build number
     private static final String BUILD_NUMBER = "0001";
     public static String getBuildNumber() {
@@ -30,7 +34,7 @@ public class Settings {
     private static final String TMP_DIR = "./appdata/tmp/";
     public static String getTmpDir() {
         String tmpDir = TMP_DIR;
-        if (DEBUG) tmpDir = "/Users/fabio/Downloads/test_gdc_download/tmp/";
+        if (DEBUG) tmpDir = DEBUG_TMP;
         if (!(new File(tmpDir)).exists())
             (new File(tmpDir)).mkdir();
         return tmpDir;
@@ -117,7 +121,7 @@ public class Settings {
     
     private static final String MIRBASE_HSA_GFF3_DATA = "./appdata/mirbase/hsa.gff3";
     public static String getMirbaseHsaDataPath() {
-        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/mirbase/hsa.gff3";
+        if (DEBUG) return DEBUG_APPDATA+"appdata/mirbase/hsa.gff3";
         return MIRBASE_HSA_GFF3_DATA;
     }
     
@@ -130,37 +134,37 @@ public class Settings {
     /*************************************************************************************************************/
     private static final String NCBI_DATA = "./appdata/ncbi/ref_GRCh38.p2_top_level.gff3";
     public static String getNCBIDataPath() {
-        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/ncbi/ref_GRCh38.p2_top_level.gff3";
+        if (DEBUG) return DEBUG_APPDATA+"ncbi/ref_GRCh38.p2_top_level.gff3";
         return NCBI_DATA;
     }
     
     private static final String HISTORY_NCBI_DATA = "./appdata/ncbi/gene_history.txt";
     public static String getHistoryNCBIDataPath() {
-        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/ncbi/gene_history.txt";
+        if (DEBUG) return DEBUG_APPDATA+"ncbi/gene_history.txt";
         return HISTORY_NCBI_DATA;
     }
     
     private static final String GENENAMES_DATA = "./appdata/genenames/hgnc_complete_set.txt";
     public static String getGENENAMESDataPath() {
-        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/genenames/hgnc_complete_set.txt";
+        if (DEBUG) return DEBUG_APPDATA+"genenames/hgnc_complete_set.txt";
         return GENENAMES_DATA;
     }
 
     private static final String ILLUMINA_DATA = "./appdata/illumina/humanMethylation.txt";
     public static String getILLUMINADataPath() {
-        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/illumina/humanMethylation.txt";
+        if (DEBUG) return DEBUG_APPDATA+"illumina/humanMethylation.txt";
         return ILLUMINA_DATA;
     }
     
     private static final String ENSEMBL_DATA = "./appdata/ensembl/Homo_sapiens.GRCh38.77.gtf";
     public static String getENSEMBLDataPath() {
-        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/ensembl/Homo_sapiens.GRCh38.77.gtf";
+        if (DEBUG) return DEBUG_APPDATA+"appdata/ensembl/Homo_sapiens.GRCh38.77.gtf";
         return ENSEMBL_DATA;
     }
 
     private static final String GENCODE_DATA = "./appdata/gencode/gencode.v22.annotation.gtf";
     public static String getGENCODEDataPath() {
-        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/gencode/gencode.v22.annotation.gtf";
+        if (DEBUG) return DEBUG_APPDATA+"gencode/gencode.v22.annotation.gtf";
         return GENCODE_DATA;
     }
     
