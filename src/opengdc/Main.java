@@ -142,6 +142,7 @@ public class Main {
                                         }
                                         catch (Exception e) {
                                             System.err.println("An error has occurred for: "+disease);
+                                            e.printStackTrace();
                                         }
                                     }
                                 }
