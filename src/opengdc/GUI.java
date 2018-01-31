@@ -935,10 +935,13 @@ public class GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton3ActionPerformed
     
     public static JTextPane createLogWindow() {                
-        LOG logFrame = new LOG();
-        logFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        logFrame.setVisible(true);
-        return logFrame.getLogPane();
+        if (!Settings.isDebug()) {
+            LOG logFrame = new LOG();
+            logFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            logFrame.setVisible(true);
+            return logFrame.getLogPane();
+        }
+        return null;
     }
     
     public static void appendLog(JTextPane pane, String text) {
