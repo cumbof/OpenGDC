@@ -20,6 +20,10 @@ public class Settings {
     // debug flag
     private static final boolean DEBUG = true;
     
+    public static boolean isDebug() {
+        return DEBUG;
+    }
+    
     // debug references local
     //private static final String DEBUG_TMP = "/Users/fabio/Downloads/test_gdc_download/tmp/";
     //private static final String DEBUG_APPDATA = "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/";
