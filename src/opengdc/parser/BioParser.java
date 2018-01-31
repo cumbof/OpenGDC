@@ -166,13 +166,18 @@ public abstract class BioParser {
             if (outputFile.exists()) {
                 if (outputFile.length() == 0) { // return length in bytes
                     outputFile.delete();
-                    GUI.appendLog(this.getLogger(), "\n WARNING [empty file]: " + outputFile.getAbsolutePath() + " has been deleted. The input file " + f.getAbsolutePath() + " could be corrupted");  
+                    System.err.println("WARNING [empty file]: " + outputFile.getAbsolutePath() + " has been deleted. The input file " + f.getAbsolutePath() + " could be corrupted");
+                    GUI.appendLog(this.getLogger(), "\n WARNING [empty file]: " + outputFile.getAbsolutePath() + " has been deleted. The input file " + f.getAbsolutePath() + " could be corrupted");
                 }
-                else
-                    GUI.appendLog(this.getLogger(), "\n WARNING [missing values]: " + outputFile.getAbsolutePath() + " has missing values. The input file " + f.getAbsolutePath() + " could be corrupted");    
+                else {
+                    System.err.println("WARNING [missing values]: " + outputFile.getAbsolutePath() + " has missing values. The input file " + f.getAbsolutePath() + " could be corrupted");
+                    GUI.appendLog(this.getLogger(), "\n WARNING [missing values]: " + outputFile.getAbsolutePath() + " has missing values. The input file " + f.getAbsolutePath() + " could be corrupted");
+                }
             }
-            else
-                GUI.appendLog(this.getLogger(), "\n WARNING [file not found]: " + outputFile.getAbsolutePath() + " does not exist. Something went wrong with the input file " + f.getAbsolutePath());    
+            else {
+                System.err.println("WARNING [file not found]: " + outputFile.getAbsolutePath() + " does not exist. Something went wrong with the input file " + f.getAbsolutePath());
+                GUI.appendLog(this.getLogger(), "\n WARNING [file not found]: " + outputFile.getAbsolutePath() + " does not exist. Something went wrong with the input file " + f.getAbsolutePath());
+            }
         }
     }
     
