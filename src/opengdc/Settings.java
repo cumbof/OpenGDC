@@ -128,7 +128,7 @@ public class Settings {
     
     private static final String MIRBASE_HSA_GFF3_DATA = "./appdata/mirbase/hsa.gff3";
     public static String getMirbaseHsaDataPath() {
-        if (DEBUG) return DEBUG_APPDATA+"appdata/mirbase/hsa.gff3";
+        if (DEBUG) return DEBUG_APPDATA+"mirbase/hsa.gff3";
         return MIRBASE_HSA_GFF3_DATA;
     }
     
