@@ -65,18 +65,16 @@ public class GeneExpressionQuantificationParser extends BioParser {
         
         HashSet<String> already_processed = new HashSet<>();
         for (File f: files) {
+            String filename = f.getName();
             String extension = FSUtils.getFileExtension(f);
-            if (f.isFile() && getAcceptedInputFileFormats().contains(extension) && !already_processed.contains(f.getName())) {
-                String file_uuid = f.getName().split("_")[0];
+            if (f.isFile() && getAcceptedInputFileFormats().contains(extension) && !already_processed.contains(filename)) {
+                String file_uuid = filename.split("_")[0];
                 String aliquot_uuid = fileUUID2aliquotUUID.get(file_uuid);
                 if (!aliquot_uuid.trim().equals("")) {
+                    File counts_file = (filename.toLowerCase().trim().endsWith(".counts")) ? f : null;
+                    File fpkm_file = (filename.toLowerCase().trim().endsWith("fpkm.txt")) ? f : null;
+                    File fpkmuq_file = (filename.toLowerCase().trim().endsWith("fpkm-uq.txt")) ? f : null;
                     
-                    String fpkmfpkmuq = f.getName().split("\\.")[1];
-
-                    File counts_file = (extension.toLowerCase().trim().equals(".counts")) ? f : null;
-                    File fpkm_file = ((fpkmfpkmuq+extension).toLowerCase().trim().equals("fpkm.txt")) ? f : null;
-                    File fpkmuq_file = ((fpkmfpkmuq+extension).toLowerCase().trim().equals("fpkm-uq.txt")) ? f : null;
-
                     if ((counts_file != null) && (fpkm_file == null) && (fpkmuq_file == null)) {
                         fpkm_file = getRelatedFile(files, aliquot_uuid, fileUUID2aliquotUUID, "fpkm.txt");
                         fpkmuq_file = getRelatedFile(files, aliquot_uuid, fileUUID2aliquotUUID, "fpkm-uq.txt");
