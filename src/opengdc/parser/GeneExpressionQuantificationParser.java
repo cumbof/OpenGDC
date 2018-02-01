@@ -70,9 +70,12 @@ public class GeneExpressionQuantificationParser extends BioParser {
                 String file_uuid = f.getName().split("_")[0];
                 String aliquot_uuid = fileUUID2aliquotUUID.get(file_uuid);
                 if (!aliquot_uuid.trim().equals("")) {
+                    
+                    String fpkmfpkmuq = f.getName().split("\\.")[1];
+
                     File counts_file = (extension.toLowerCase().trim().equals(".counts")) ? f : null;
-                    File fpkm_file = (extension.toLowerCase().trim().equals("fpkm.txt")) ? f : null;
-                    File fpkmuq_file = (extension.toLowerCase().trim().equals("fpkm-uq.txt")) ? f : null;
+                    File fpkm_file = ((fpkmfpkmuq+extension).toLowerCase().trim().equals("fpkm.txt")) ? f : null;
+                    File fpkmuq_file = ((fpkmfpkmuq+extension).toLowerCase().trim().equals("fpkm-uq.txt")) ? f : null;
 
                     if ((counts_file != null) && (fpkm_file == null) && (fpkmuq_file == null)) {
                         fpkm_file = getRelatedFile(files, aliquot_uuid, fileUUID2aliquotUUID, "fpkm.txt");
