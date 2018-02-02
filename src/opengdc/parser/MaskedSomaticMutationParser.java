@@ -70,8 +70,10 @@ public class MaskedSomaticMutationParser extends BioParser {
                                 for (int entry: uuidData.keySet()) {
                                     ArrayList<String> values = new ArrayList<>();
                                     values.add(parseValue(uuidData.get(entry).get("chromosome"), 0));
-                                    values.add(parseValue(uuidData.get(entry).get("start_position"), 1));
-                                    values.add(parseValue(uuidData.get(entry).get("end_position"), 2));
+                                    String start = String.valueOf((int)Double.parseDouble(uuidData.get(entry).get("start_position")));
+                                    values.add(parseValue(start, 1));
+                                    String end = String.valueOf((int)Double.parseDouble(uuidData.get(entry).get("end_position")));
+                                    values.add(parseValue(end, 2));
                                     values.add(parseValue(uuidData.get(entry).get("strand"), 3));
                                     values.add(parseValue(uuidData.get(entry).get("hugo_symbol"), 4));
                                     values.add(parseValue(uuidData.get(entry).get("entrez_gene_id"), 5));
