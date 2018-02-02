@@ -94,8 +94,8 @@ public class MiRNAExpressionQuantificationParser extends BioParser {
 
                                         String chr = coordinates.get("CHR");
                                         if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
-                                        String start = coordinates.get("START");
-                                        String end = coordinates.get("END");
+                                        String start = String.valueOf((int)Double.parseDouble(coordinates.get("START")));
+                                        String end = String.valueOf((int)Double.parseDouble(coordinates.get("END")));
                                         String strand = coordinates.get("STRAND");
                                         String entrez = "NA";
                                         String symbol = "NA";
