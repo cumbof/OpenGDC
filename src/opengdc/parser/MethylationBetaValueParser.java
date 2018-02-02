@@ -83,8 +83,8 @@ public class MethylationBetaValueParser extends BioParser {
                                 else {
                                     String[] line_split = line.split("\t");
                                     String chr = line_split[2]; // 1
-                                    String start = line_split[3]; //2
-                                    String end = line_split[4]; //3
+                                    String start = String.valueOf((int)Double.parseDouble(line_split[3])); //2
+                                    String end = String.valueOf((int)Double.parseDouble(line_split[4])); //3
                                     String strand = "*"; //4
                                     String composite_element_ref = line_split[0]; //5
                                     String beta_value = line_split[1]; //6
