@@ -146,8 +146,8 @@ public class GeneExpressionQuantificationParser extends BioParser {
 
                                         String chr = gene_info.get("CHR");
                                         if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
-                                        String start = gene_info.get("START");
-                                        String end = gene_info.get("END");
+                                        String start = String.valueOf((int)Double.parseDouble(gene_info.get("START")));
+                                        String end = String.valueOf((int)Double.parseDouble(gene_info.get("END")));
                                         String strand = gene_info.get("STRAND");
                                         String gene_symbol = gene_info.get("SYMBOL");
                                         String type = gene_info.get("TYPE");
