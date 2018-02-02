@@ -165,7 +165,7 @@ public class Settings {
     
     private static final String ENSEMBL_DATA = "./appdata/ensembl/Homo_sapiens.GRCh38.77.gtf";
     public static String getENSEMBLDataPath() {
-        if (DEBUG) return DEBUG_APPDATA+"appdata/ensembl/Homo_sapiens.GRCh38.77.gtf";
+        if (DEBUG) return DEBUG_APPDATA+"ensembl/Homo_sapiens.GRCh38.77.gtf";
         return ENSEMBL_DATA;
     }
 
