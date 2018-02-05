@@ -19,9 +19,8 @@ import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -204,9 +203,9 @@ public class GDCQuery {
     
     public static void downloadFile(String uuid, String outFolderPath, String fileName, boolean requestRelated, int recursive_iteration, JTextPane logPane) {
         try {
-            String url = BASE_DOWNLOAD_URL + uuid;
+            String url_string = BASE_DOWNLOAD_URL + uuid;
             if (requestRelated)
-                url += "?related_files=true"; // why it does not always work?
+                url_string += "?related_files=true"; // why it does not always work?
             //System.err.println(url);
             System.err.println(uuid + "\t" + fileName);
             GUI.appendLog(logPane, uuid + "\t" + fileName + "\n");
@@ -215,12 +214,23 @@ public class GDCQuery {
             if (outFile.exists())
                 outFile.delete();
             
-            URL website = new URL(url);
-            ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+            URL url = new URL(url_string);
+            URLConnection connection = url.openConnection();
             FileOutputStream fos = new FileOutputStream(outFolderPath + fileName);
-            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+            PrintStream out = new PrintStream(fos);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line = reader.readLine();
+            while (line != null) {
+                String nextLine = reader.readLine();
+                if (nextLine != null)
+                    out.println(line);
+                else
+                    out.print(line); //remove last newline char
+                line = nextLine;
+            }
+            reader.close();
+            out.close();
             fos.close();
-            rbc.close();
         }
         catch (Exception e) {
             recursive_iteration++;
