@@ -60,8 +60,10 @@ public class DownloadDataAction extends Action {
     }
     
     private void retrieveData(String disease, String dataType, String gdc_path, boolean autoextract, boolean autoremove) {
-        GDCQuery.query(disease, dataType, 0);
-        HashMap<String, HashMap<String, String>> dataMap = GDCQuery.extractInfo(GDCQuery.getLastQueryFilePath());
+        String query_file_path = GDCQuery.query(disease, dataType, 0);
+        HashMap<String, HashMap<String, String>> dataMap = GDCQuery.extractInfo(query_file_path);
+        if (query_file_path != null)
+            (new File(query_file_path)).delete();
         GUI.appendLog(logPane, "Data Amount: " + dataMap.size() + " files" + "\n\n");
         
         // TODO activate progress bar

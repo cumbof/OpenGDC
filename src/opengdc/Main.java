@@ -29,11 +29,23 @@ public class Main {
     
     private static void initSkipDiseases() {
         skip_diseases = new HashSet<>();
-        skip_diseases.add("tcga-acc");
-        skip_diseases.add("tcga-brca");
+        skip_diseases.add("tcga-thca");
         skip_diseases.add("tcga-kirc");
         skip_diseases.add("tcga-ov");
-        skip_diseases.add("tcga-thca");
+        skip_diseases.add("tcga-brca");
+        skip_diseases.add("tcga-acc");
+        skip_diseases.add("tcga-stad");
+        skip_diseases.add("tcga-kich");
+        skip_diseases.add("tcga-chol");
+        skip_diseases.add("tcga-thym");
+        skip_diseases.add("tcga-sarc");
+        skip_diseases.add("tcga-skcm");
+        skip_diseases.add("tcga-dlbc");
+        skip_diseases.add("tcga-paad");
+        skip_diseases.add("tcga-coad");
+        skip_diseases.add("tcga-esca");
+        skip_diseases.add("tcga-read");
+        skip_diseases.add("tcga-lusc");
     }
     
     private static void initSkipDataTypes() {

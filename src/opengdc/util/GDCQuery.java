@@ -14,12 +14,12 @@ import opengdc.Settings;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,7 +37,6 @@ import org.json.JSONTokener;
  */
 public class GDCQuery {
     
-    
     /*
         Result window is too large, from + size must be less than or equal to: [10000] but was [2147483648]. 
         See the scroll api for a more efficient way to request large data sets. 
@@ -49,14 +48,10 @@ public class GDCQuery {
     //private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&fields="+FIELDS+"&filters=";
     private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&filters=";
     private static final String BASE_DOWNLOAD_URL = "https://gdc-api.nci.nih.gov/data/";
-    private static String last_query_file_path = null;
     private static final int RECURSIVE_LIMIT = 100;
+    private static final int BUFFER_SIZE = 4096;
     
-    public static String getLastQueryFilePath() {
-        return last_query_file_path;
-    }
-    
-    public static void query(String disease, String dataType, int recursive_iteration) {
+    public static String query(String disease, String dataType, int recursive_iteration) {
         try {
             String json_str = "{" +
                                   "\"op\":\"and\"," +
@@ -114,15 +109,16 @@ public class GDCQuery {
             out.close();
             fos.close();
             
-            last_query_file_path = Settings.getTmpDir() + query_file_name;
+            return Settings.getTmpDir() + query_file_name;
         }
         catch (Exception e) {
             recursive_iteration++;
             if (recursive_iteration < RECURSIVE_LIMIT)
-                query(disease, dataType, recursive_iteration++);
+                return query(disease, dataType, recursive_iteration++);
             else
                 e.printStackTrace();
         }
+        return null;
     }
     
     public static String searchFor(String key, Object obj) {
@@ -161,7 +157,8 @@ public class GDCQuery {
         try {
             File jsonFile = new File(last_query_file_tmp_path);
             URI uri = jsonFile.toURI();
-            JSONTokener tokener = new JSONTokener(uri.toURL().openStream());
+            InputStream in = uri.toURL().openStream();
+            JSONTokener tokener = new JSONTokener(in);
             JSONObject root = new JSONObject(tokener);
             HashMap<String, Object> json_data = new HashMap<>(JSONUtils.jsonToMap(root));
             
@@ -194,6 +191,7 @@ public class GDCQuery {
                     System.err.println("exp already exists");*/
                 data.put(key, values);
             }
+            in.close();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -209,28 +207,60 @@ public class GDCQuery {
             //System.err.println(url);
             System.err.println(uuid + "\t" + fileName);
             GUI.appendLog(logPane, uuid + "\t" + fileName + "\n");
-            
+
             File outFile = new File(outFolderPath + fileName);
             if (outFile.exists())
                 outFile.delete();
             
             URL url = new URL(url_string);
-            URLConnection connection = url.openConnection();
+            HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
+            InputStream is = httpConn.getInputStream();
             FileOutputStream fos = new FileOutputStream(outFolderPath + fileName);
-            PrintStream out = new PrintStream(fos);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line = reader.readLine();
-            while (line != null) {
-                String nextLine = reader.readLine();
-                if (nextLine != null)
-                    out.println(line);
-                else
-                    out.print(line); //remove last newline char
-                line = nextLine;
-            }
-            reader.close();
-            out.close();
+            int bytesRead;
+            byte[] buffer = new byte[BUFFER_SIZE];
+            while ((bytesRead = is.read(buffer)) != -1)
+                fos.write(buffer, 0, bytesRead);
             fos.close();
+            is.close();
+            httpConn.disconnect();
+            
+            /*URL website = new URL(url_string);
+            ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+            FileOutputStream fos = new FileOutputStream(outFolderPath + fileName);
+            long read = 0;
+            long pos = 0;
+            while ((read = fos.getChannel().transferFrom(rbc, pos, Long.MAX_VALUE)) > 0)
+                pos += read;
+            fos.close();
+            rbc.close();*/
+            
+            /*if (fileName.trim().toLowerCase().endsWith(".gz")) {
+                URL website = new URL(url_string);
+                ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+                FileOutputStream fos = new FileOutputStream(outFolderPath + fileName);
+                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                fos.close();
+                rbc.close();
+            }
+            else {
+                URL url = new URL(url_string);
+                URLConnection connection = url.openConnection();
+                FileOutputStream fos = new FileOutputStream(outFolderPath + fileName);
+                PrintStream out = new PrintStream(fos);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String line = reader.readLine();
+                while (line != null) {
+                    String nextLine = reader.readLine();
+                    if (nextLine != null)
+                        out.println(line);
+                    else
+                        out.print(line); //remove last newline char
+                    line = nextLine;
+                }
+                reader.close();
+                out.close();
+                fos.close();
+            }*/
         }
         catch (Exception e) {
             recursive_iteration++;
