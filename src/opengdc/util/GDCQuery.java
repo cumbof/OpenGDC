@@ -109,6 +109,8 @@ public class GDCQuery {
             out.close();
             fos.close();
             
+            conn.disconnect();
+            
             return Settings.getTmpDir() + query_file_name;
         }
         catch (Exception e) {
@@ -154,8 +156,8 @@ public class GDCQuery {
     public static HashMap<String, HashMap<String, String>> extractInfo(String last_query_file_tmp_path) {
         //aliquot = "";
         HashMap<String, HashMap<String, String>> data = new HashMap<>();
-        try {
-            File jsonFile = new File(last_query_file_tmp_path);
+        File jsonFile = new File(last_query_file_tmp_path);
+        try {    
             URI uri = jsonFile.toURI();
             InputStream in = uri.toURL().openStream();
             JSONTokener tokener = new JSONTokener(in);
@@ -196,6 +198,7 @@ public class GDCQuery {
         catch (Exception e) {
             e.printStackTrace();
         }
+        jsonFile.delete();
         return data;
     }
     
@@ -277,6 +280,10 @@ public class GDCQuery {
             - cases.samples.portions.analytes.aliquots.aliquot_id
     */
     public static ArrayList<HashMap<String, String>> retrieveExpInfoFromAttribute(String field, String value, HashSet<String> attributes, int recursive_iteration, int from, ArrayList<HashMap<String, String>> info) {
+        Date now = new Date();
+        SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
+        String query_file_name = "query_"+ft.format(now)+".json";
+        String query_file_path = Settings.getTmpDir() + query_file_name;
         if (attributes!=null) {
             if (!attributes.isEmpty()) {
                 try {
@@ -304,12 +311,8 @@ public class GDCQuery {
                     System.err.println(conn_str);
                     HttpURLConnection conn = (HttpURLConnection) (new URL(conn_str)).openConnection();
                     conn.connect();
-
-                    Date now = new Date();
-                    SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
-
-                    String query_file_name = "query_"+ft.format(now)+".json";
-                    FileOutputStream fos = new FileOutputStream(Settings.getTmpDir() + query_file_name);
+                    
+                    FileOutputStream fos = new FileOutputStream(query_file_path);
                     PrintStream out = new PrintStream(fos);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                     for (String line; (line = reader.readLine()) != null;) {
@@ -320,10 +323,13 @@ public class GDCQuery {
                     reader.close();
                     out.close();
                     fos.close();
+                    
+                    conn.disconnect();
 
-                    File jsonFile = new File(Settings.getTmpDir() + query_file_name);
+                    File jsonFile = new File(query_file_path);
                     URI uri = jsonFile.toURI();
-                    JSONTokener tokener = new JSONTokener(uri.toURL().openStream());
+                    InputStream in = uri.toURL().openStream();
+                    JSONTokener tokener = new JSONTokener(in);
                     JSONObject root = new JSONObject(tokener);
                     HashMap<String, Object> json_data = new HashMap<>(JSONUtils.jsonToMap(root));
                     
@@ -346,8 +352,9 @@ public class GDCQuery {
                         }
                         info.add(data_node);
                     }
-
-                    conn.disconnect();
+                    
+                    in.close();
+                    jsonFile.delete();
                     
                     if ((total - ((recursive_iteration+1)*SIZE_LIMIT)) > 0) {
                         from = ((recursive_iteration+1)*SIZE_LIMIT)+1;

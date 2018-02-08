@@ -34,8 +34,6 @@ public class DownloadAndUncompressTest {
     public static void main(String[] args) {
         String query_file_path = GDCQuery.query(disease, dataType, 0);
         HashMap<String, HashMap<String, String>> dataMap = GDCQuery.extractInfo(query_file_path);
-        if (query_file_path != null)
-            (new File(query_file_path)).delete();
         
         /* DOWNLOAD (AND EXTRACT (AND REMOVE)) FILE BY FILE */
         for (String uuid: dataMap.keySet()) {
