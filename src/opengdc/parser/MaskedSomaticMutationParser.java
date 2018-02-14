@@ -35,7 +35,7 @@ public class MaskedSomaticMutationParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
-        HashMap<File,File> error_inputFile2outputFile = new HashMap<>();
+        HashMap<String, String> error_inputFile2outputFile = new HashMap<>();
         HashMap<String, String> filesPathConverted = new HashMap<>();
         HashMap<String, Object> uuid_dataMap = new HashMap<>();
         
@@ -210,7 +210,7 @@ public class MaskedSomaticMutationParser extends BioParser {
                                 }
                             }
                             catch (Exception e) {
-                                error_inputFile2outputFile.put(f, new File(filePath));
+                                error_inputFile2outputFile.put(f.getAbsolutePath(), filePath);
                                 e.printStackTrace();
                             }
                         }

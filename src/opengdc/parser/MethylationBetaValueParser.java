@@ -24,6 +24,7 @@ import java.util.List;
 import opengdc.GUI;
 import opengdc.integration.GeneNames;
 import opengdc.integration.Gencode;
+import opengdc.integration.NCBI;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
 import opengdc.util.GDCQuery;
@@ -43,7 +44,7 @@ public class MethylationBetaValueParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
 
-        HashMap<File,File> error_inputFile2outputFile = new HashMap<>();
+        HashMap<String, String> error_inputFile2outputFile = new HashMap<>();
         HashSet<String> filesPathConverted = new HashSet<>();
         
         File[] files = (new File(inPath)).listFiles();
@@ -178,7 +179,7 @@ public class MethylationBetaValueParser extends BioParser {
                             filesPathConverted.add(filePath);
                         }
                         catch (Exception e) {
-                            error_inputFile2outputFile.put(f, new File(filePath));
+                            error_inputFile2outputFile.put(f.getAbsolutePath(), filePath);
                             e.printStackTrace();
                         }
                     }
@@ -276,7 +277,7 @@ public class MethylationBetaValueParser extends BioParser {
             gene_type = gene_type_comp.split(";")[i];
             all_gene_types = all_gene_types + ";"+gene_type;
 
-            List<String> index_entrez = new ArrayList<String>();
+            List<String> index_entrez = new ArrayList<>();
             index_entrez.add(i+"_"+last);
             index_entrez.add(entrez);
             gene2startEnd.put(gene_symbol_tmp, index_entrez);

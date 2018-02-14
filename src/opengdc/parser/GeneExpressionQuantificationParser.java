@@ -39,7 +39,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
 
-        HashMap<File,File> error_outputFile2inputFile = new HashMap<>();
+        HashMap<String, String> error_outputFile2inputFile = new HashMap<>();
         HashSet<String> filesPathConverted = new HashSet<>();
         
         // retrive all aliquot IDs
@@ -62,7 +62,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
                 }
             }
         }
-        
+                
         HashSet<String> already_processed = new HashSet<>();
         for (File f: files) {
             String filename = f.getName();
@@ -101,17 +101,27 @@ public class GeneExpressionQuantificationParser extends BioParser {
                     HashMap<String, String> ensembl2fpkm = GeneExpressionQuantificationReader.getEnsembl2Value(fpkm_file);
                     HashMap<String, String> ensembl2fpkmuq = GeneExpressionQuantificationReader.getEnsembl2Value(fpkmuq_file);
 
-                    ArrayList<File> filesInput_exception = new ArrayList<>() ;
+                    ArrayList<String> filesInput_exception = new ArrayList<>() ;
+                    String f_suffixName = filename.toLowerCase().replaceAll(".htseq.counts", "").replaceAll(".fpkm.txt", "").replaceAll(".fpkm-uq.txt", "");
                     if (ensembl2count.containsKey("error")){
-                        filesInput_exception.add(f);
+                        if (counts_file != null)
+                            filesInput_exception.add(counts_file.getAbsolutePath());
+                        else
+                            filesInput_exception.add(f_suffixName+".htseq.counts");
                         ensembl2count.remove("error");
                     }
                     if (ensembl2fpkm.containsKey("error")){
-                        filesInput_exception.add(fpkm_file);
+                        if (fpkm_file != null)
+                            filesInput_exception.add(fpkm_file.getAbsolutePath());
+                        else
+                            filesInput_exception.add(f_suffixName+".fpkm.txt");
                         ensembl2fpkm.remove("error");
                     }
                     if (ensembl2fpkmuq.containsKey("error")){
-                        filesInput_exception.add(fpkmuq_file);
+                        if (fpkmuq_file != null)
+                            filesInput_exception.add(fpkmuq_file.getAbsolutePath());
+                        else
+                            filesInput_exception.add(f_suffixName+".fpkm-uq.txt");
                         ensembl2fpkmuq.remove("error");
                     }
                     
@@ -119,8 +129,8 @@ public class GeneExpressionQuantificationParser extends BioParser {
                     String filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
 
                     if (!filesInput_exception.isEmpty()) {
-                        for (File filewitherror: filesInput_exception)
-                            error_outputFile2inputFile.put(filewitherror, new File(filePath));
+                        for (String filewitherror: filesInput_exception)
+                            error_outputFile2inputFile.put(filewitherror, filePath);
                     }
 
                     if (filesInput_exception.size() < 3) { // the number of input files is always 3 (count, fpkm, fpkmuq)

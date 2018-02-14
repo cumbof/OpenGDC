@@ -83,38 +83,44 @@ public class FormatUtils {
     
     /*-------------------------------------------------------*/
     
-    public static String createEntry(String formatExt, ArrayList<String> values, String[] doc_header) {
+    public static String createEntry(String formatExt, ArrayList<String> values, String[] doc_header, boolean firstRow) {
         if (formatExt.toLowerCase().equals("bed"))
-            return strBED(values);
+            return strBED(values, firstRow);
         else if (formatExt.toLowerCase().equals("csv"))
-            return strCSV(values);
+            return strCSV(values, firstRow);
         else if (formatExt.toLowerCase().equals("json"))
             return strJSON(values, doc_header);
         else if (formatExt.toLowerCase().equals("xml"))
             return strXML(values, doc_header);
         else if (formatExt.toLowerCase().equals("gtf"))
-            return strGTF(values, doc_header);
+            return strGTF(values, doc_header, firstRow);
         return "";
     }
 
-    private static String strBED(ArrayList<String> values) {
+    private static String strBED(ArrayList<String> values, boolean firstRow) {
         if (!values.isEmpty()) {
             String line = "";
             for (int i=0; i<values.size()-1; i++)
                 line = line + values.get(i) + BED_SEPARATOR;
             line = line + values.get(values.size()-1);
-            return line + END_OF_LINE;
+            if (firstRow)
+                return line;
+            return END_OF_LINE + line;
+            //return line + END_OF_LINE;
         }
         return "";
     }
     
-    private static String strCSV(ArrayList<String> values) {
+    private static String strCSV(ArrayList<String> values, boolean firstRow) {
         if (!values.isEmpty()) {
             String line = "";
             for (int i=0; i<values.size()-1; i++)
                 line = line + values.get(i) + CSV_SEPARATOR;
             line = line + values.get(values.size()-1);
-            return line + END_OF_LINE;
+            if (firstRow)
+                return line;
+            return END_OF_LINE + line;
+            //return line + END_OF_LINE;
         }
         return "";
     }
@@ -150,7 +156,7 @@ public class FormatUtils {
         return str;
     }
     
-    private static String strGTF(ArrayList<String> values, String[] doc_header) {
+    private static String strGTF(ArrayList<String> values, String[] doc_header, boolean firstRow) {
         if (!values.isEmpty()) {
             String chr = values.get(0);
             String source = "OpenGDC";
@@ -176,7 +182,10 @@ public class FormatUtils {
                     line = line + doc_header[i] + " " + "\""+values.get(i)+"\"" + "; ";
                 }
             }
-            return line + END_OF_LINE;
+            if (firstRow)
+                return line;
+            return END_OF_LINE + line;
+            //return line + END_OF_LINE;
         }
         return "";
     }

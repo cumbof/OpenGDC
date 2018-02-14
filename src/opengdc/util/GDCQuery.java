@@ -20,7 +20,10 @@ import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -215,7 +218,7 @@ public class GDCQuery {
             if (outFile.exists())
                 outFile.delete();
             
-            URL url = new URL(url_string);
+            /*URL url = new URL(url_string);
             HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
             InputStream is = httpConn.getInputStream();
             FileOutputStream fos = new FileOutputStream(outFolderPath + fileName);
@@ -225,23 +228,15 @@ public class GDCQuery {
                 fos.write(buffer, 0, bytesRead);
             fos.close();
             is.close();
-            httpConn.disconnect();
-            
-            /*URL website = new URL(url_string);
-            ReadableByteChannel rbc = Channels.newChannel(website.openStream());
-            FileOutputStream fos = new FileOutputStream(outFolderPath + fileName);
-            long read = 0;
-            long pos = 0;
-            while ((read = fos.getChannel().transferFrom(rbc, pos, Long.MAX_VALUE)) > 0)
-                pos += read;
-            fos.close();
-            rbc.close();*/
-            
-            /*if (fileName.trim().toLowerCase().endsWith(".gz")) {
-                URL website = new URL(url_string);
-                ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+            httpConn.disconnect();*/
+                        
+            if (fileName.trim().toLowerCase().endsWith(".gz")) {
+                URL url = new URL(url_string);
+                ReadableByteChannel rbc = Channels.newChannel(url.openStream());
                 FileOutputStream fos = new FileOutputStream(outFolderPath + fileName);
-                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                long read, pos = 0;
+                while ((read = fos.getChannel().transferFrom(rbc, pos, Long.MAX_VALUE)) > 0)
+                    pos += read;
                 fos.close();
                 rbc.close();
             }
@@ -263,7 +258,7 @@ public class GDCQuery {
                 reader.close();
                 out.close();
                 fos.close();
-            }*/
+            }
         }
         catch (Exception e) {
             recursive_iteration++;

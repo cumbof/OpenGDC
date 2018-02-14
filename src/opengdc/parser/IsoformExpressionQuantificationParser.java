@@ -41,7 +41,7 @@ public class IsoformExpressionQuantificationParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
-        HashMap<File,File> error_inputFile2outputFile = new HashMap<>();
+        HashMap<String, String> error_inputFile2outputFile = new HashMap<>();
         HashSet<String> filesPathConverted = new HashSet<>();
                 
         File[] files = (new File(inPath)).listFiles();
@@ -155,7 +155,7 @@ public class IsoformExpressionQuantificationParser extends BioParser {
                             filesPathConverted.add(filePath);
                         }
                         catch (Exception e) {
-                            error_inputFile2outputFile.put(f, new File(filePath));
+                            error_inputFile2outputFile.put(f.getAbsolutePath(), filePath);
                             e.printStackTrace();
                         }
                     }

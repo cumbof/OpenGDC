@@ -85,6 +85,7 @@ public abstract class BioParser {
     
     public void printData(Path outFilePath, HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMap, String format, String[] header) {
         if (!dataMap.isEmpty()) {
+            boolean firstRow = true;
             ArrayList<Integer> chrs = new ArrayList<>(dataMap.keySet());
             // sort by chr
             Collections.sort(chrs);
@@ -97,7 +98,8 @@ public abstract class BioParser {
                     ArrayList<ArrayList<String>> dataArray = dataList.get(start);
                     for (ArrayList<String> data: dataArray) {
                         try {
-                            Files.write(outFilePath, (FormatUtils.createEntry(format, data, header)).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                            Files.write(outFilePath, (FormatUtils.createEntry(format, data, header, firstRow)).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                            firstRow = false;
                         }
                         catch (Exception e) {
                             e.printStackTrace();
@@ -159,24 +161,24 @@ public abstract class BioParser {
             return "";
         else return metaValue;
     }
-
-    public void printErrorFileLog(HashMap<File,File> error_inputFile2outputFile){
-        for (File f: error_inputFile2outputFile.keySet())   {
-            File outputFile = error_inputFile2outputFile.get(f);
+    
+    public void printErrorFileLog(HashMap<String, String> error_inputFile2outputFile){
+        for (String f: error_inputFile2outputFile.keySet())   {
+            File outputFile = new File(error_inputFile2outputFile.get(f));
             if (outputFile.exists()) {
                 if (outputFile.length() == 0) { // return length in bytes
                     outputFile.delete();
-                    System.err.println("WARNING [empty file]: " + outputFile.getAbsolutePath() + " has been deleted. The input file " + f.getAbsolutePath() + " could be corrupted");
-                    GUI.appendLog(this.getLogger(), "\n WARNING [empty file]: " + outputFile.getAbsolutePath() + " has been deleted. The input file " + f.getAbsolutePath() + " could be corrupted");
+                    System.err.println("WARNING [empty file]: " + outputFile.getAbsolutePath() + " has been deleted. The input file " + f + " could be corrupted");
+                    GUI.appendLog(this.getLogger(), "\n WARNING [empty file]: " + outputFile.getAbsolutePath() + " has been deleted. The input file " + f + " could be corrupted");
                 }
                 else {
-                    System.err.println("WARNING [missing values]: " + outputFile.getAbsolutePath() + " has missing values. The input file " + f.getAbsolutePath() + " could be corrupted");
-                    GUI.appendLog(this.getLogger(), "\n WARNING [missing values]: " + outputFile.getAbsolutePath() + " has missing values. The input file " + f.getAbsolutePath() + " could be corrupted");
+                    System.err.println("WARNING [missing values]: " + outputFile.getAbsolutePath() + " has missing values. The input file " + f + " could be corrupted or may not exist");
+                    GUI.appendLog(this.getLogger(), "\n WARNING [missing values]: " + outputFile.getAbsolutePath() + " has missing values. The input file " + f + " could be corrupted or may not exist");
                 }
             }
             else {
-                System.err.println("WARNING [file not found]: " + outputFile.getAbsolutePath() + " does not exist. Something went wrong with the input file " + f.getAbsolutePath());
-                GUI.appendLog(this.getLogger(), "\n WARNING [file not found]: " + outputFile.getAbsolutePath() + " does not exist. Something went wrong with the input file " + f.getAbsolutePath());
+                System.err.println("WARNING [file not found]: " + outputFile.getAbsolutePath() + " does not exist. Something went wrong with the input file " + f);
+                GUI.appendLog(this.getLogger(), "\n WARNING [file not found]: " + outputFile.getAbsolutePath() + " does not exist. Something went wrong with the input file " + f);
             }
         }
     }
