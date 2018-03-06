@@ -21,11 +21,28 @@ import java.util.HashSet;
 public class Main {
     
     private static HashSet<String> skip_diseases = new HashSet<>();
+    private static HashSet<String> todo_diseases = new HashSet<>();
     private static HashSet<String> skip_datatypes = new HashSet<>();
     //private static final String CMD = "download and convert";
     private static final String CMD = "download and convert";
     private static final String ROOT = "/FTP/ftp-root/";
     //private static final String ROOT = "/Users/fabio/Downloads/test_gdc_download/";
+    
+    private static void initDiseases() {
+        todo_diseases = new HashSet<>();
+        todo_diseases.add("tcga-uvm");
+        todo_diseases.add("tcga-ucs");
+        todo_diseases.add("tcga-ucec");
+        todo_diseases.add("tcga-tgct");
+        todo_diseases.add("tcga-pcpg");
+        todo_diseases.add("tcga-meso");
+        todo_diseases.add("tcga-luad");
+        todo_diseases.add("tcga-lihc");
+        todo_diseases.add("tcga-kirp");
+        todo_diseases.add("tcga-gbm");
+        todo_diseases.add("tcga-cesc");
+        todo_diseases.add("tcga-blca");
+    }
     
     private static void initSkipDiseases() {
         skip_diseases = new HashSet<>();
@@ -80,6 +97,7 @@ public class Main {
         
         initSkipDiseases();
         initSkipDataTypes();
+        initDiseases();
         
         HashMap<String, HashMap<String, HashSet<String>>> gdcDataMap = GDCData.getBigGDCDataMap();
         for (String program: gdcDataMap.keySet()) {
@@ -87,6 +105,7 @@ public class Main {
                 for (String disease: gdcDataMap.get(program).keySet()) {
                     //if (disease.toLowerCase().equals(inputDisease.toLowerCase())) {
                         if (!skip_diseases.contains(disease.toLowerCase())) {
+                        //if (todo_diseases.contains(disease.toLowerCase())) {
                             //HashSet<String> dataTypes = new HashSet<>();
                             //dataTypes.add("Clinical and Biospecimen Supplements");
                             for (String dataType: gdcDataMap.get(program).get(disease)) {

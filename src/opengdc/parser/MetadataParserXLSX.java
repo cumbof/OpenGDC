@@ -164,7 +164,11 @@ public class MetadataParserXLSX extends BioParser {
 
                                                 // biospecimen
                                                 for (String attribute: biospecimen_sorted) {
-                                                    String attribute_parsed = FSUtils.stringToValidJavaIdentifier("biospecimen__" + attribute.replaceAll("\\.", "__"));
+                                                    String[] headers = attribute.split(MetadataHandler.__OPENGDCSEP__);
+                                                    String attribute_parsed = "";
+                                                    for (String h: headers)
+                                                        attribute_parsed += FSUtils.stringToValidJavaIdentifier(h) + "__";
+                                                    attribute_parsed = "biospecimen__" + attribute_parsed.substring(0, attribute_parsed.length()-2);
                                                     String value_parsed = checkForNAs(biospecimenBigMap.get(case_usi).get(attribute));
                                                     if (!value_parsed.trim().equals(""))
                                                         out.println(attribute_parsed + "\t" + value_parsed);
@@ -172,7 +176,11 @@ public class MetadataParserXLSX extends BioParser {
 
                                                 // clinical
                                                 for (String attribute: clinical_sorted) {
-                                                    String attribute_parsed = FSUtils.stringToValidJavaIdentifier("clinical__" + attribute.replaceAll("\\.", "__"));
+                                                    String[] headers = attribute.split(MetadataHandler.__OPENGDCSEP__);
+                                                    String attribute_parsed = "";
+                                                    for (String h: headers)
+                                                        attribute_parsed += FSUtils.stringToValidJavaIdentifier(h) + "__";
+                                                    attribute_parsed = "clinical__" + attribute_parsed.substring(0, attribute_parsed.length()-2);
                                                     String value_parsed = checkForNAs(clinicalBigMap.get(case_usi).get(attribute));
                                                     if (!value_parsed.trim().equals(""))
                                                         out.println(attribute_parsed + "\t" + value_parsed);

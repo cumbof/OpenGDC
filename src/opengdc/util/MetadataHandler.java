@@ -43,6 +43,8 @@ import org.xml.sax.SAXParseException;
  */
 public class MetadataHandler {
     
+    public static final String __OPENGDCSEP__ = "__opengdcsep__";
+    
     // for createMap function only
     private static int keyPrefixCounterForUniqueness = 0;
     // cast to HashMap<String, Object>
@@ -254,7 +256,7 @@ public class MetadataHandler {
                                         else if (prefix_header.trim().equals(suffix_header.trim()))
                                             header_str = prefix_header;
                                         else if (!prefix_header.trim().equals("") && !suffix_header.trim().equals(""))
-                                            header_str = prefix_header+" "+suffix_header;
+                                            header_str = prefix_header+__OPENGDCSEP__+suffix_header;
 
                                         //System.err.println(header_str + "\t" + cellIterations);
 

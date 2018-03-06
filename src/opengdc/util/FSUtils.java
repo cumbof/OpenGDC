@@ -17,7 +17,7 @@ import java.util.HashSet;
  * @author fabio
  */
 public class FSUtils {
-    
+        
     public static void deleteDir(File file) {
         File[] contents = file.listFiles();
         if (contents != null) {
@@ -48,14 +48,40 @@ public class FSUtils {
     
     /* https://stackoverflow.com/a/7440915 */
     public static String stringToValidJavaIdentifier(String str) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < str.length(); i++) {
-            if (Character.isJavaIdentifierStart(str.charAt(0)) || i > 0 && Character.isJavaIdentifierPart(str.charAt(i)))
-                sb.append(str.charAt(i));
-            else
-                sb.append("_");
+        str = str.trim();
+        if (str.length() > 0) {
+            StringBuilder sb = new StringBuilder();
+            int countSpecialChars = 0;
+            for (int i = 0; i < str.length(); i++) {
+                if (i == 0 && String.valueOf(str.charAt(i)).matches("[a-zA-Z]")) {
+                    sb.append(str.charAt(i));
+                    countSpecialChars = 0;
+                } 
+                else if (i > 0 && String.valueOf(str.charAt(i)).matches("[a-zA-Z0-9]")) {
+                    sb.append(str.charAt(i));
+                    countSpecialChars = 0;
+                }
+                else {
+                    if (countSpecialChars == 0) {
+                        if (i < str.length()-1) {
+                            if (i == 0) {
+                                try {
+                                    sb.append("_");
+                                    String integerChar = String.valueOf(Integer.valueOf(str.charAt(i)));
+                                    sb.append(integerChar);
+                                }
+                                catch (Exception e) { }
+                            }
+                            else
+                                sb.append("_");
+                        }
+                    }
+                    countSpecialChars++;
+                }
+            }
+            return sb.toString();
         }
-        return sb.toString();
+        return null;
     }
-    
+
 }

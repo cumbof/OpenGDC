@@ -230,7 +230,7 @@ public class GDCQuery {
             is.close();
             httpConn.disconnect();*/
                         
-            if (fileName.trim().toLowerCase().endsWith(".gz")) {
+            if (fileName.trim().toLowerCase().endsWith(".gz") || fileName.trim().toLowerCase().endsWith(".xlsx")) {
                 URL url = new URL(url_string);
                 ReadableByteChannel rbc = Channels.newChannel(url.openStream());
                 FileOutputStream fos = new FileOutputStream(outFolderPath + fileName);
