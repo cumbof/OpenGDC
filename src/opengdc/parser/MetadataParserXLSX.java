@@ -49,7 +49,6 @@ public class MetadataParserXLSX extends BioParser {
                     System.err.println("Processing " + f.getName());
                     GUI.appendLog(this.getLogger(), "Processing " + f.getName() + "\n");
                     
-                    
                     if (f.getName().toLowerCase().contains("clinical")) {                        
                         HashMap<String, HashMap<String, String>> metadata_from_tsv = MetadataHandler.getXLSXMap(f.getAbsolutePath(), "target usi");
                         clinicalBigMap.putAll(metadata_from_tsv);

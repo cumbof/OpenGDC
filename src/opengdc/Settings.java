@@ -18,7 +18,7 @@ import java.io.File;
 public class Settings {
     
     // debug flag
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     
     public static boolean isDebug() {
         return DEBUG;
@@ -85,7 +85,7 @@ public class Settings {
         return GDC_DATA_PORTAL_URL;
     }
     
-    private static final String OPEN_GDC_PAGE_URL = "http://bioinf.iasi.cnr.it/opengdc/";
+    private static final String OPEN_GDC_PAGE_URL = "http://bioinformatics.iasi.cnr.it/opengdc/";
     public static String getOpenGDCPageURL() {
         return OPEN_GDC_PAGE_URL;
     }

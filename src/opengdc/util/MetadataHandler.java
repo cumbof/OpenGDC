@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -179,10 +180,8 @@ public class MetadataHandler {
         return result;
     }
     
+    // https://gist.github.com/madan712/3912272
     public static HashMap<String, HashMap<String, String>> getXLSXMap(String file_path, String indexBy) {
-        // TO-DO
-        // https://gist.github.com/madan712/3912272
-        
         HashMap<String, HashMap<String, String>> result = new HashMap<>();
         
         try {
@@ -194,13 +193,14 @@ public class MetadataHandler {
                 XSSFSheet sheet = wb.getSheetAt(sheet_index);
                 
                 String sheet_name = sheet.getSheetName();
-                if (!sheet_name.toLowerCase().trim().contains("criteria")) { // skip criteria sheet
+                if (!sheet_name.toLowerCase().trim().contains("criteria") &&
+                    !sheet_name.toLowerCase().trim().contains("original")) { // skip sheets
                     XSSFRow row; 
                     XSSFCell cell;
                     Iterator rows = sheet.rowIterator();
 
                     //String criteria_str = "";
-                    int header_rows = 2;
+                    int header_rows = 1;
                     int current_row = 0;
 
                     ArrayList<String> header = new ArrayList<>();
@@ -224,14 +224,17 @@ public class MetadataHandler {
                             else if (cell.getCellTypeEnum() == CellType.NUMERIC)
                                 cellValue = String.valueOf(cell.getNumericCellValue());
                             
-                            if (!cellValue.equals("")) {
+                            if (!cellValue.trim().equals("")) {
                             
                                 //String cellValue = cell.getRawValue();
                                 //System.err.println(cellValue);
 
                                 // cell is in merged region?
                                 int cellIterations = 1;
-                                for (CellRangeAddress mergedRegion: sheet.getMergedRegions()) {
+                                List<CellRangeAddress> mergedRegionsInSheet = sheet.getMergedRegions();
+                                if (mergedRegionsInSheet.size() > 0)
+                                    header_rows = 2;
+                                for (CellRangeAddress mergedRegion: mergedRegionsInSheet) {
                                     if (mergedRegion.isInRange(cell)) {
                                         cellIterations = mergedRegion.getNumberOfCells();
                                         //if (mergedRegion.containsRow(current_row-1))

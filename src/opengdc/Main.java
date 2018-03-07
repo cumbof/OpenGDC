@@ -21,58 +21,23 @@ import java.util.HashSet;
 public class Main {
     
     private static HashSet<String> skip_diseases = new HashSet<>();
-    private static HashSet<String> todo_diseases = new HashSet<>();
     private static HashSet<String> skip_datatypes = new HashSet<>();
     //private static final String CMD = "download and convert";
     private static final String CMD = "download and convert";
     private static final String ROOT = "/FTP/ftp-root/";
     //private static final String ROOT = "/Users/fabio/Downloads/test_gdc_download/";
     
-    private static void initDiseases() {
-        todo_diseases = new HashSet<>();
-        todo_diseases.add("tcga-uvm");
-        todo_diseases.add("tcga-ucs");
-        todo_diseases.add("tcga-ucec");
-        todo_diseases.add("tcga-tgct");
-        todo_diseases.add("tcga-pcpg");
-        todo_diseases.add("tcga-meso");
-        todo_diseases.add("tcga-luad");
-        todo_diseases.add("tcga-lihc");
-        todo_diseases.add("tcga-kirp");
-        todo_diseases.add("tcga-gbm");
-        todo_diseases.add("tcga-cesc");
-        todo_diseases.add("tcga-blca");
-    }
-    
     private static void initSkipDiseases() {
         skip_diseases = new HashSet<>();
-        skip_diseases.add("tcga-thca");
-        skip_diseases.add("tcga-kirc");
-        skip_diseases.add("tcga-ov");
-        skip_diseases.add("tcga-brca");
-        skip_diseases.add("tcga-acc");
-        skip_diseases.add("tcga-stad");
-        skip_diseases.add("tcga-kich");
-        skip_diseases.add("tcga-chol");
-        skip_diseases.add("tcga-thym");
-        skip_diseases.add("tcga-sarc");
-        skip_diseases.add("tcga-skcm");
-        skip_diseases.add("tcga-dlbc");
-        skip_diseases.add("tcga-paad");
-        skip_diseases.add("tcga-coad");
-        skip_diseases.add("tcga-esca");
-        skip_diseases.add("tcga-read");
-        skip_diseases.add("tcga-lusc");
     }
     
     private static void initSkipDataTypes() {
         skip_datatypes = new HashSet<>();
         /*skip_datatypes.add("clinical supplement");
-        skip_datatypes.add("biospecimen supplement");
+        skip_datatypes.add("biospecimen supplement");*/
         skip_datatypes.add("gene expression quantification");
-        skip_datatypes.add("methylation beta value");
-        skip_datatypes.add("copy number segment");
-        skip_datatypes.add("isoform expression quantification");*/
+        skip_datatypes.add("miRNA Expression Quantification");
+        skip_datatypes.add("isoform expression quantification");
     }
 
     /**
@@ -97,11 +62,10 @@ public class Main {
         
         initSkipDiseases();
         initSkipDataTypes();
-        initDiseases();
         
         HashMap<String, HashMap<String, HashSet<String>>> gdcDataMap = GDCData.getBigGDCDataMap();
         for (String program: gdcDataMap.keySet()) {
-            if (program.toLowerCase().trim().equals("tcga")) {
+            if (program.toLowerCase().trim().equals("target")) {
                 for (String disease: gdcDataMap.get(program).keySet()) {
                     //if (disease.toLowerCase().equals(inputDisease.toLowerCase())) {
                         if (!skip_diseases.contains(disease.toLowerCase())) {

@@ -563,7 +563,7 @@ public class GUI extends javax.swing.JFrame {
         });
         jMenu2.add(jMenuItem4);
 
-        jMenuItem5.setText("OpenGDC Web-Page");
+        jMenuItem5.setText("GDC2BED Web-Page");
         jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItem5ActionPerformed(evt);
