@@ -9,6 +9,7 @@
  */
 package opengdc;
 
+import java.io.File;
 import opengdc.util.FormatUtils;
 import opengdc.util.GDCData;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.StyledDocument;
+import opengdc.util.FSUtils;
 
 /**
  *
@@ -110,7 +112,12 @@ public class GUI extends javax.swing.JFrame {
         jMenuItem4 = new javax.swing.JMenuItem();
         jMenuItem5 = new javax.swing.JMenuItem();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                GUI.this.windowClosing(evt);
+            }
+        });
 
         jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
@@ -600,6 +607,10 @@ public class GUI extends javax.swing.JFrame {
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
         this.dispose();
+        // empty tmp dir
+        File tmpDir = new File(Settings.getTmpDir());
+        FSUtils.deleteDir(tmpDir);
+        // terminate process
         System.exit(0);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
@@ -933,6 +944,15 @@ public class GUI extends javax.swing.JFrame {
         Settings.setInputGDCFolder("");
         jButton8.setEnabled(false);
     }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void windowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_windowClosing
+        this.dispose();
+        // empty tmp dir
+        File tmpDir = new File(Settings.getTmpDir());
+        FSUtils.deleteDir(tmpDir);
+        // terminate process
+        System.exit(0);
+    }//GEN-LAST:event_windowClosing
     
     public static JTextPane createLogWindow() {                
         if (!Settings.isDebug()) {

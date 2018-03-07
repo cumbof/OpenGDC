@@ -201,7 +201,7 @@ public class GDCQuery {
         catch (Exception e) {
             e.printStackTrace();
         }
-        jsonFile.delete();
+        //jsonFile.delete();
         return data;
     }
     
@@ -349,7 +349,7 @@ public class GDCQuery {
                     }
                     
                     in.close();
-                    jsonFile.delete();
+                    //jsonFile.delete();
                     
                     if ((total - ((recursive_iteration+1)*SIZE_LIMIT)) > 0) {
                         from = ((recursive_iteration+1)*SIZE_LIMIT)+1;
