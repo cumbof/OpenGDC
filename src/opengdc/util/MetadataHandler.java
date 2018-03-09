@@ -293,6 +293,7 @@ public class MetadataHandler {
                                         wb.close();
                                         excelFileToRead.close();
                                         File xlsxFile = new File(file_path);
+                                        System.err.println("ERROR [malformed input format]: An error has occurred while reading the XLSX file. Please control the structure of " + xlsxFile.getName());
                                         GUI.appendLog(pane, "\n ERROR [malformed input format]: An error has occurred while reading the XLSX file. Please control the structure of " + xlsxFile.getName());
                                         return new HashMap<>();
                                     }
