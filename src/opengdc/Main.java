@@ -23,25 +23,21 @@ public class Main {
     private static HashSet<String> skip_diseases = new HashSet<>();
     private static HashSet<String> skip_datatypes = new HashSet<>();
     //private static final String CMD = "download and convert";
-    private static final String CMD = "download and convert";
+    private static final String CMD = "convert";
     private static final String ROOT = "/FTP/ftp-root/";
     //private static final String ROOT = "/Users/fabio/Downloads/test_gdc_download/";
     
     private static void initSkipDiseases() {
         skip_diseases = new HashSet<>();
-        /*skip_diseases.add("TARGET-WT");
-        skip_diseases.add("TARGET-RT");
-        skip_diseases.add("TARGET-CCSK");
-        skip_diseases.add("TARGET-AML");*/
     }
     
     private static void initSkipDataTypes() {
         skip_datatypes = new HashSet<>();
         /*skip_datatypes.add("clinical supplement");
-        skip_datatypes.add("biospecimen supplement");
+        skip_datatypes.add("biospecimen supplement");*/
         skip_datatypes.add("gene expression quantification");
-        skip_datatypes.add("miRNA Expression Quantification");
-        skip_datatypes.add("isoform expression quantification");*/
+        //skip_datatypes.add("mirna Expression Quantification");
+        skip_datatypes.add("isoform expression quantification");
     }
 
     /**

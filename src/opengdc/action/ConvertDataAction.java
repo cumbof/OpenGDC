@@ -44,7 +44,7 @@ public class ConvertDataAction extends Action {
         
         // create log window
         logPane = GUI.createLogWindow();
-        
+        System.out.println("CONVERT\tDisease: "+disease+"\tDataType: "+dataType);
         System.err.println("Converting GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Format: " + format + "\n" + "Input Folder Path: " + input_path + "\n" + "Output Folder Path: " + output_path + "\n");
         GUI.appendLog(logPane, "Converting GDC Data" + "\n" + "Disease: " + disease + "\n" + "Data Type: " + dataType + "\n" + "Format: " + format + "\n" + "Input Folder Path: " + input_path + "\n" + "Output Folder Path: " + output_path + "\n");
         

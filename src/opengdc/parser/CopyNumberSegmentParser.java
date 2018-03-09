@@ -40,6 +40,24 @@ public class CopyNumberSegmentParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
 
+        // if the output folder is not empty, delete the most recent file
+        File folder = new File(outPath);
+        File[] files_out = folder.listFiles();
+        if (files_out.length != 0) {
+           File last_modified =files_out[0];
+           long time = 0;
+           for (File file : files_out) {
+              if (file.getName().endsWith(this.getFormat())) {
+                 if (file.lastModified() > time) {  
+                    time = file.lastModified();
+                    last_modified = file;
+                 }
+              }
+           }
+           System.err.println("File deleted: " + last_modified.getName());
+           last_modified.delete();
+        }
+        
         HashMap<String, String> error_inputFile2outputFile = new HashMap<>();
         HashSet<String> filesPathConverted = new HashSet<>();
         
@@ -64,72 +82,76 @@ public class CopyNumberSegmentParser extends BioParser {
                     if (!aliquot_uuid.trim().equals("")) {
                         String suffix_id = this.getOpenGDCSuffix(dataType, false);
                         String filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
-                        try {
-                            Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
-                            /** store entries **/
-                            HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
-                            
-                            InputStream fstream = new FileInputStream(f.getAbsolutePath());
-                            DataInputStream in = new DataInputStream(fstream);
-                            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                            String line;
-                            boolean firstLine = true;
-                            while ((line = br.readLine()) != null) {
-                                if (firstLine)
-                                    firstLine = false; // just skip the first line (header)
-                                else {
-                                    String[] line_split = line.split("\t");
-                                    String chr = line_split[1];
-                                    if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
-                                    String start = String.valueOf((int)Double.parseDouble(line_split[2]));
-                                    String end = String.valueOf((int)Double.parseDouble(line_split[3]));
-                                    String strand = "*"; // unknown strand for copy number variation data
-                                    String num_probes = line_split[4];
-                                    String segment_mean = line_split[5];
+                        // create file if it does not exist
+                        File out_file = new File(filePath);
+                        if (!out_file.exists()) {
+                            try {
+                                Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                                /** store entries **/
+                                HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMapChr = new HashMap<>();
 
-                                    ArrayList<String> values = new ArrayList<>();
-                                    values.add(parseValue(chr, 0));
-                                    values.add(parseValue(start, 1));
-                                    values.add(parseValue(end, 2));
-                                    values.add(parseValue(strand, 3));
-                                    values.add(parseValue(num_probes, 4));
-                                    values.add(parseValue(segment_mean, 5));
-                                    
-                                    /**********************************************************************/
-                                    /** populate dataMap then sort genomic coordinates and print entries **/
-                                    int chr_id = Integer.parseInt(parseValue(chr, 0).replaceAll("chr", "").replaceAll("X", "23").replaceAll("Y", "24"));
-                                    int start_id = Integer.parseInt(parseValue(start, 1));
-                                    HashMap<Integer, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
-                                    ArrayList<ArrayList<String>> dataList = new ArrayList<>();
-                                    if (dataMapChr.containsKey(chr_id)) {
-                                        dataMapStart = dataMapChr.get(chr_id);                                        
-                                        if (dataMapStart.containsKey(start_id))
-                                            dataList = dataMapStart.get(start_id);
-                                        dataList.add(values);
+                                InputStream fstream = new FileInputStream(f.getAbsolutePath());
+                                DataInputStream in = new DataInputStream(fstream);
+                                BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                                String line;
+                                boolean firstLine = true;
+                                while ((line = br.readLine()) != null) {
+                                    if (firstLine)
+                                        firstLine = false; // just skip the first line (header)
+                                    else {
+                                        String[] line_split = line.split("\t");
+                                        String chr = line_split[1];
+                                        if (!chr.toLowerCase().contains("chr")) chr = "chr"+chr;
+                                        String start = String.valueOf((int)Double.parseDouble(line_split[2]));
+                                        String end = String.valueOf((int)Double.parseDouble(line_split[3]));
+                                        String strand = "*"; // unknown strand for copy number variation data
+                                        String num_probes = line_split[4];
+                                        String segment_mean = line_split[5];
+
+                                        ArrayList<String> values = new ArrayList<>();
+                                        values.add(parseValue(chr, 0));
+                                        values.add(parseValue(start, 1));
+                                        values.add(parseValue(end, 2));
+                                        values.add(parseValue(strand, 3));
+                                        values.add(parseValue(num_probes, 4));
+                                        values.add(parseValue(segment_mean, 5));
+
+                                        /**********************************************************************/
+                                        /** populate dataMap then sort genomic coordinates and print entries **/
+                                        int chr_id = Integer.parseInt(parseValue(chr, 0).replaceAll("chr", "").replaceAll("X", "23").replaceAll("Y", "24"));
+                                        int start_id = Integer.parseInt(parseValue(start, 1));
+                                        HashMap<Integer, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
+                                        ArrayList<ArrayList<String>> dataList = new ArrayList<>();
+                                        if (dataMapChr.containsKey(chr_id)) {
+                                            dataMapStart = dataMapChr.get(chr_id);                                        
+                                            if (dataMapStart.containsKey(start_id))
+                                                dataList = dataMapStart.get(start_id);
+                                            dataList.add(values);
+                                        }
+                                        else
+                                            dataList.add(values);
+                                        dataMapStart.put(start_id, dataList);
+                                        dataMapChr.put(chr_id, dataMapStart);
+                                        /**********************************************************************/
+
+                                        // decomment this line to print entries without sorting genomic coordinates
+                                        //Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                     }
-                                    else
-                                        dataList.add(values);
-                                    dataMapStart.put(start_id, dataList);
-                                    dataMapChr.put(chr_id, dataMapStart);
-                                    /**********************************************************************/
-
-                                    // decomment this line to print entries without sorting genomic coordinates
-                                    //Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 }
-                            }
-                            br.close();
-                            in.close();
-                            fstream.close();
-                            
-                            // sort genomic coordinates and print data
-                            this.printData((new File(filePath)).toPath(), dataMapChr, this.getFormat(), getHeader());
+                                br.close();
+                                in.close();
+                                fstream.close();
 
-                            Files.write((new File(filePath)).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
-                            filesPathConverted.add(filePath);
-                        }
-                        catch (Exception e) {
-                            error_inputFile2outputFile.put(f.getAbsolutePath(), filePath);
-                            e.printStackTrace();
+                                // sort genomic coordinates and print data
+                                this.printData((new File(filePath)).toPath(), dataMapChr, this.getFormat(), getHeader());
+
+                                Files.write((new File(filePath)).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                filesPathConverted.add(filePath);
+                            }
+                            catch (Exception e) {
+                                error_inputFile2outputFile.put(f.getAbsolutePath(), filePath);
+                                e.printStackTrace();
+                            }
                         }
                     }
                     else {

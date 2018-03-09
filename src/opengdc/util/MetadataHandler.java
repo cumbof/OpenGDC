@@ -20,9 +20,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import javax.swing.JTextPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import opengdc.GUI;
 import opengdc.Settings;
 import opengdc.parser.BioParser;
 import org.apache.poi.ss.usermodel.CellType;
@@ -181,12 +183,12 @@ public class MetadataHandler {
     }
     
     // https://gist.github.com/madan712/3912272
-    public static HashMap<String, HashMap<String, String>> getXLSXMap(String file_path, String indexBy) {
+    public static HashMap<String, HashMap<String, String>> getXLSXMap(JTextPane pane, String file_path, String indexBy) {
         HashMap<String, HashMap<String, String>> result = new HashMap<>();
         
         try {
-            InputStream ExcelFileToRead = new FileInputStream(file_path);
-            XSSFWorkbook wb = new XSSFWorkbook(ExcelFileToRead);
+            InputStream excelFileToRead = new FileInputStream(file_path);
+            XSSFWorkbook wb = new XSSFWorkbook(excelFileToRead);
 
             int sheets = wb.getNumberOfSheets();
             for (int sheet_index=0; sheet_index<sheets; sheet_index++) {
@@ -281,10 +283,19 @@ public class MetadataHandler {
                                     }
                                 }
                                 else { // content
-                                    content_map.put(header.get(cell_index), cellValue);
-                                    if (cell_index == indexBy_position)
-                                        indexBy_value = cellValue;
-                                    cell_index++;
+                                    try {
+                                        content_map.put(header.get(cell_index), cellValue);
+                                        if (cell_index == indexBy_position)
+                                            indexBy_value = cellValue;
+                                        cell_index++;
+                                    }
+                                    catch (Exception e) {
+                                        wb.close();
+                                        excelFileToRead.close();
+                                        File xlsxFile = new File(file_path);
+                                        GUI.appendLog(pane, "\n ERROR [malformed input format]: An error has occurred while reading the XLSX file. Please control the structure of " + xlsxFile.getName());
+                                        return new HashMap<>();
+                                    }
                                 }
                             }
                             else
@@ -292,8 +303,11 @@ public class MetadataHandler {
                         }
                         
                         if (current_row >= header_rows) { // content
-                            if (!indexBy_value.trim().equals(""))
+                            if (!indexBy_value.trim().equals("")) {
+                                if (result.containsKey(indexBy_value))
+                                    content_map.putAll(result.get(indexBy_value));
                                 result.put(indexBy_value, content_map);
+                            }
                         }
                         //criteria_str += row_str;
                         current_row++;
@@ -307,6 +321,8 @@ public class MetadataHandler {
                     }*/
                 }
             }
+            wb.close();
+            excelFileToRead.close();
         }
         catch (Exception e) {
             e.printStackTrace();

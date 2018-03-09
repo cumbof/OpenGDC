@@ -39,6 +39,24 @@ public class MetadataParserXML extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
+        // if the output folder is not empty, delete the most recent file
+        File folder = new File(outPath);
+        File[] files_out = folder.listFiles();
+        if (files_out.length != 0) {
+           File last_modified =files_out[0];
+           long time = 0;
+           for (File file : files_out) {
+              if (file.getName().endsWith(this.getFormat())) {
+                 if (file.lastModified() > time) {  
+                    time = file.lastModified();
+                    last_modified = file;
+                 }
+              }
+           }
+           System.err.println("File deleted: " + last_modified.getName());
+           last_modified.delete();
+        }
+        
         HashMap<String, HashMap<String, String>> clinicalBigMap = new HashMap<>();
         HashMap<String, HashMap<String, String>> biospecimenBigMap = new HashMap<>();
         
@@ -191,7 +209,10 @@ public class MetadataParserXML extends BioParser {
                                             }
                                         }
 
-                                        if (!manually_curated_data_type.equals("")) {
+                                        
+                                        // create file if it does not exist
+                                        File out_file = new File(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
+                                        if (!out_file.exists()) {
                                             FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
                                             PrintStream out = new PrintStream(fos);
 
@@ -219,16 +240,17 @@ public class MetadataParserXML extends BioParser {
                                                 manually_curated.put("manually_curated__audit_warning", "missed the following required metadata: ["+missed_attributes_list.substring(0, missed_attributes_list.length()-2)+"]");
                                             }
 
-                                            // sort and print manually_curated attributes
-                                            ArrayList<String> manually_curated_attributes_sorted = new ArrayList<>(manually_curated.keySet());
-                                            Collections.sort(manually_curated_attributes_sorted);
-                                            for (String attr: manually_curated_attributes_sorted)
-                                                out.println(attr + "\t" + manually_curated.get(attr));
+                                            if (!manually_curated_data_type.equals("")) {
+                                                // sort and print manually_curated attributes
+                                                ArrayList<String> manually_curated_attributes_sorted = new ArrayList<>(manually_curated.keySet());
+                                                Collections.sort(manually_curated_attributes_sorted);
+                                                for (String attr: manually_curated_attributes_sorted)
+                                                    out.println(attr + "\t" + manually_curated.get(attr));
+                                            }
 
                                             out.close();
                                             fos.close();
                                         }
-
                                     }
                                 }
                             }

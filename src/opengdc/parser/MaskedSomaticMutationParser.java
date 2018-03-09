@@ -35,6 +35,24 @@ public class MaskedSomaticMutationParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
+        // if the output folder is not empty, delete the most recent file
+        File folder = new File(outPath);
+        File[] files_out = folder.listFiles();
+        if (files_out.length != 0) {
+           File last_modified =files_out[0];
+           long time = 0;
+           for (File file : files_out) {
+              if (file.getName().endsWith(this.getFormat())) {
+                 if (file.lastModified() > time) {  
+                    time = file.lastModified();
+                    last_modified = file;
+                 }
+              }
+           }
+           System.err.println("File deleted: " + last_modified.getName());
+           last_modified.delete();
+        }
+        
         HashMap<String, String> error_inputFile2outputFile = new HashMap<>();
         HashMap<String, String> filesPathConverted = new HashMap<>();
         HashMap<String, Object> uuid_dataMap = new HashMap<>();
@@ -60,158 +78,162 @@ public class MaskedSomaticMutationParser extends BioParser {
                             
                             String suffix_id = this.getOpenGDCSuffix(dataType, false);
                             String filePath = outPath + aliquot_uuid + "-" + suffix_id + "." + this.getFormat();
-                            try {
-                                HashSet<String> filePaths = new HashSet<>(filesPathConverted.values());
-                                if (!filePaths.contains(outPath + aliquot_uuid + "." + this.getFormat())) {
-                                    Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
-                                    filesPathConverted.put(aliquot_uuid, filePath);
-                                }
-                            
-                                for (int entry: uuidData.keySet()) {
-                                    ArrayList<String> values = new ArrayList<>();
-                                    values.add(parseValue(uuidData.get(entry).get("chromosome"), 0));
-                                    String start = String.valueOf((int)Double.parseDouble(uuidData.get(entry).get("start_position")));
-                                    values.add(parseValue(start, 1));
-                                    String end = String.valueOf((int)Double.parseDouble(uuidData.get(entry).get("end_position")));
-                                    values.add(parseValue(end, 2));
-                                    values.add(parseValue(uuidData.get(entry).get("strand"), 3));
-                                    values.add(parseValue(uuidData.get(entry).get("hugo_symbol"), 4));
-                                    values.add(parseValue(uuidData.get(entry).get("entrez_gene_id"), 5));
-                                    /*values.add(uuidData.get(entry).get("center"));
-                                    values.add(uuidData.get(entry).get("ncbi_build"));*/
-                                    values.add(parseValue(uuidData.get(entry).get("variant_classification"), 6));
-                                    values.add(parseValue(uuidData.get(entry).get("variant_type"), 7));
-                                    values.add(parseValue(uuidData.get(entry).get("reference_allele"), 8));
-                                    values.add(parseValue(uuidData.get(entry).get("tumor_seq_allele1"), 9));
-                                    values.add(parseValue(uuidData.get(entry).get("tumor_seq_allele2"), 10));
-                                    values.add(parseValue(uuidData.get(entry).get("dbsnp_rs"), 11));
-                                    //values.add(uuidData.get(entry).get("dbsnp_val_status"));
-                                    values.add(parseValue(uuidData.get(entry).get("tumor_sample_barcode"), 12));
-                                    values.add(parseValue(uuidData.get(entry).get("matched_norm_sample_barcode"), 13));
-                                    values.add(parseValue(uuidData.get(entry).get("match_norm_seq_allele1"), 14));
-                                    values.add(parseValue(uuidData.get(entry).get("match_norm_seq_allele2"), 15));
-                                    /*values.add(uuidData.get(entry).get("tumor_validation_allele1"));
-                                    values.add(uuidData.get(entry).get("tumor_validation_allele2"));
-                                    values.add(uuidData.get(entry).get("match_norm_validation_allele1"));
-                                    values.add(uuidData.get(entry).get("match_norm_validation_allele2"));
-                                    values.add(uuidData.get(entry).get("verification_status"));
-                                    values.add(uuidData.get(entry).get("validation_status"));
-                                    values.add(uuidData.get(entry).get("mutation_status"));
-                                    values.add(uuidData.get(entry).get("sequencing_phase"));
-                                    values.add(uuidData.get(entry).get("sequence_source"));
-                                    values.add(uuidData.get(entry).get("validation_method"));
-                                    values.add(uuidData.get(entry).get("score"));
-                                    values.add(uuidData.get(entry).get("bam_file"));
-                                    values.add(uuidData.get(entry).get("sequencer"));*/
-                                    values.add(parseValue(uuidData.get(entry).get("tumor_sample_uuid"), 16));
-                                    values.add(parseValue(uuidData.get(entry).get("matched_norm_sample_uuid"), 17));
-                                    /*values.add(uuidData.get(entry).get("hgvsc"));
-                                    values.add(uuidData.get(entry).get("hgvsp"));
-                                    values.add(uuidData.get(entry).get("hgvsp_short"));
-                                    values.add(uuidData.get(entry).get("transcript_id"));
-                                    values.add(uuidData.get(entry).get("exon_number"));
-                                    values.add(uuidData.get(entry).get("t_depth"));
-                                    values.add(uuidData.get(entry).get("t_ref_count"));
-                                    values.add(uuidData.get(entry).get("t_alt_count"));
-                                    values.add(uuidData.get(entry).get("n_depth_count"));
-                                    values.add(uuidData.get(entry).get("n_ref_count"));
-                                    values.add(uuidData.get(entry).get("n_alt_count"));
-                                    values.add(uuidData.get(entry).get("all_effects_count"));
-                                    values.add(uuidData.get(entry).get("allele"));
-                                    values.add(uuidData.get(entry).get("gene"));
-                                    values.add(uuidData.get(entry).get("feature"));
-                                    values.add(uuidData.get(entry).get("feature_type"));
-                                    values.add(uuidData.get(entry).get("consequence"));
-                                    values.add(uuidData.get(entry).get("cdna_position"));
-                                    values.add(uuidData.get(entry).get("cds_position"));
-                                    values.add(uuidData.get(entry).get("protein_position"));
-                                    values.add(uuidData.get(entry).get("amino_acids"));
-                                    values.add(uuidData.get(entry).get("codons"));
-                                    values.add(uuidData.get(entry).get("existing_variation"));
-                                    values.add(uuidData.get(entry).get("allele_num"));
-                                    values.add(uuidData.get(entry).get("distance"));
-                                    values.add(uuidData.get(entry).get("transcript_strand"));
-                                    values.add(uuidData.get(entry).get("symbol"));
-                                    values.add(uuidData.get(entry).get("symbol_source"));
-                                    values.add(uuidData.get(entry).get("hgnc_id"));
-                                    values.add(uuidData.get(entry).get("biotype"));
-                                    values.add(uuidData.get(entry).get("canonical"));
-                                    values.add(uuidData.get(entry).get("ccds"));
-                                    values.add(uuidData.get(entry).get("ensp"));
-                                    values.add(uuidData.get(entry).get("swissprot"));
-                                    values.add(uuidData.get(entry).get("trembl"));
-                                    values.add(uuidData.get(entry).get("uniparc"));
-                                    values.add(uuidData.get(entry).get("refseq"));
-                                    values.add(uuidData.get(entry).get("sift"));
-                                    values.add(uuidData.get(entry).get("polyphen"));
-                                    values.add(uuidData.get(entry).get("exon"));
-                                    values.add(uuidData.get(entry).get("intron"));
-                                    values.add(uuidData.get(entry).get("domains"));
-                                    values.add(uuidData.get(entry).get("gmaf"));
-                                    values.add(uuidData.get(entry).get("afr_maf"));
-                                    values.add(uuidData.get(entry).get("amr_maf"));
-                                    values.add(uuidData.get(entry).get("asn_maf"));
-                                    values.add(uuidData.get(entry).get("eas_maf"));
-                                    values.add(uuidData.get(entry).get("eur_maf"));
-                                    values.add(uuidData.get(entry).get("sas_maf"));
-                                    values.add(uuidData.get(entry).get("aa_maf"));
-                                    values.add(uuidData.get(entry).get("ea_maf"));
-                                    values.add(uuidData.get(entry).get("clin_sig"));
-                                    values.add(uuidData.get(entry).get("somatic"));
-                                    values.add(uuidData.get(entry).get("pubmed"));
-                                    values.add(uuidData.get(entry).get("motif_name"));
-                                    values.add(uuidData.get(entry).get("motif_pos"));
-                                    values.add(uuidData.get(entry).get("high_inf_pos"));
-                                    values.add(uuidData.get(entry).get("motif_score_change"));
-                                    values.add(uuidData.get(entry).get("impact"));
-                                    values.add(uuidData.get(entry).get("pick"));
-                                    values.add(uuidData.get(entry).get("variant_class"));
-                                    values.add(uuidData.get(entry).get("tsl"));
-                                    values.add(uuidData.get(entry).get("hgvs_offset"));
-                                    values.add(uuidData.get(entry).get("pheno"));
-                                    values.add(uuidData.get(entry).get("minimised"));
-                                    values.add(uuidData.get(entry).get("exac_af_af"));
-                                    values.add(uuidData.get(entry).get("exac_af_afr"));
-                                    values.add(uuidData.get(entry).get("exac_af_amr"));
-                                    values.add(uuidData.get(entry).get("exac_af_eas"));
-                                    values.add(uuidData.get(entry).get("exac_af_fin"));
-                                    values.add(uuidData.get(entry).get("exac_af_nfe"));
-                                    values.add(uuidData.get(entry).get("exac_af_oth"));
-                                    values.add(uuidData.get(entry).get("exac_af_sas"));
-                                    values.add(uuidData.get(entry).get("gene_pheno"));
-                                    values.add(uuidData.get(entry).get("filter"));
-                                    values.add(uuidData.get(entry).get("src_vcf_id"));
-                                    values.add(uuidData.get(entry).get("tumor_bam_uuid"));
-                                    values.add(uuidData.get(entry).get("normal_bam_uuid"));
-                                    values.add(uuidData.get(entry).get("gdc_validation_status"));
-                                    values.add(uuidData.get(entry).get("gdc_valid_somatic"));*/
-                                    
-                                    /**********************************************************************/
-                                    /** populate dataMap then sort genomic coordinates and print entries **/
-                                    Integer chr_id = Integer.parseInt(parseValue(uuidData.get(entry).get("chromosome"), 0).replaceAll("chr", "").replaceAll("X", "23").replaceAll("Y", "24"));
-                                    Integer start_id = Integer.parseInt(parseValue(uuidData.get(entry).get("start_position"), 1));
-                                    HashMap<Integer, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
-                                    ArrayList<ArrayList<String>> dataList = new ArrayList<>();
-                                    if (dataMapChr.containsKey(chr_id)) {
-                                        dataMapStart = dataMapChr.get(chr_id);                                        
-                                        if (dataMapStart.containsKey(start_id))
-                                            dataList = dataMapStart.get(start_id);
-                                        dataList.add(values);
+                            // create file if it does not exist
+                            File out_file = new File(filePath);
+                            if (!out_file.exists()) {
+                                try {
+                                    HashSet<String> filePaths = new HashSet<>(filesPathConverted.values());
+                                    if (!filePaths.contains(outPath + aliquot_uuid + "." + this.getFormat())) {
+                                        Files.write((new File(filePath)).toPath(), (FormatUtils.initDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.CREATE);
+                                        filesPathConverted.put(aliquot_uuid, filePath);
                                     }
-                                    else
-                                        dataList.add(values);
-                                    dataMapStart.put(start_id, dataList);
-                                    dataMapChr.put(chr_id, dataMapStart);
-                                    uuid_dataMap.put(aliquot_uuid, dataMapChr);
-                                    /**********************************************************************/
-                                    
-                                    // decomment this line to print entries without sorting genomic coordinates
-                                    //Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+
+                                    for (int entry: uuidData.keySet()) {
+                                        ArrayList<String> values = new ArrayList<>();
+                                        values.add(parseValue(uuidData.get(entry).get("chromosome"), 0));
+                                        String start = String.valueOf((int)Double.parseDouble(uuidData.get(entry).get("start_position")));
+                                        values.add(parseValue(start, 1));
+                                        String end = String.valueOf((int)Double.parseDouble(uuidData.get(entry).get("end_position")));
+                                        values.add(parseValue(end, 2));
+                                        values.add(parseValue(uuidData.get(entry).get("strand"), 3));
+                                        values.add(parseValue(uuidData.get(entry).get("hugo_symbol"), 4));
+                                        values.add(parseValue(uuidData.get(entry).get("entrez_gene_id"), 5));
+                                        /*values.add(uuidData.get(entry).get("center"));
+                                        values.add(uuidData.get(entry).get("ncbi_build"));*/
+                                        values.add(parseValue(uuidData.get(entry).get("variant_classification"), 6));
+                                        values.add(parseValue(uuidData.get(entry).get("variant_type"), 7));
+                                        values.add(parseValue(uuidData.get(entry).get("reference_allele"), 8));
+                                        values.add(parseValue(uuidData.get(entry).get("tumor_seq_allele1"), 9));
+                                        values.add(parseValue(uuidData.get(entry).get("tumor_seq_allele2"), 10));
+                                        values.add(parseValue(uuidData.get(entry).get("dbsnp_rs"), 11));
+                                        //values.add(uuidData.get(entry).get("dbsnp_val_status"));
+                                        values.add(parseValue(uuidData.get(entry).get("tumor_sample_barcode"), 12));
+                                        values.add(parseValue(uuidData.get(entry).get("matched_norm_sample_barcode"), 13));
+                                        values.add(parseValue(uuidData.get(entry).get("match_norm_seq_allele1"), 14));
+                                        values.add(parseValue(uuidData.get(entry).get("match_norm_seq_allele2"), 15));
+                                        /*values.add(uuidData.get(entry).get("tumor_validation_allele1"));
+                                        values.add(uuidData.get(entry).get("tumor_validation_allele2"));
+                                        values.add(uuidData.get(entry).get("match_norm_validation_allele1"));
+                                        values.add(uuidData.get(entry).get("match_norm_validation_allele2"));
+                                        values.add(uuidData.get(entry).get("verification_status"));
+                                        values.add(uuidData.get(entry).get("validation_status"));
+                                        values.add(uuidData.get(entry).get("mutation_status"));
+                                        values.add(uuidData.get(entry).get("sequencing_phase"));
+                                        values.add(uuidData.get(entry).get("sequence_source"));
+                                        values.add(uuidData.get(entry).get("validation_method"));
+                                        values.add(uuidData.get(entry).get("score"));
+                                        values.add(uuidData.get(entry).get("bam_file"));
+                                        values.add(uuidData.get(entry).get("sequencer"));*/
+                                        values.add(parseValue(uuidData.get(entry).get("tumor_sample_uuid"), 16));
+                                        values.add(parseValue(uuidData.get(entry).get("matched_norm_sample_uuid"), 17));
+                                        /*values.add(uuidData.get(entry).get("hgvsc"));
+                                        values.add(uuidData.get(entry).get("hgvsp"));
+                                        values.add(uuidData.get(entry).get("hgvsp_short"));
+                                        values.add(uuidData.get(entry).get("transcript_id"));
+                                        values.add(uuidData.get(entry).get("exon_number"));
+                                        values.add(uuidData.get(entry).get("t_depth"));
+                                        values.add(uuidData.get(entry).get("t_ref_count"));
+                                        values.add(uuidData.get(entry).get("t_alt_count"));
+                                        values.add(uuidData.get(entry).get("n_depth_count"));
+                                        values.add(uuidData.get(entry).get("n_ref_count"));
+                                        values.add(uuidData.get(entry).get("n_alt_count"));
+                                        values.add(uuidData.get(entry).get("all_effects_count"));
+                                        values.add(uuidData.get(entry).get("allele"));
+                                        values.add(uuidData.get(entry).get("gene"));
+                                        values.add(uuidData.get(entry).get("feature"));
+                                        values.add(uuidData.get(entry).get("feature_type"));
+                                        values.add(uuidData.get(entry).get("consequence"));
+                                        values.add(uuidData.get(entry).get("cdna_position"));
+                                        values.add(uuidData.get(entry).get("cds_position"));
+                                        values.add(uuidData.get(entry).get("protein_position"));
+                                        values.add(uuidData.get(entry).get("amino_acids"));
+                                        values.add(uuidData.get(entry).get("codons"));
+                                        values.add(uuidData.get(entry).get("existing_variation"));
+                                        values.add(uuidData.get(entry).get("allele_num"));
+                                        values.add(uuidData.get(entry).get("distance"));
+                                        values.add(uuidData.get(entry).get("transcript_strand"));
+                                        values.add(uuidData.get(entry).get("symbol"));
+                                        values.add(uuidData.get(entry).get("symbol_source"));
+                                        values.add(uuidData.get(entry).get("hgnc_id"));
+                                        values.add(uuidData.get(entry).get("biotype"));
+                                        values.add(uuidData.get(entry).get("canonical"));
+                                        values.add(uuidData.get(entry).get("ccds"));
+                                        values.add(uuidData.get(entry).get("ensp"));
+                                        values.add(uuidData.get(entry).get("swissprot"));
+                                        values.add(uuidData.get(entry).get("trembl"));
+                                        values.add(uuidData.get(entry).get("uniparc"));
+                                        values.add(uuidData.get(entry).get("refseq"));
+                                        values.add(uuidData.get(entry).get("sift"));
+                                        values.add(uuidData.get(entry).get("polyphen"));
+                                        values.add(uuidData.get(entry).get("exon"));
+                                        values.add(uuidData.get(entry).get("intron"));
+                                        values.add(uuidData.get(entry).get("domains"));
+                                        values.add(uuidData.get(entry).get("gmaf"));
+                                        values.add(uuidData.get(entry).get("afr_maf"));
+                                        values.add(uuidData.get(entry).get("amr_maf"));
+                                        values.add(uuidData.get(entry).get("asn_maf"));
+                                        values.add(uuidData.get(entry).get("eas_maf"));
+                                        values.add(uuidData.get(entry).get("eur_maf"));
+                                        values.add(uuidData.get(entry).get("sas_maf"));
+                                        values.add(uuidData.get(entry).get("aa_maf"));
+                                        values.add(uuidData.get(entry).get("ea_maf"));
+                                        values.add(uuidData.get(entry).get("clin_sig"));
+                                        values.add(uuidData.get(entry).get("somatic"));
+                                        values.add(uuidData.get(entry).get("pubmed"));
+                                        values.add(uuidData.get(entry).get("motif_name"));
+                                        values.add(uuidData.get(entry).get("motif_pos"));
+                                        values.add(uuidData.get(entry).get("high_inf_pos"));
+                                        values.add(uuidData.get(entry).get("motif_score_change"));
+                                        values.add(uuidData.get(entry).get("impact"));
+                                        values.add(uuidData.get(entry).get("pick"));
+                                        values.add(uuidData.get(entry).get("variant_class"));
+                                        values.add(uuidData.get(entry).get("tsl"));
+                                        values.add(uuidData.get(entry).get("hgvs_offset"));
+                                        values.add(uuidData.get(entry).get("pheno"));
+                                        values.add(uuidData.get(entry).get("minimised"));
+                                        values.add(uuidData.get(entry).get("exac_af_af"));
+                                        values.add(uuidData.get(entry).get("exac_af_afr"));
+                                        values.add(uuidData.get(entry).get("exac_af_amr"));
+                                        values.add(uuidData.get(entry).get("exac_af_eas"));
+                                        values.add(uuidData.get(entry).get("exac_af_fin"));
+                                        values.add(uuidData.get(entry).get("exac_af_nfe"));
+                                        values.add(uuidData.get(entry).get("exac_af_oth"));
+                                        values.add(uuidData.get(entry).get("exac_af_sas"));
+                                        values.add(uuidData.get(entry).get("gene_pheno"));
+                                        values.add(uuidData.get(entry).get("filter"));
+                                        values.add(uuidData.get(entry).get("src_vcf_id"));
+                                        values.add(uuidData.get(entry).get("tumor_bam_uuid"));
+                                        values.add(uuidData.get(entry).get("normal_bam_uuid"));
+                                        values.add(uuidData.get(entry).get("gdc_validation_status"));
+                                        values.add(uuidData.get(entry).get("gdc_valid_somatic"));*/
+
+                                        /**********************************************************************/
+                                        /** populate dataMap then sort genomic coordinates and print entries **/
+                                        Integer chr_id = Integer.parseInt(parseValue(uuidData.get(entry).get("chromosome"), 0).replaceAll("chr", "").replaceAll("X", "23").replaceAll("Y", "24"));
+                                        Integer start_id = Integer.parseInt(parseValue(uuidData.get(entry).get("start_position"), 1));
+                                        HashMap<Integer, ArrayList<ArrayList<String>>> dataMapStart = new HashMap<>();
+                                        ArrayList<ArrayList<String>> dataList = new ArrayList<>();
+                                        if (dataMapChr.containsKey(chr_id)) {
+                                            dataMapStart = dataMapChr.get(chr_id);                                        
+                                            if (dataMapStart.containsKey(start_id))
+                                                dataList = dataMapStart.get(start_id);
+                                            dataList.add(values);
+                                        }
+                                        else
+                                            dataList.add(values);
+                                        dataMapStart.put(start_id, dataList);
+                                        dataMapChr.put(chr_id, dataMapStart);
+                                        uuid_dataMap.put(aliquot_uuid, dataMapChr);
+                                        /**********************************************************************/
+
+                                        // decomment this line to print entries without sorting genomic coordinates
+                                        //Files.write((new File(outPath + aliquot_uuid + "." + this.getFormat())).toPath(), (FormatUtils.createEntry(this.getFormat(), values, getHeader())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                    }
                                 }
-                            }
-                            catch (Exception e) {
-                                error_inputFile2outputFile.put(f.getAbsolutePath(), filePath);
-                                e.printStackTrace();
+                                catch (Exception e) {
+                                    error_inputFile2outputFile.put(f.getAbsolutePath(), filePath);
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }

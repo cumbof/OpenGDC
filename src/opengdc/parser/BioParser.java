@@ -114,10 +114,12 @@ public abstract class BioParser {
         if (!hash) {
             String suffix_id = "";
             if (dataType.equals("Aggregated Somatic Mutation")) 
-                suffix_id= "agsm";
+                suffix_id = "agsm";
             else if (dataType.equals("Annotated Somatic Mutation")) 
-                suffix_id= "ansm";
-            else{
+                suffix_id = "ansm";
+            else if (dataType.trim().equals(""))
+                suffix_id = "xxx";
+            else {
                 String[] dataType_split = dataType.trim().toLowerCase().split(" ");
                 for (String w: dataType_split)
                     suffix_id += w.substring(0, 1);

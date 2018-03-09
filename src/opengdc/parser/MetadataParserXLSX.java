@@ -38,6 +38,24 @@ public class MetadataParserXLSX extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
+        // if the output folder is not empty, delete the most recent file
+        File folder = new File(outPath);
+        File[] files_out = folder.listFiles();
+        if (files_out.length != 0) {
+           File last_modified =files_out[0];
+           long time = 0;
+           for (File file : files_out) {
+              if (file.getName().endsWith(this.getFormat())) {
+                 if (file.lastModified() > time) {  
+                    time = file.lastModified();
+                    last_modified = file;
+                 }
+              }
+           }
+           System.err.println("File deleted: " + last_modified.getName());
+           last_modified.delete();
+        }
+        
         HashMap<String, HashMap<String, String>> clinicalBigMap = new HashMap<>();
         HashMap<String, HashMap<String, String>> biospecimenBigMap = new HashMap<>();
         
@@ -50,12 +68,22 @@ public class MetadataParserXLSX extends BioParser {
                     GUI.appendLog(this.getLogger(), "Processing " + f.getName() + "\n");
                     
                     if (f.getName().toLowerCase().contains("clinical")) {                        
-                        HashMap<String, HashMap<String, String>> metadata_from_tsv = MetadataHandler.getXLSXMap(f.getAbsolutePath(), "target usi");
-                        clinicalBigMap.putAll(metadata_from_tsv);
+                        HashMap<String, HashMap<String, String>> metadata_from_tsv = MetadataHandler.getXLSXMap(this.logPane, f.getAbsolutePath(), "target usi");
+                        for (String key: metadata_from_tsv.keySet()) {
+                            HashMap<String, String> values = metadata_from_tsv.get(key);
+                            if (clinicalBigMap.containsKey(key))
+                                values.putAll(clinicalBigMap.get(key));
+                            clinicalBigMap.put(key, values);
+                        }
                     }
                     else if (f.getName().toLowerCase().contains("samplematrix")) {                        
-                        HashMap<String, HashMap<String, String>> metadata_from_tsv = MetadataHandler.getXLSXMap(f.getAbsolutePath(), "case usi");
-                        biospecimenBigMap.putAll(metadata_from_tsv);
+                        HashMap<String, HashMap<String, String>> metadata_from_tsv = MetadataHandler.getXLSXMap(this.logPane, f.getAbsolutePath(), "case usi");
+                        for (String key: metadata_from_tsv.keySet()) {
+                            HashMap<String, String> values = metadata_from_tsv.get(key);
+                            if (biospecimenBigMap.containsKey(key))
+                                values.putAll(biospecimenBigMap.get(key));
+                            biospecimenBigMap.put(key, values);
+                        }
                     }
                 }
             }
@@ -63,7 +91,10 @@ public class MetadataParserXLSX extends BioParser {
         
         if (!biospecimenBigMap.isEmpty()) {
             HashMap<String, HashMap<String, Boolean>> additional_attributes = MetadataHandler.getAdditionalAttributes();
-            HashMap<String, ArrayList<String>> caseusi2aliquots = retrieveAliquotsBRCFromCaseUSI(biospecimenBigMap);
+            HashMap<String, HashSet<String>> caseusi2aliquots = retrieveAliquotsBRCFromCaseUSI(biospecimenBigMap);
+            
+            System.err.println("CASE USI #: "+caseusi2aliquots.size());
+            
             for (String case_usi: caseusi2aliquots.keySet()) {
                 try {
                     // retrieve biospecimen
@@ -156,8 +187,10 @@ public class MetadataParserXLSX extends BioParser {
                                                     }
                                                 }
                                             }
-
-                                            if (!manually_curated_data_type.equals("")) {
+                                            
+                                            // create file if it does not exist
+                                            File out_file = new File(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
+                                            if (!out_file.exists()) {
                                                 FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
                                                 PrintStream out = new PrintStream(fos);
 
@@ -193,11 +226,13 @@ public class MetadataParserXLSX extends BioParser {
                                                     manually_curated.put("manually_curated__audit_warning", "missed the following required metadata: ["+missed_attributes_list.substring(0, missed_attributes_list.length()-2)+"]");
                                                 }
 
-                                                // sort and print manually_curated attributes
-                                                ArrayList<String> manually_curated_attributes_sorted = new ArrayList<>(manually_curated.keySet());
-                                                Collections.sort(manually_curated_attributes_sorted);
-                                                for (String attr: manually_curated_attributes_sorted)
-                                                    out.println(attr + "\t" + manually_curated.get(attr));
+                                                if (!manually_curated_data_type.equals("")) {
+                                                    // sort and print manually_curated attributes
+                                                    ArrayList<String> manually_curated_attributes_sorted = new ArrayList<>(manually_curated.keySet());
+                                                    Collections.sort(manually_curated_attributes_sorted);
+                                                    for (String attr: manually_curated_attributes_sorted)
+                                                        out.println(attr + "\t" + manually_curated.get(attr));
+                                                }
 
                                                 out.close();
                                                 fos.close();
@@ -219,17 +254,17 @@ public class MetadataParserXLSX extends BioParser {
         return 0;
     }    
 
-    private HashMap<String, ArrayList<String>> retrieveAliquotsBRCFromCaseUSI(HashMap<String, HashMap<String, String>> bigMap) {
-        HashMap<String, ArrayList<String>> result = new HashMap<>();
+    private HashMap<String, HashSet<String>> retrieveAliquotsBRCFromCaseUSI(HashMap<String, HashMap<String, String>> bigMap) {
+        HashMap<String, HashSet<String>> result = new HashMap<>();
         for (String case_usi: bigMap.keySet()) {
-            ArrayList<String> aliquots = new ArrayList<>();
+            HashSet<String> aliquots = new HashSet<>();
             for (String attribute: bigMap.get(case_usi).keySet()) {
                 String value = bigMap.get(case_usi).get(attribute);
                 String[] value_comma_split = value.trim().split(",");
                 for (String v: value_comma_split) {
                     if (v.toLowerCase().trim().startsWith("target")) {
                         String[] v_dash_split = v.trim().split("-");
-                        if (v_dash_split.length == 5)
+                        if (v_dash_split.length == 5) // aliquot brc size
                             aliquots.add(v);
                     }
                 }
