@@ -274,7 +274,8 @@ public class GDCQuery {
             - files.file_id
             - cases.samples.portions.analytes.aliquots.aliquot_id
     */
-    public static ArrayList<HashMap<String, String>> retrieveExpInfoFromAttribute(String field, String value, HashSet<String> attributes, int recursive_iteration, int from, ArrayList<HashMap<String, String>> info) {
+    // endpoint: {files, cases}
+    public static ArrayList<HashMap<String, String>> retrieveExpInfoFromAttribute(String endpoint, String field, String value, HashSet<String> attributes, int recursive_iteration, int from, ArrayList<HashMap<String, String>> info) {
         Date now = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
         String query_file_name = "query_"+ft.format(now)+".json";
@@ -291,7 +292,7 @@ public class GDCQuery {
                         fields += attr + ",";
                     //fields = fields.substring(0, fields.length()-1) + "\"";
                     
-                    String conn_str = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&fields="+fields+"&format=JSON&filters=";
+                    String conn_str = "https://gdc-api.nci.nih.gov/"+endpoint+"?from="+from+"&size="+SIZE_LIMIT+"&pretty=true&fields="+fields+"&format=JSON&filters=";
                     String json_str = "{" +
                                             "\"op\":\"in\"," +
                                             "\"content\":{" +
@@ -353,14 +354,16 @@ public class GDCQuery {
                     
                     if ((total - ((recursive_iteration+1)*SIZE_LIMIT)) > 0) {
                         from = ((recursive_iteration+1)*SIZE_LIMIT)+1;
-                        return retrieveExpInfoFromAttribute(field, value, attributes, recursive_iteration, from, info);
+                        recursive_iteration++;
+                        System.err.println(from);
+                        return retrieveExpInfoFromAttribute(endpoint, field, value, attributes, recursive_iteration, from, info);
                     }
                     else return info;
                 }
                 catch (Exception e) {
                     recursive_iteration++;
                     if (recursive_iteration < RECURSIVE_LIMIT)
-                        return retrieveExpInfoFromAttribute(field, value, attributes, recursive_iteration, from, info);
+                        return retrieveExpInfoFromAttribute(endpoint, field, value, attributes, recursive_iteration, from, info);
                     else {
                         e.printStackTrace();
                         return new ArrayList<>();

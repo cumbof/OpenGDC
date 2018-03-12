@@ -115,7 +115,7 @@ public class MetadataParserXML extends BioParser {
         ArrayList<String> currentSkippedAliquots = new ArrayList<>();
         // merge clinical and biospecimen info (plus additional metadata)
         if (!biospecimenBigMap.isEmpty()) {
-            HashMap<String, HashMap<String, Boolean>> additional_attributes = MetadataHandler.getAdditionalAttributes();
+            HashMap<String, HashMap<String, Boolean>> additional_attributes = MetadataHandler.getAdditionalAttributes("files");
             for (String aliquot_uuid: biospecimenBigMap.keySet()) {
                 try {
                     if (skippedAliquots.isEmpty() || skippedAliquots.contains(aliquot_uuid)) {
@@ -150,7 +150,7 @@ public class MetadataParserXML extends BioParser {
                             ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes.keySet());
                             Collections.sort(additional_attributes_sorted);
                             for (String metakey: additional_attributes_sorted) {
-                                ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
+                                ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
                                 ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
 
                                 for (HashMap<String, String> file_info: aggregated_files_info) {

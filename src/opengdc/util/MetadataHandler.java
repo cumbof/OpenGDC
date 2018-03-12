@@ -512,7 +512,7 @@ public class MetadataHandler {
         return additional_attributes;
     }
     
-    public static HashMap<String, HashMap<String, Boolean>> getAdditionalAttributes() {
+    public static HashMap<String, HashMap<String, Boolean>> getAdditionalAttributes(String endpoint) {
         HashMap<String, HashMap<String, Boolean>> additionalAttributes = new HashMap<>();
         // <'attribute:string', 'required:boolean'>
         HashMap<String, Boolean> attributes = new HashMap<>();
@@ -527,15 +527,27 @@ public class MetadataHandler {
         attributes.put("analysis.analysis_id", true);
         attributes.put("analysis.workflow_link", true);
         attributes.put("analysis.workflow_type", true);
-        attributes.put("cases.case_id", true);
-        attributes.put("cases.disease_type", true);
-        attributes.put("cases.primary_site", true);
-        attributes.put("cases.demographic.year_of_birth", true);
-        attributes.put("cases.project.program.program_id", true);
-        attributes.put("cases.project.program.name", true);
-                
-        // other gdc attributes
-        attributes.put("cases.submitter_id", true);
+        if (endpoint.trim().toLowerCase().equals("files")) {
+            attributes.put("cases.case_id", true);
+            attributes.put("cases.disease_type", true);
+            attributes.put("cases.primary_site", true);
+            attributes.put("cases.demographic.year_of_birth", true);
+            attributes.put("cases.project.program.program_id", true);
+            attributes.put("cases.project.program.name", true);
+            // other gdc attributes
+            attributes.put("cases.submitter_id", true);
+        }
+        else if (endpoint.trim().toLowerCase().equals("cases")) {
+            attributes.put("case_id", true);
+            attributes.put("disease_type", true);
+            attributes.put("primary_site", true);
+            attributes.put("demographic.year_of_birth", true);
+            attributes.put("project.program.program_id", true);
+            attributes.put("project.program.name", true);
+            // other gdc attributes
+            attributes.put("submitter_id", true);
+        }
+
         //attributes.put("cases.samples.tumor_descriptor", false);
         //attributes.put("cases.samples.tissue_type", false);
         //attributes.put("cases.samples.sample_type", false);

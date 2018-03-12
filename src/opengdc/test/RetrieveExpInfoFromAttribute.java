@@ -18,13 +18,19 @@ import opengdc.util.MetadataHandler;
  */
 public class RetrieveExpInfoFromAttribute {
     
+    // mapping endpoint
+    // https://api.gdc.cancer.gov/files/_mapping
+    // https://api.gdc.cancer.gov/cases/_mapping
+    
     public static void main(String[] args) {
-        String aliquot_uuid = "0AAB0660-F928-4EE0-86FB-583E0F3F42D2";
-        HashMap<String, HashMap<String, Boolean>> additional_attributes = MetadataHandler.getAdditionalAttributes();
+        String aliquot_uuid = "TARGET-40-PANVJJ-01A-01D";
+        HashMap<String, HashMap<String, Boolean>> additional_attributes = MetadataHandler.getAdditionalAttributes("cases");
+        HashMap<String, Boolean> add_attr_tmp = additional_attributes.get("manually_curated");
+        add_attr_tmp.put("samples.portions.analytes.aliquots.aliquot_id", false);
         ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes.keySet());
         Collections.sort(additional_attributes_sorted);
         for (String metakey: additional_attributes_sorted) {
-            ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
+            ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("cases", "samples.portions.analytes.aliquots.submitter_id", aliquot_uuid, new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
             System.err.println("files_info: "+files_info.size());
             if (!files_info.isEmpty()) {
                 for (HashMap<String, String> file_info: files_info) {

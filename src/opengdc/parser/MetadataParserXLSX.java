@@ -90,7 +90,8 @@ public class MetadataParserXLSX extends BioParser {
         }
         
         if (!biospecimenBigMap.isEmpty()) {
-            HashMap<String, HashMap<String, Boolean>> additional_attributes = MetadataHandler.getAdditionalAttributes();
+            HashMap<String, HashMap<String, Boolean>> additional_attributes_files = MetadataHandler.getAdditionalAttributes("files");
+            HashMap<String, HashMap<String, Boolean>> additional_attributes_cases = MetadataHandler.getAdditionalAttributes("cases");
             HashMap<String, HashSet<String>> caseusi2aliquots = retrieveAliquotsBRCFromCaseUSI(biospecimenBigMap);
             
             System.err.println("CASE USI #: "+caseusi2aliquots.size());
@@ -111,22 +112,29 @@ public class MetadataParserXLSX extends BioParser {
                     
                     for (String aliquot_brc: caseusi2aliquots.get(case_usi)) {
                         // generate manually curated metadata
-                        if (!additional_attributes.isEmpty()) {
-                            ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes.keySet());
+                        if (!additional_attributes_files.isEmpty() || !additional_attributes_cases.isEmpty()) {
+                            ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes_files.keySet());
                             Collections.sort(additional_attributes_sorted);
                             for (String metakey: additional_attributes_sorted) {
 
                                 /** just to retrieve aliquot uuid **/
-                                HashMap<String, Boolean> additional_attributes_tmp = additional_attributes.get(metakey);
-                                additional_attributes_tmp.put("cases.samples.portions.analytes.aliquots.aliquot_id", false);
+                                HashMap<String, Boolean> additional_attributes_files_tmp = additional_attributes_files.get(metakey);
+                                HashMap<String, Boolean> additional_attributes_cases_tmp = additional_attributes_files.get(metakey);
+                                additional_attributes_files_tmp.put("cases.samples.portions.analytes.aliquots.aliquot_id", false);
+                                additional_attributes_cases_tmp.put("samples.portions.analytes.aliquots.aliquot_id", false);
                                 /***********************************/
-                                ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("cases.samples.portions.analytes.aliquots.submitter_id", aliquot_brc, new HashSet<>(additional_attributes_tmp.keySet()), 0, 0, null);
-                                
+                                ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.submitter_id", aliquot_brc, new HashSet<>(additional_attributes_files_tmp.keySet()), 0, 0, null);
                                 ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
                                 
                                 String aliquot_uuid = "";
                                 if (!aggregated_files_info.isEmpty())
                                     aliquot_uuid = aggregated_files_info.get(0).get("cases.samples.portions.analytes.aliquots.aliquot_id");
+                                
+                                if (aliquot_uuid.trim().equals("")) {
+                                    files_info = GDCQuery.retrieveExpInfoFromAttribute("cases", "samples.portions.analytes.aliquots.submitter_id", aliquot_brc, new HashSet<>(additional_attributes_cases_tmp.keySet()), 0, 0, null);
+                                    if (!files_info.isEmpty())
+                                        aliquot_uuid = files_info.get(0).get("samples.portions.analytes.aliquots.aliquot_id");
+                                }
 
                                 if (!aliquot_uuid.equals("")) {
                                     for (HashMap<String, String> file_info: aggregated_files_info) {
@@ -134,10 +142,10 @@ public class MetadataParserXLSX extends BioParser {
                                             // handle missing required attributes
                                             HashSet<String> missing_required_attributes = new HashSet<>();
                                             HashMap<String, String> manually_curated = new HashMap<>();
-                                            HashMap<String, Boolean> attribute2required = additional_attributes.get(metakey);
+                                            HashMap<String, Boolean> attribute2required = additional_attributes_files.get(metakey);
                                             ArrayList<String> file_info_sorted = new ArrayList<>(file_info.keySet());
                                             /***********************/
-                                            file_info_sorted.remove(file_info_sorted.indexOf("cases.samples.portions.analytes.aliquots.aliquot_id"));
+                                            file_info_sorted.remove(file_info_sorted.indexOf("samples.portions.analytes.aliquots.aliquot_id"));
                                             /***********************/
                                             Collections.sort(file_info_sorted);
                                             for (String attribute: file_info_sorted) {
