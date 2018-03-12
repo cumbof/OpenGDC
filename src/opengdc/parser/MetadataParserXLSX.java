@@ -132,8 +132,10 @@ public class MetadataParserXLSX extends BioParser {
                                 
                                 if (aliquot_uuid.trim().equals("")) {
                                     files_info = GDCQuery.retrieveExpInfoFromAttribute("cases", "samples.portions.analytes.aliquots.submitter_id", aliquot_brc, new HashSet<>(additional_attributes_cases_tmp.keySet()), 0, 0, null);
-                                    if (!files_info.isEmpty())
+                                    if (!files_info.isEmpty()) {
                                         aliquot_uuid = files_info.get(0).get("samples.portions.analytes.aliquots.aliquot_id");
+                                        aggregated_files_info = files_info;
+                                    }
                                 }
 
                                 if (!aliquot_uuid.equals("")) {
