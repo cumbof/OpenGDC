@@ -36,7 +36,7 @@ public class Main {
         /*skip_datatypes.add("clinical supplement");
         skip_datatypes.add("biospecimen supplement");*/
         skip_datatypes.add("gene expression quantification");
-        skip_datatypes.add("mirna Expression Quantification");
+        skip_datatypes.add("mirna expression quantification");
         skip_datatypes.add("isoform expression quantification");
     }
 

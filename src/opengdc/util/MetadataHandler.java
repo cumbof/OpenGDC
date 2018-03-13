@@ -225,6 +225,7 @@ public class MetadataHandler {
                                 cellValue = cell.getStringCellValue();
                             else if (cell.getCellTypeEnum() == CellType.NUMERIC)
                                 cellValue = String.valueOf(cell.getNumericCellValue());
+                            cellValue = cellValue.replaceAll("\r\n", " ").replaceAll("\n", " ");
                             
                             if (!cellValue.trim().equals("")) {
                             
