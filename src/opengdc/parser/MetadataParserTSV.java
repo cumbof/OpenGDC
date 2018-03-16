@@ -99,7 +99,7 @@ public class MetadataParserTSV extends BioParser {
                         ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes.keySet());
                         Collections.sort(additional_attributes_sorted);
                         for (String metakey: additional_attributes_sorted) {
-                            ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
+                            ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
                             ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
 
                             for (HashMap<String, String> file_info: aggregated_files_info) {
@@ -111,7 +111,8 @@ public class MetadataParserTSV extends BioParser {
                                     ArrayList<String> file_info_sorted = new ArrayList<>(file_info.keySet());
                                     Collections.sort(file_info_sorted);
                                     for (String attribute: file_info_sorted) {
-                                        String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
+                                        //String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
+                                        String attribute_parsed = metakey + "__" + attribute.replaceAll("\\.", "__");
                                         /*************************************************************/
                                         /** patch for the attribute 'manually_curated__data_format' **/
                                         if (attribute_parsed.trim().toLowerCase().equals("manually_curated__data_format"))
@@ -144,7 +145,8 @@ public class MetadataParserTSV extends BioParser {
                                     HashMap<String, HashMap<String, Object>> additional_manually_curated = MetadataHandler.getAdditionalManuallyCuratedAttributes(program, disease, dataType, this.getFormat(), aliquot_uuid, biospecimenBigMap.get(aliquot_uuid), clinicalBigMap.get(patient_uuid), manually_curated, suffix_id);
                                     if (!additional_manually_curated.isEmpty()) {
                                         for (String attr: additional_manually_curated.keySet()) {
-                                            String attribute_parsed = FSUtils.stringToValidJavaIdentifier(attr);
+                                            //String attribute_parsed = FSUtils.stringToValidJavaIdentifier(attr);
+                                            String attribute_parsed = attr;
                                             HashMap<String, Object> values = additional_manually_curated.get(attr);
                                             if (!values.isEmpty()) {
                                                 String value_parsed = checkForNAs((String)additional_manually_curated.get(attr).get("value"));

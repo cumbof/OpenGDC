@@ -123,18 +123,65 @@ public class MetadataParserXLSX extends BioParser {
                                 additional_attributes_files_tmp.put("cases.samples.portions.analytes.aliquots.aliquot_id", false);
                                 additional_attributes_cases_tmp.put("samples.portions.analytes.aliquots.aliquot_id", false);
                                 /***********************************/
-                                ArrayList<HashMap<String, String>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.submitter_id", aliquot_brc, new HashSet<>(additional_attributes_files_tmp.keySet()), 0, 0, null);
+                                ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.submitter_id", aliquot_brc, new HashSet<>(additional_attributes_files_tmp.keySet()), 0, 0, null);
                                 ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
                                 
                                 String aliquot_uuid = "";
-                                if (!aggregated_files_info.isEmpty())
+                                if (!aggregated_files_info.isEmpty()) {
                                     aliquot_uuid = aggregated_files_info.get(0).get("cases.samples.portions.analytes.aliquots.aliquot_id");
+                                    /*for (String k: aggregated_files_info.get(0).keySet())
+                                        System.err.println("---------------> "+k+": "+aggregated_files_info.get(0).get(k));
+                                    System.err.println("----> aliquot_id: "+aliquot_uuid);*/
+                                }
                                 
                                 if (aliquot_uuid.trim().equals("")) {
-                                    files_info = GDCQuery.retrieveExpInfoFromAttribute("cases", "samples.portions.analytes.aliquots.submitter_id", aliquot_brc, new HashSet<>(additional_attributes_cases_tmp.keySet()), 0, 0, null);
+                                    HashSet<String> additional_attributes_tmp = new HashSet<>(additional_attributes_cases_tmp.keySet());
+                                    files_info = GDCQuery.retrieveExpInfoFromAttribute("cases", "samples.portions.analytes.aliquots.submitter_id", aliquot_brc, additional_attributes_tmp, 0, 0, null);
                                     if (!files_info.isEmpty()) {
-                                        aliquot_uuid = files_info.get(0).get("samples.portions.analytes.aliquots.aliquot_id");
-                                        aggregated_files_info = files_info;
+                                        HashMap<String, String> files_info_res = new HashMap<>();
+                                        for (HashMap<String, ArrayList<Object>> file_info: files_info) {
+                                            for (String k: file_info.keySet()) {
+                                                for (Object obj: file_info.get(k)) {
+                                                    HashMap<String, Object> map = (HashMap<String, Object>)obj;
+                                                    for (String kmap: map.keySet()) {
+                                                        try {
+                                                            boolean contains_submitter_id = false;
+                                                            if (kmap.toLowerCase().equals("aliquot_id")) {
+                                                                if (map.containsKey("submitter_id"))
+                                                                    contains_submitter_id = true;
+                                                            }
+
+                                                            if (contains_submitter_id) {
+                                                                if (String.valueOf(map.get("submitter_id")).toLowerCase().equals(aliquot_brc.toLowerCase())) {
+                                                                    files_info_res.put("samples.portions.analytes.aliquots.aliquot_id", String.valueOf(map.get("aliquot_id")));
+                                                                    files_info_res.put("samples.portions.analytes.aliquots.submitter_id", String.valueOf(map.get("submitter_id")));
+                                                                    additional_attributes_tmp.remove("samples.portions.analytes.aliquots.submitter_id");
+                                                                }
+                                                            }
+                                                            else {
+                                                                String add_attr_curr = "";
+                                                                for (String add_attr: additional_attributes_tmp) {
+                                                                    String[] add_attr_split = add_attr.split("\\.");
+                                                                    String last_val = add_attr_split[add_attr_split.length-1];
+                                                                    if (last_val.toLowerCase().equals(kmap.toLowerCase())) {
+                                                                        files_info_res.put(add_attr, String.valueOf(map.get(kmap)));
+                                                                        add_attr_curr = add_attr;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                if (!add_attr_curr.trim().equals(""))
+                                                                    additional_attributes_tmp.remove(add_attr_curr);
+                                                            }
+                                                        }
+                                                        catch (Exception e) { }
+                                                    }
+                                                }
+
+                                            }
+                                        }
+                                        aliquot_uuid = files_info_res.get("samples.portions.analytes.aliquots.aliquot_id");
+                                        aggregated_files_info = new ArrayList<>();
+                                        aggregated_files_info.add(files_info_res);
                                     }
                                 }
 
@@ -147,11 +194,15 @@ public class MetadataParserXLSX extends BioParser {
                                             HashMap<String, Boolean> attribute2required = additional_attributes_files.get(metakey);
                                             ArrayList<String> file_info_sorted = new ArrayList<>(file_info.keySet());
                                             /***********************/
-                                            file_info_sorted.remove(file_info_sorted.indexOf("samples.portions.analytes.aliquots.aliquot_id"));
+                                            if (file_info_sorted.contains("samples.portions.analytes.aliquots.submitter_id"))
+                                                file_info_sorted.remove(file_info_sorted.indexOf("samples.portions.analytes.aliquots.submitter_id"));
+                                            if (file_info_sorted.contains("cases.samples.portions.analytes.aliquots.submitter_id"))
+                                                file_info_sorted.remove(file_info_sorted.indexOf("cases.samples.portions.analytes.aliquots.submitter_id"));
                                             /***********************/
                                             Collections.sort(file_info_sorted);
                                             for (String attribute: file_info_sorted) {
-                                                String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
+                                                //String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
+                                                String attribute_parsed = metakey + "__" + attribute.replaceAll("\\.", "__");
                                                 /*************************************************************/
                                                 /** patch for the attribute 'manually_curated__data_format' **/
                                                 if (attribute_parsed.trim().toLowerCase().equals("manually_curated__data_format"))
@@ -184,7 +235,8 @@ public class MetadataParserXLSX extends BioParser {
                                             HashMap<String, HashMap<String, Object>> additional_manually_curated = MetadataHandler.getAdditionalManuallyCuratedAttributes(program, disease, dataType, this.getFormat(), aliquot_uuid, biospecimenBigMap.get(case_usi), clinicalBigMap.get(case_usi), manually_curated, suffix_id);
                                             if (!additional_manually_curated.isEmpty()) {
                                                 for (String attr: additional_manually_curated.keySet()) {
-                                                    String attribute_parsed = FSUtils.stringToValidJavaIdentifier(attr);
+                                                    //String attribute_parsed = FSUtils.stringToValidJavaIdentifier(attr);
+                                                    String attribute_parsed = attr;
                                                     HashMap<String, Object> values = additional_manually_curated.get(attr);
                                                     if (!values.isEmpty()) {
                                                         String value_parsed = checkForNAs((String)additional_manually_curated.get(attr).get("value"));

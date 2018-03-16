@@ -91,22 +91,22 @@ public class RetrieveMetadataFromFileUUID {
             Object data_node_obj = json_data.get("data");
             
             HashMap<String, String> info = new HashMap<>();
-            String aliquot_id = GDCQuery.searchFor("aliquot_id", data_node_obj);
+            /*String aliquot_id = GDCQuery.searchFor("aliquot_id", data_node_obj, null);
             info.put("aliquot_id", aliquot_id!=null ? aliquot_id : "null");
-            String experimental_strategy = GDCQuery.searchFor("experimental_strategy", data_node_obj);
+            String experimental_strategy = GDCQuery.searchFor("experimental_strategy", data_node_obj, null);
             info.put("experimental_strategy", experimental_strategy!=null ? experimental_strategy : "null");
-            String platform = GDCQuery.searchFor("platform", data_node_obj);
+            String platform = GDCQuery.searchFor("platform", data_node_obj, null);
             info.put("platform", platform!=null ? platform : "null");
-            String analysis_workflow_link = GDCQuery.searchFor("workflow_link", data_node_obj);
+            String analysis_workflow_link = GDCQuery.searchFor("workflow_link", data_node_obj, null);
             info.put("workflow_link", analysis_workflow_link!=null ? analysis_workflow_link : "null");
-            String data_category = GDCQuery.searchFor("data_category", data_node_obj);
+            String data_category = GDCQuery.searchFor("data_category", data_node_obj, null);
             info.put("data_category", data_category!=null ? data_category : "null");
-            String data_type = GDCQuery.searchFor("data_type", data_node_obj);
+            String data_type = GDCQuery.searchFor("data_type", data_node_obj, null);
             info.put("data_type", data_type!=null ? data_type : "null");
-            String data_format = GDCQuery.searchFor("data_format", data_node_obj);
+            String data_format = GDCQuery.searchFor("data_format", data_node_obj, null);
             info.put("data_format", data_format!=null ? data_format : "null");
-            String file_size = GDCQuery.searchFor("file_size", data_node_obj);
-            info.put("file_size", file_size!=null ? file_size : "null");
+            String file_size = GDCQuery.searchFor("file_size", data_node_obj, null);
+            info.put("file_size", file_size!=null ? file_size : "null");*/
             
             for (String attr: info.keySet())
                 System.err.println(attr + ": " + info.get(attr));

@@ -285,7 +285,7 @@ public class MetadataHandler {
                                 }
                                 else { // content
                                     try {
-                                        content_map.put(header.get(cell_index), cellValue);
+                                        content_map.put(sheet_name + __OPENGDCSEP__ + header.get(cell_index), cellValue);
                                         if (cell_index == indexBy_position)
                                             indexBy_value = cellValue;
                                         cell_index++;
@@ -572,21 +572,40 @@ public class MetadataHandler {
         return attributes;
     }
     
-    public static ArrayList<HashMap<String, String>> aggregateSameDataTypeInfo(ArrayList<HashMap<String, String>> files_info, ArrayList<String> aggregatedAdditionalAttributes) {
-        HashMap<String, ArrayList<HashMap<String, String>>> aggregated = new HashMap<>();
+    public static ArrayList<HashMap<String, String>> aggregateSameDataTypeInfo(ArrayList<HashMap<String, ArrayList<Object>>> files_info, ArrayList<String> aggregatedAdditionalAttributes) {
+        HashMap<String, ArrayList<HashMap<String, ArrayList<Object>>>> aggregated = new HashMap<>();
         String platform_tmp = "";
-        for (HashMap<String, String> file_info: files_info) {
+        for (HashMap<String, ArrayList<Object>> file_info: files_info) {
             if (file_info != null) {
                 if (file_info.containsKey("data_type")) {
-                    String data_type = file_info.get("data_type");
-                    ArrayList<HashMap<String, String>> values = new ArrayList<>();
+                    ArrayList<Object> data_type_list = file_info.get("data_type");
+                    ArrayList<HashMap<String, ArrayList<Object>>> values = new ArrayList<>();
+                    String data_type = "";
+                    for (Object obj: data_type_list) {
+                        try {
+                            HashMap<String, Object> map = (HashMap<String, Object>)obj;
+                            data_type = String.valueOf(map.get("data_type"));
+                            break;
+                        }
+                        catch (Exception e) { }
+                    }
                     if (aggregated.containsKey(data_type))
                         values = aggregated.get(data_type);
                     values.add(file_info);
                     aggregated.put(data_type, values);
                     if (data_type.trim().toLowerCase().equals("aligned reads")) {
-                        if (file_info.containsKey("platform"))
-                            platform_tmp = file_info.get("platform");
+                        if (file_info.containsKey("platform")) {
+                            ArrayList<Object> platform_tmp_list = file_info.get("platform");
+                            platform_tmp = "";
+                            for (Object obj: platform_tmp_list) {
+                                try {
+                                    HashMap<String, Object> map = (HashMap<String, Object>)obj;
+                                    platform_tmp = String.valueOf(map.get("platform"));
+                                    break;
+                                }
+                                catch (Exception e) { }
+                            }
+                        }
                     }
                 }
             }
@@ -595,15 +614,44 @@ public class MetadataHandler {
         ArrayList<HashMap<String,String>> compressedMap = new ArrayList<>();
         for(String key: aggregated.keySet()){
             HashMap<String, String> tmp = new HashMap<>();
-            ArrayList<HashMap<String, String>> mapList = aggregated.get(key);
-            for (HashMap<String, String> map: mapList){
+            ArrayList<HashMap<String, ArrayList<Object>>> mapList = aggregated.get(key);
+            for (HashMap<String, ArrayList<Object>> map: mapList){
                 for (String attribute: map.keySet()){
-                    if (!tmp.containsKey(attribute))
-                        tmp.put(attribute, map.get(attribute));
+                    if (!tmp.containsKey(attribute)) {
+                        ArrayList<Object> attribute_tmp_list = map.get(attribute);
+                        String attribute_tmp = "";
+                        for (Object obj: attribute_tmp_list) {
+                            try {
+                                HashMap<String, Object> map_tmp = (HashMap<String, Object>)obj;
+                                
+                                String[] attribute_split = attribute.split("\\.");
+                                String last_val = attribute_split[attribute_split.length-1];
+                                
+                                attribute_tmp = String.valueOf(map_tmp.get(last_val));
+                                break;
+                            }
+                            catch (Exception e) { }
+                        }                        
+                        tmp.put(attribute, attribute_tmp);
+                    }
                     else {
                         if (aggregatedAdditionalAttributes.contains(attribute)) {
                             String value = tmp.get(attribute);
-                            value = value + "," + map.get(attribute);
+                            ArrayList<Object> value_tmp_list = map.get(attribute);
+                            String value_tmp = "";
+                            for (Object obj: value_tmp_list) {
+                                try {
+                                    HashMap<String, Object> map_tmp = (HashMap<String, Object>)obj;
+                                    
+                                    String[] attribute_split = attribute.split("\\.");
+                                    String last_val = attribute_split[attribute_split.length-1];
+                                    
+                                    value_tmp = String.valueOf(map_tmp.get(last_val));
+                                    break;
+                                }
+                                catch (Exception e) { }
+                            }
+                            value = value + "," + value_tmp;
                             tmp.put(attribute, value);
                         }
                     }

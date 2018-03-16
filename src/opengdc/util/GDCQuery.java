@@ -126,32 +126,39 @@ public class GDCQuery {
         return null;
     }
     
-    public static String searchFor(String key, Object obj) {
-        if (obj instanceof HashMap) {
-            HashMap<String, Object> hashmap = (HashMap<String, Object>)obj;
-            HashSet<String> tmps = new HashSet<>();
+    public static ArrayList<Object> searchFor(String key, Object current_obj, ArrayList<Object> results) {
+        if (results == null)
+            results = new ArrayList<>();
+        
+        if (current_obj instanceof HashMap) {
+            HashMap<String, Object> hashmap = (HashMap<String, Object>)current_obj;
+            HashSet<Object> tmps = new HashSet<>();
             for (String k: hashmap.keySet()) {
                 if (k.toLowerCase().trim().equals(key)) {
                     //return (String)hashmap.get(k);
-                    return String.valueOf(hashmap.get(k));
+                    //return hashmap.get(k);
+                    results.add(hashmap);
+                    return results;
                 }
                 else
-                    tmps.add(searchFor(key, hashmap.get(k)));
+                    tmps.add(searchFor(key, hashmap.get(k), results));
             }
-            for (String tmp: tmps) {
+            /*for (Object tmp: tmps) {
                 if (tmp != null)
                     return tmp;
-            }
+            }*/
+            return results;
         }
-        else if (obj instanceof List) {
-            ArrayList<Object> list = (ArrayList<Object>)obj;
-            HashSet<String> tmps = new HashSet<>();
+        else if (current_obj instanceof List) {
+            ArrayList<Object> list = (ArrayList<Object>)current_obj;
+            HashSet<Object> tmps = new HashSet<>();
             for (Object o: list)
-                tmps.add(searchFor(key, o));
-            for (String tmp: tmps) {
+                tmps.add(searchFor(key, o, results));
+            /*for (Object tmp: tmps) {
                 if (tmp != null)
                     return tmp;
-            }
+            }*/
+            return results;
         }
         return null;
     }
@@ -275,7 +282,7 @@ public class GDCQuery {
             - cases.samples.portions.analytes.aliquots.aliquot_id
     */
     // endpoint: {files, cases}
-    public static ArrayList<HashMap<String, String>> retrieveExpInfoFromAttribute(String endpoint, String field, String value, HashSet<String> attributes, int recursive_iteration, int from, ArrayList<HashMap<String, String>> info) {
+    public static ArrayList<HashMap<String, ArrayList<Object>>> retrieveExpInfoFromAttribute(String endpoint, String field, String value, HashSet<String> attributes, int recursive_iteration, int from, ArrayList<HashMap<String, ArrayList<Object>>> info) {
         Date now = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
         String query_file_name = "query_"+ft.format(now)+".json";
@@ -338,13 +345,17 @@ public class GDCQuery {
                     //System.err.println("pagination.total: "+total);
                     
                     for (Object node: hits_node) {
-                        HashMap<String, String> data_node = new HashMap<>();
+                        HashMap<String, ArrayList<Object>> data_node = new HashMap<>();
                         for (String attribute: attributes) {
                             String[] attribute_split = attribute.split("\\.");
                             String searchForKey = attribute_split[attribute_split.length-1];
-                            String val = searchFor(searchForKey, node);
+                            ArrayList<Object> values = searchFor(searchForKey, node, null);
+                            /*String val = null;
+                            for (Object map: values)
+                                val = String.valueOf(((HashMap<String, Object>)map).get(searchForKey));*/
                             //info.put(attribute, val!=null ? val : "");
-                            data_node.put(attribute, val!=null ? val : "");  
+                            //data_node.put(attribute, val!=null ? val : "");  
+                            data_node.put(attribute, values);
                         }
                         info.add(data_node);
                     }
@@ -355,7 +366,7 @@ public class GDCQuery {
                     if ((total - ((recursive_iteration+1)*SIZE_LIMIT)) > 0) {
                         from = ((recursive_iteration+1)*SIZE_LIMIT)+1;
                         recursive_iteration++;
-                        System.err.println(from);
+                        //System.err.println(from);
                         return retrieveExpInfoFromAttribute(endpoint, field, value, attributes, recursive_iteration, from, info);
                     }
                     else return info;
