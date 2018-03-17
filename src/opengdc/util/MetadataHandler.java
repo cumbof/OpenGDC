@@ -445,7 +445,7 @@ public class MetadataHandler {
     }
     
     // the attributes in this methods are all required 
-    public static HashMap<String, HashMap<String, Object>> getAdditionalManuallyCuratedAttributes(String program, String disease, String dataType, String format, String aliquot_uuid, HashMap<String, String> biospecimen_attributes, HashMap<String, String> clinical_attributes, HashMap<String, String> manually_curated, String suffix_id) {
+    public static HashMap<String, HashMap<String, Object>> getAdditionalManuallyCuratedAttributes(String program, String disease, String dataType, String format, String aliquot_uuid,String aliquot_brc, HashMap<String, String> biospecimen_attributes, HashMap<String, String> clinical_attributes, HashMap<String, String> manually_curated, String suffix_id) {
         String attributes_prefix = "manually_curated";
         String category_separator = "__";
         
@@ -457,7 +457,8 @@ public class MetadataHandler {
             if (bio_attr.trim().toLowerCase().contains("sample_type_id")) {
                 tissue_id = biospecimen_attributes.get(bio_attr);
                 break;
-            }
+            }else   tissue_id = aliquot_brc.split("-")[3].substring(0,2);
+
         }
         HashMap<String, Object> values = new HashMap<>();
         String tissue_status = "";
@@ -537,6 +538,8 @@ public class MetadataHandler {
             attributes.put("cases.project.program.name", true);
             // other gdc attributes
             attributes.put("cases.submitter_id", true);
+            attributes.put("cases.samples.sample_id", true);
+
         }
         else if (endpoint.trim().toLowerCase().equals("cases")) {
             attributes.put("case_id", true);
@@ -547,6 +550,8 @@ public class MetadataHandler {
             attributes.put("project.program.name", true);
             // other gdc attributes
             attributes.put("submitter_id", true);
+            attributes.put("samples.sample_id", true);
+
         }
 
         //attributes.put("cases.samples.tumor_descriptor", false);
@@ -559,6 +564,24 @@ public class MetadataHandler {
         
         additionalAttributes.put("manually_curated", attributes);
         return additionalAttributes;
+    }
+    
+    public static ArrayList<String> getManually_without_cases(){
+        ArrayList<String> attributes = new ArrayList<>();
+         attributes.add("case_id");
+         attributes.add("disease_type");
+         attributes.add("primary_site");
+         attributes.add("demographic.year_of_birth");
+         attributes.add("project.program.program_id");
+         attributes.add("project.program.name");
+         // other gdc attributes
+         attributes.add("submitter_id");
+         attributes.add("samples.sample_id");
+         attributes.add("samples.portions.analytes.aliquots.aliquot_id");
+         attributes.add("samples.portions.analytes.aliquots.submitter_id");
+
+        return attributes;
+
     }
     
     public static ArrayList<String> getAggregatedAdditionalAttributes() {
