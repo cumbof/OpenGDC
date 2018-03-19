@@ -190,6 +190,7 @@ public class MetadataParserXML extends BioParser {
                                                 break;
                                             }
                                         }
+                                        
                                         // create a suffix to append to the aliquot id
                                         String suffix_id = this.getOpenGDCSuffix(manually_curated_data_type, false);
                                         
