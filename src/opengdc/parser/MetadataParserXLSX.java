@@ -26,7 +26,7 @@ import opengdc.util.MetadataHandler;
  * @author fabio
  */
 public class MetadataParserXLSX extends BioParser {
-    /** FM **/
+
     @Override
     public int convert(String program, String disease, String dataType, String inPath, String outPath) {
         int acceptedFiles = FSUtils.acceptedFilesInFolder(inPath, getAcceptedInputFileFormats());
@@ -39,7 +39,7 @@ public class MetadataParserXLSX extends BioParser {
         File folder = new File(outPath);
         File[] files_out = folder.listFiles();
         if (files_out.length != 0) {
-            File last_modified =files_out[0];
+            File last_modified = files_out[0];
             long time = 0;
             for (File file : files_out) {
                 if (file.getName().endsWith(this.getFormat())) {
@@ -194,15 +194,15 @@ public class MetadataParserXLSX extends BioParser {
 
                                             HashMap<String, Boolean> additional_attributes_tmp = new HashMap<String, Boolean>();
 
-                                            if(file_info.containsKey("samples.portions.analytes.aliquots.submitter_id")){
+                                            if (file_info.containsKey("samples.portions.analytes.aliquots.submitter_id")) {
                                                 attribute2required = additional_attributes_cases.get(metakey);
                                                 additional_attributes_tmp = additional_attributes_cases_tmp;
                                             }
-                                            else                                               { 
+                                            else { 
                                                 attribute2required = additional_attributes_files.get(metakey);
                                                 additional_attributes_tmp = additional_attributes_files_tmp;
-
                                             }
+                                            
                                             ArrayList<String> file_info_sorted = new ArrayList<>(file_info.keySet());
                                             /***********************/
                                             if (file_info_sorted.contains("samples.portions.analytes.aliquots.submitter_id"))
@@ -210,23 +210,23 @@ public class MetadataParserXLSX extends BioParser {
                                             if (file_info_sorted.contains("cases.samples.portions.analytes.aliquots.submitter_id"))
                                                 file_info_sorted.remove(file_info_sorted.indexOf("cases.samples.portions.analytes.aliquots.submitter_id"));
                                             /***********************/
-                                            ArrayList<String> manually_without_cases= MetadataHandler.getManually_without_cases();
+                                            ArrayList<String> manually_without_cases= MetadataHandler.getManuallyCuratedAttributesWithNoCases();
                                             Collections.sort(file_info_sorted);
                                             //start warning missing attribute
-                                            for(String attribute: additional_attributes_tmp.keySet()){
+                                            for (String attribute: additional_attributes_tmp.keySet()) {
                                                 String attribute_parsed = null;
-                                                if(manually_without_cases.contains(attribute))
+                                                if (manually_without_cases.contains(attribute))
                                                     attribute_parsed = metakey + "__cases__" + attribute.replaceAll("\\.", "__");
                                                 else
                                                     attribute_parsed = metakey + "__" + attribute.replaceAll("\\.", "__");
-                                                if(additional_attributes_tmp.containsKey(attribute) && !file_info.containsKey(attribute) && attribute2required.containsKey(attribute))
+                                                if (additional_attributes_tmp.containsKey(attribute) && !file_info.containsKey(attribute) && attribute2required.containsKey(attribute))
                                                     missing_required_attributes.add(attribute_parsed);
-                                            }   //end warning missing attribute
+                                            } //end warning missing attribute
 
                                             for (String attribute: file_info_sorted) {
                                                 //String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
                                                 String attribute_parsed = null;
-                                                if(manually_without_cases.contains(attribute))
+                                                if (manually_without_cases.contains(attribute))
                                                     attribute_parsed = metakey + "__cases__" + attribute.replaceAll("\\.", "__");
                                                 else
                                                     attribute_parsed = metakey + "__" + attribute.replaceAll("\\.", "__");
@@ -239,7 +239,7 @@ public class MetadataParserXLSX extends BioParser {
 
                                                 if (!value_parsed.trim().equals(""))
                                                     manually_curated.put(attribute_parsed, value_parsed);
-                                                else { // warning  missing data old
+                                                else { // warning missing data old
                                                     for (String attr: attribute2required.keySet()) {
                                                         if (attr.toLowerCase().equals(attribute.toLowerCase())) {
                                                             if (attribute2required.get(attr)) // if attribute is required
@@ -317,13 +317,13 @@ public class MetadataParserXLSX extends BioParser {
                                                     manually_curated.put("manually_curated__audit_warning", "missed the following required metadata: ["+missed_attributes_list.substring(0, missed_attributes_list.length()-2)+"]");
                                                 }
 
-                                                //  if (!manually_curated_data_type.equals("")) {
+                                                // if (!manually_curated_data_type.equals("")) {
                                                 // sort and print manually_curated attributes
                                                 ArrayList<String> manually_curated_attributes_sorted = new ArrayList<>(manually_curated.keySet());
                                                 Collections.sort(manually_curated_attributes_sorted);
                                                 for (String attr: manually_curated_attributes_sorted)
                                                     out.println(attr + "\t" + manually_curated.get(attr));
-                                                //  }
+                                                // }
 
                                                 out.close();
                                                 fos.close();
