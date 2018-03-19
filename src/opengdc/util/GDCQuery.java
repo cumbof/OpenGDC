@@ -126,41 +126,40 @@ public class GDCQuery {
         return null;
     }
     
-    public static ArrayList<Object> searchFor(String key, Object current_obj, ArrayList<Object> results) {
+    public static HashMap<String, ArrayList<Object>> searchFor(HashSet<String> keys, Object current_obj, HashMap<String, ArrayList<Object>> results) {
         if (results == null)
-            results = new ArrayList<>();
+            results = new HashMap<>();
         
         if (current_obj instanceof HashMap) {
             HashMap<String, Object> hashmap = (HashMap<String, Object>)current_obj;
-            HashSet<Object> tmps = new HashSet<>();
             for (String k: hashmap.keySet()) {
-                if (k.toLowerCase().trim().equals(key)) {
-                    //return (String)hashmap.get(k);
-                    //return hashmap.get(k);
-                    results.add(hashmap);
-                    return results;
+                if (keys.contains(k.toLowerCase().trim())) {
+                    HashMap<String, Object> reduced_hashmap = new HashMap<>();
+                    for (String key: hashmap.keySet()) {
+                        if (!(hashmap.get(key) instanceof HashMap) && !(hashmap.get(key) instanceof List))
+                            reduced_hashmap.put(key, hashmap.get(key));
+                    }
+                    ArrayList<Object> val = new ArrayList<>();
+                    if (results.containsKey(k.toLowerCase().trim()))
+                        val = results.get(k.toLowerCase().trim());
+                    val.add(reduced_hashmap);
+                    results.put(k.toLowerCase().trim(), val);
                 }
-                else
-                    tmps.add(searchFor(key, hashmap.get(k), results));
+                else {
+                    if ((hashmap.get(k) instanceof HashMap) || (hashmap.get(k) instanceof List))
+                        results.putAll(searchFor(keys, hashmap.get(k), results));
+                }
+                
             }
-            /*for (Object tmp: tmps) {
-                if (tmp != null)
-                    return tmp;
-            }*/
-            return results;
         }
         else if (current_obj instanceof List) {
             ArrayList<Object> list = (ArrayList<Object>)current_obj;
-            HashSet<Object> tmps = new HashSet<>();
-            for (Object o: list)
-                tmps.add(searchFor(key, o, results));
-            /*for (Object tmp: tmps) {
-                if (tmp != null)
-                    return tmp;
-            }*/
-            return results;
+            for (Object o: list) {
+                if ((o instanceof HashMap) || (o instanceof List))
+                    results.putAll(searchFor(keys, o, results));
+            }
         }
-        return null;
+        return results;
     }
     
     public static HashMap<String, HashMap<String, String>> extractInfo(String last_query_file_tmp_path) {
@@ -346,17 +345,15 @@ public class GDCQuery {
                     
                     for (Object node: hits_node) {
                         HashMap<String, ArrayList<Object>> data_node = new HashMap<>();
+                        HashSet<String> keys = new HashSet<>();
                         for (String attribute: attributes) {
                             String[] attribute_split = attribute.split("\\.");
                             String searchForKey = attribute_split[attribute_split.length-1];
-                            ArrayList<Object> values = searchFor(searchForKey, node, null);
-                            /*String val = null;
-                            for (Object map: values)
-                                val = String.valueOf(((HashMap<String, Object>)map).get(searchForKey));*/
-                            //info.put(attribute, val!=null ? val : "");
-                            //data_node.put(attribute, val!=null ? val : "");  
-                            data_node.put(attribute, values);
+                            keys.add(searchForKey);
                         }
+                        HashMap<String, ArrayList<Object>> values = searchFor(keys, node, null);
+                        for (String attr: values.keySet())
+                            data_node.put(attr, values.get(attr));
                         info.add(data_node);
                     }
                     
