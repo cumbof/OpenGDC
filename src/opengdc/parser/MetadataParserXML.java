@@ -114,8 +114,10 @@ public class MetadataParserXML extends BioParser {
     private ArrayList<String> convertProcedure(String program, String disease, String dataType, String outPath, HashMap<String, HashMap<String, String>> clinicalBigMap, HashMap<String, HashMap<String, String>> biospecimenBigMap, ArrayList<String> skippedAliquots) {
         ArrayList<String> currentSkippedAliquots = new ArrayList<>();
         // merge clinical and biospecimen info (plus additional metadata)
-        if (!biospecimenBigMap.isEmpty()) {
-            HashMap<String, HashMap<String, Boolean>> additional_attributes = MetadataHandler.getAdditionalAttributes("files");
+        if (!biospecimenBigMap.isEmpty()) {            
+            HashMap<String, HashMap<String, Boolean>> additional_attributes_files = MetadataHandler.getAdditionalAttributes("files");
+            HashMap<String, HashMap<String, Boolean>> additional_attributes_cases = MetadataHandler.getAdditionalAttributes("cases");
+            
             for (String aliquot_uuid: biospecimenBigMap.keySet()) {
                 try {
                     if (skippedAliquots.isEmpty() || skippedAliquots.contains(aliquot_uuid)) {
@@ -146,24 +148,93 @@ public class MetadataParserXML extends BioParser {
                         }
 
                         // generate manually curated metadata
-                        if (!additional_attributes.isEmpty()) {
-                            ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes.keySet());
+                        if (!additional_attributes_files.isEmpty() || !additional_attributes_cases.isEmpty()) {
+                            ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes_files.keySet());
                             Collections.sort(additional_attributes_sorted);
                             for (String metakey: additional_attributes_sorted) {
-                                ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
+                                HashMap<String, Boolean> additional_attributes_files_tmp = additional_attributes_files.get(metakey);
+                                HashMap<String, Boolean> additional_attributes_cases_tmp = additional_attributes_cases.get(metakey);
+                                additional_attributes_files_tmp.remove("cases.samples.sample_id");
+                                additional_attributes_cases_tmp.remove("samples.sample_id");
+                                
+                                ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes_files.get(metakey).keySet()), 0, 0, null);
                                 ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
+
+                                boolean use_files_endpoint = true;
+                                if (aggregated_files_info.isEmpty()) {
+                                    use_files_endpoint = false;
+                                    HashSet<String> additional_attributes_tmp = new HashSet<>(additional_attributes_cases_tmp.keySet());
+                                    files_info = GDCQuery.retrieveExpInfoFromAttribute("cases", "samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid, additional_attributes_tmp, 0, 0, null);
+                                    if (!files_info.isEmpty()) {
+                                        HashMap<String, String> files_info_res = new HashMap<>();
+                                        for (HashMap<String, ArrayList<Object>> file_info: files_info) {
+                                            for (String k: file_info.keySet()) {
+                                                for (Object obj: file_info.get(k)) {
+                                                    HashMap<String, Object> map = (HashMap<String, Object>)obj;
+                                                    for (String kmap: map.keySet()) {
+                                                        String add_attr_curr = "";
+                                                        for (String add_attr: additional_attributes_tmp) {
+                                                            String[] add_attr_split = add_attr.split("\\.");
+                                                            String last_val = add_attr_split[add_attr_split.length-1];
+                                                            if (last_val.toLowerCase().equals(kmap.toLowerCase())) {
+                                                                files_info_res.put(add_attr, String.valueOf(map.get(kmap)));
+                                                                add_attr_curr = add_attr;
+                                                                break;
+                                                            }
+                                                        }
+                                                        if (!add_attr_curr.trim().equals(""))
+                                                            additional_attributes_tmp.remove(add_attr_curr);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        aggregated_files_info = new ArrayList<>();
+                                        aggregated_files_info.add(files_info_res);
+                                    }
+                                }
 
                                 for (HashMap<String, String> file_info: aggregated_files_info) {
                                     if (file_info != null) {
                                         // handle missing required attributes
                                         HashSet<String> missing_required_attributes = new HashSet<>();
                                         HashMap<String, String> manually_curated = new HashMap<>();
-                                        HashMap<String, Boolean> attribute2required = additional_attributes.get(metakey);
+                                        HashMap<String, Boolean> attribute2required;
+                                        HashMap<String, Boolean> additional_attributes_tmp;
+
+                                        if (!use_files_endpoint) {
+                                            attribute2required = additional_attributes_cases.get(metakey);
+                                            additional_attributes_tmp = additional_attributes_cases_tmp;
+                                        }
+                                        else { 
+                                            attribute2required = additional_attributes_files.get(metakey);
+                                            additional_attributes_tmp = additional_attributes_files_tmp;
+                                        }
+                                        
                                         ArrayList<String> file_info_sorted = new ArrayList<>(file_info.keySet());
                                         Collections.sort(file_info_sorted);
+                                        
+                                        ArrayList<String> manually_without_cases = MetadataHandler.getManuallyCuratedAttributesWithNoCases();
+
+                                        //start warning missing attribute
+                                        for (String attribute: additional_attributes_tmp.keySet()) {
+                                            String attribute_parsed;
+                                            if (manually_without_cases.contains(attribute))
+                                                attribute_parsed = metakey + "__cases__" + attribute.replaceAll("\\.", "__");
+                                            else
+                                                attribute_parsed = metakey + "__" + attribute.replaceAll("\\.", "__");
+                                            if (additional_attributes_tmp.containsKey(attribute) && !file_info.containsKey(attribute) && attribute2required.containsKey(attribute)) {
+                                                if (attribute2required.get(attribute))
+                                                    missing_required_attributes.add(attribute_parsed);
+                                            }
+                                        } //end warning missing attribute
+                                        
                                         for (String attribute: file_info_sorted) {
                                             //String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
-                                            String attribute_parsed = metakey + "__" + attribute.replaceAll("\\.", "__");
+                                            String attribute_parsed;
+                                            if (manually_without_cases.contains(attribute))
+                                                attribute_parsed = metakey + "__cases__" + attribute.replaceAll("\\.", "__");
+                                            else
+                                                attribute_parsed = metakey + "__" + attribute.replaceAll("\\.", "__");
                                             /*************************************************************/
                                             /** patch for the attribute 'manually_curated__data_format' **/
                                             if (attribute_parsed.trim().toLowerCase().equals("manually_curated__data_format"))
@@ -173,9 +244,9 @@ public class MetadataParserXML extends BioParser {
                                             if (!value_parsed.trim().equals(""))
                                                 manually_curated.put(attribute_parsed, value_parsed);
                                             else {
-                                                for (String attr: attribute2required.keySet()) {
+                                                for (String attr: additional_attributes_files_tmp.keySet()) {
                                                     if (attr.toLowerCase().equals(attribute.toLowerCase())) {
-                                                        if (attribute2required.get(attr)) // if attribute is required
+                                                        if (additional_attributes_files_tmp.get(attr)) // if attribute is required
                                                             missing_required_attributes.add(attribute_parsed);
                                                     }
                                                 }
@@ -190,10 +261,10 @@ public class MetadataParserXML extends BioParser {
                                                 break;
                                             }
                                         }
-                                        
+
                                         // create a suffix to append to the aliquot id
                                         String suffix_id = this.getOpenGDCSuffix(manually_curated_data_type, false);
-                                        
+
                                         HashMap<String, HashMap<String, Object>> additional_manually_curated = MetadataHandler.getAdditionalManuallyCuratedAttributes(program, disease, dataType, this.getFormat(), aliquot_uuid, "", biospecimenBigMap.get(aliquot_uuid), clinicalBigMap.get(patient_uuid), manually_curated, suffix_id);
                                         if (!additional_manually_curated.isEmpty()) {
                                             for (String attr: additional_manually_curated.keySet()) {
@@ -242,13 +313,13 @@ public class MetadataParserXML extends BioParser {
                                                 manually_curated.put("manually_curated__audit_warning", "missed the following required metadata: ["+missed_attributes_list.substring(0, missed_attributes_list.length()-2)+"]");
                                             }
 
-                                            if (!manually_curated_data_type.equals("")) {
-                                                // sort and print manually_curated attributes
-                                                ArrayList<String> manually_curated_attributes_sorted = new ArrayList<>(manually_curated.keySet());
-                                                Collections.sort(manually_curated_attributes_sorted);
-                                                for (String attr: manually_curated_attributes_sorted)
-                                                    out.println(attr + "\t" + manually_curated.get(attr));
-                                            }
+                                            //if (!manually_curated_data_type.equals("")) {
+                                            // sort and print manually_curated attributes
+                                            ArrayList<String> manually_curated_attributes_sorted = new ArrayList<>(manually_curated.keySet());
+                                            Collections.sort(manually_curated_attributes_sorted);
+                                            for (String attr: manually_curated_attributes_sorted)
+                                                out.println(attr + "\t" + manually_curated.get(attr));
+                                            //}
 
                                             out.close();
                                             fos.close();

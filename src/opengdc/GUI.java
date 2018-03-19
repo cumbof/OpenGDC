@@ -703,16 +703,23 @@ public class GUI extends javax.swing.JFrame {
             String selectedProgram = jComboBox1.getSelectedItem().toString().trim();
             String selectedDisease = jComboBox2.getSelectedItem().toString().trim();
             if (!selectedProgram.trim().equals("") && !selectedDisease.trim().equals("")) {
-                ArrayList<String> dataTypes = new ArrayList<>(GDCData.getBigGDCDataMap().get(selectedProgram).get(selectedDisease));
-                Collections.sort(dataTypes);
+                ArrayList<String> dataTypes_tmp = new ArrayList<>(GDCData.getBigGDCDataMap().get(selectedProgram).get(selectedDisease));
+                //Collections.sort(dataTypes);
                 //System.err.println(diseases.size());
+                ArrayList<String> dataTypes = new ArrayList<>();
                 jComboBox3.removeAllItems();
                 jComboBox3.addItem("");
-                for (String dataType: dataTypes) {
-                    if (!dataType.trim().toLowerCase().equals("biospecimen supplement") && !dataType.trim().toLowerCase().equals("clinical supplement"))
-                        jComboBox3.addItem(dataType);
+                for (String dataType: dataTypes_tmp) {
+                    if (!dataType.trim().toLowerCase().equals("biospecimen supplement") && !dataType.trim().toLowerCase().equals("clinical supplement")) {
+                        //jComboBox3.addItem(dataType);
+                        dataTypes.add(dataType);
+                    }
                 }
-                jComboBox3.addItem("Clinical and Biospecimen Supplements");
+                //jComboBox3.addItem("Clinical and Biospecimen Supplements");
+                dataTypes.add("Clinical and Biospecimen Supplements");
+                Collections.sort(dataTypes);
+                for (String dataType: dataTypes)
+                    jComboBox3.addItem(dataType);
             }
             else {
                 jComboBox3.removeAllItems();
@@ -791,16 +798,23 @@ public class GUI extends javax.swing.JFrame {
             String selectedProgram = jComboBox5.getSelectedItem().toString().trim();
             String selectedDisease = jComboBox6.getSelectedItem().toString().trim();
             if (!selectedProgram.trim().equals("") && !selectedDisease.trim().equals("")) {
-                ArrayList<String> dataTypes = new ArrayList<>(GDCData.getBigGDCDataMap().get(selectedProgram).get(selectedDisease));
-                Collections.sort(dataTypes);
+                ArrayList<String> dataTypes_tmp = new ArrayList<>(GDCData.getBigGDCDataMap().get(selectedProgram).get(selectedDisease));
+                //Collections.sort(dataTypes);
                 //System.err.println(diseases.size());
+                ArrayList<String> dataTypes = new ArrayList<>();
                 jComboBox7.removeAllItems();
                 jComboBox7.addItem("");
-                for (String dataType: dataTypes) {
-                    if (!dataType.trim().toLowerCase().equals("biospecimen supplement") && !dataType.trim().toLowerCase().equals("clinical supplement"))
-                        jComboBox7.addItem(dataType);
+                for (String dataType: dataTypes_tmp) {
+                    if (!dataType.trim().toLowerCase().equals("biospecimen supplement") && !dataType.trim().toLowerCase().equals("clinical supplement")) {
+                        //jComboBox3.addItem(dataType);
+                        dataTypes.add(dataType);
+                    }
                 }
-                jComboBox7.addItem("Clinical and Biospecimen Supplements");
+                //jComboBox3.addItem("Clinical and Biospecimen Supplements");
+                dataTypes.add("Clinical and Biospecimen Supplements");
+                Collections.sort(dataTypes);
+                for (String dataType: dataTypes)
+                    jComboBox7.addItem(dataType);
             }
             else {
                 jComboBox7.removeAllItems();

@@ -114,8 +114,8 @@ public class MetadataParserXLSX extends BioParser {
                         if (!additional_attributes_files.isEmpty() || !additional_attributes_cases.isEmpty()) {
                             ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes_files.keySet());
                             Collections.sort(additional_attributes_sorted);
+                            
                             for (String metakey: additional_attributes_sorted) {
-
                                 /** just to retrieve aliquot uuid **/
                                 HashMap<String, Boolean> additional_attributes_files_tmp = additional_attributes_files.get(metakey);
                                 HashMap<String, Boolean> additional_attributes_cases_tmp = additional_attributes_cases.get(metakey);
@@ -192,9 +192,8 @@ public class MetadataParserXLSX extends BioParser {
                                             // handle missing required attributes
                                             HashSet<String> missing_required_attributes = new HashSet<>();
                                             HashMap<String, String> manually_curated = new HashMap<>();
-                                            HashMap<String, Boolean> attribute2required = new HashMap<String, Boolean>();
-
-                                            HashMap<String, Boolean> additional_attributes_tmp = new HashMap<String, Boolean>();
+                                            HashMap<String, Boolean> attribute2required;
+                                            HashMap<String, Boolean> additional_attributes_tmp;
 
                                             if (file_info.containsKey("samples.portions.analytes.aliquots.submitter_id")) {
                                                 attribute2required = additional_attributes_cases.get(metakey);
@@ -212,22 +211,25 @@ public class MetadataParserXLSX extends BioParser {
                                             if (file_info_sorted.contains("cases.samples.portions.analytes.aliquots.submitter_id"))
                                                 file_info_sorted.remove(file_info_sorted.indexOf("cases.samples.portions.analytes.aliquots.submitter_id"));
                                             /***********************/
-                                            ArrayList<String> manually_without_cases= MetadataHandler.getManuallyCuratedAttributesWithNoCases();
                                             Collections.sort(file_info_sorted);
+                                            ArrayList<String> manually_without_cases = MetadataHandler.getManuallyCuratedAttributesWithNoCases();
+                                            
                                             //start warning missing attribute
                                             for (String attribute: additional_attributes_tmp.keySet()) {
-                                                String attribute_parsed = null;
+                                                String attribute_parsed;
                                                 if (manually_without_cases.contains(attribute))
                                                     attribute_parsed = metakey + "__cases__" + attribute.replaceAll("\\.", "__");
                                                 else
                                                     attribute_parsed = metakey + "__" + attribute.replaceAll("\\.", "__");
-                                                if (additional_attributes_tmp.containsKey(attribute) && !file_info.containsKey(attribute) && attribute2required.containsKey(attribute))
-                                                    missing_required_attributes.add(attribute_parsed);
+                                                if (additional_attributes_tmp.containsKey(attribute) && !file_info.containsKey(attribute) && attribute2required.containsKey(attribute)) {
+                                                    if (attribute2required.get(attribute))
+                                                        missing_required_attributes.add(attribute_parsed);
+                                                }
                                             } //end warning missing attribute
 
                                             for (String attribute: file_info_sorted) {
                                                 //String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
-                                                String attribute_parsed = null;
+                                                String attribute_parsed;
                                                 if (manually_without_cases.contains(attribute))
                                                     attribute_parsed = metakey + "__cases__" + attribute.replaceAll("\\.", "__");
                                                 else
@@ -245,7 +247,6 @@ public class MetadataParserXLSX extends BioParser {
                                                     for (String attr: attribute2required.keySet()) {
                                                         if (attr.toLowerCase().equals(attribute.toLowerCase())) {
                                                             if (attribute2required.get(attr)) // if attribute is required
-
                                                                 missing_required_attributes.add(attribute_parsed);
                                                         }
                                                     }

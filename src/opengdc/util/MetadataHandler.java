@@ -68,7 +68,7 @@ public class MetadataHandler {
                     Node child = source.getChildNodes().item(i);
                     Object child_data = createMap(child, false);
                     if (child.getNodeName().toLowerCase().trim().contains("#text") && childs<=1) {
-                        return (String)child_data;
+                        return ((String)child_data).replaceAll("\t", " ");
                     }
                     else {
                         if (!child.getNodeName().toLowerCase().trim().contains("#text")) {
@@ -165,7 +165,7 @@ public class MetadataHandler {
                         HashMap<String, String> values = new HashMap<>();
                         for (int i=0; i<line_split.length; i++) {
                             if (i != index_position)
-                                values.put(header[i], line_split[i]);
+                                values.put(header[i], line_split[i].replaceAll("\t", " "));
                         }
                         result.put(key, values);
                     }
@@ -225,7 +225,7 @@ public class MetadataHandler {
                                 cellValue = cell.getStringCellValue();
                             else if (cell.getCellTypeEnum() == CellType.NUMERIC)
                                 cellValue = String.valueOf(cell.getNumericCellValue());
-                            cellValue = cellValue.replaceAll("\r\n", " ").replaceAll("\n", " ");
+                            cellValue = cellValue.replaceAll("\r\n", " ").replaceAll("\n", " ").replaceAll("\t", " ");
                             
                             if (!cellValue.trim().equals("")) {
                             
