@@ -6,4 +6,4 @@ Everyone is welcome to contribute to the software development. Simply reply to t
 
 ## Links
 - Software web-page: [http://bioinf.iasi.cnr.it/opengdc/](http://bioinf.iasi.cnr.it/opengdc/)
-- Public data repository: [ftp://bioinf.iasi.cnr.it/opengdc/](ftp://bioinf.iasi.cnr.it/opengdc/)
+- Public data repository: [ftp://bioinformatics.iasi.cnr.it/opengdc/](ftp://bioinformatics.iasi.cnr.it/opengdc/)
