@@ -1,12 +1,3 @@
-/*
- * Application: OpenGDC
- * Version: 1.0
- * Authors: Fabio Cumbo (1,2), Eleonora Cappelli (1,2), Emanuel Weitschek (1,3)
- * Organizations: 
- * 1. Institute for Systems Analysis and Computer Science "Antonio Ruberti" - National Research Council of Italy, Rome, Italy
- * 2. Department of Engineering - Third University of Rome, Rome, Italy
- * 3. Department of Engineering - Uninettuno International University, Rome, Italy
- */
 package opengdc;
 
 import java.io.File;
@@ -18,7 +9,7 @@ import java.io.File;
 public class Settings {
     
     // debug flag
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     
     public static boolean isDebug() {
         return DEBUG;
@@ -85,7 +76,7 @@ public class Settings {
         return GDC_DATA_PORTAL_URL;
     }
     
-    private static final String OPEN_GDC_PAGE_URL = "http://bioinformatics.iasi.cnr.it/opengdc/";
+    private static final String OPEN_GDC_PAGE_URL = "http://bioinf.iasi.cnr.it/opengdc/";
     public static String getOpenGDCPageURL() {
         return OPEN_GDC_PAGE_URL;
     }
@@ -107,6 +98,7 @@ public class Settings {
     
     private static final String OPEN_GDC_FTP_REPO_TCGA = "tcga";
     private static final String OPEN_GDC_FTP_REPO_TARGET = "target";
+    private static final String OPEN_GDC_FTP_REPO_FM = "fm";
     public static String getOpenGDCFTPRepoProgram(String program, boolean original) {
         if (program.trim().toLowerCase().contains("tcga")) {
             if (original) return getOpenGDCFTPRepoOriginal()+OPEN_GDC_FTP_REPO_TCGA+"/";
@@ -115,6 +107,10 @@ public class Settings {
         else if (program.trim().toLowerCase().contains("target")) {
             if (original) return getOpenGDCFTPRepoOriginal()+OPEN_GDC_FTP_REPO_TARGET+"/";
             return getOpenGDCFTPRepoBEDConverted()+OPEN_GDC_FTP_REPO_TARGET+"/";
+        }
+        else if (program.trim().toLowerCase().contains("fm")) {
+            if (original) return getOpenGDCFTPRepoOriginal()+OPEN_GDC_FTP_REPO_FM+"/";
+            return getOpenGDCFTPRepoBEDConverted()+OPEN_GDC_FTP_REPO_FM+"/";
         }
         return "";
     }
@@ -132,13 +128,6 @@ public class Settings {
         return MIRBASE_HSA_GFF3_DATA;
     }
     
-    /***************************************** old method: querying NCBI *****************************************/
-    /*private static final String NCBI_DATA = "./appdata/ncbi/GRCh38_data.txt";
-    public static String getNCBIDataPath() {
-        if (DEBUG) return "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/ncbi/GRCh38_data.txt";
-        return NCBI_DATA;
-    }*/
-    /*************************************************************************************************************/
     private static final String NCBI_DATA = "./appdata/ncbi/ref_GRCh38.p2_top_level.gff3";
     public static String getNCBIDataPath() {
         if (DEBUG) return DEBUG_APPDATA+"ncbi/ref_GRCh38.p2_top_level.gff3";
@@ -155,18 +144,6 @@ public class Settings {
     public static String getGENENAMESDataPath() {
         if (DEBUG) return DEBUG_APPDATA+"genenames/hgnc_complete_set.txt";
         return GENENAMES_DATA;
-    }
-
-    private static final String ILLUMINA_DATA = "./appdata/illumina/humanMethylation.txt";
-    public static String getILLUMINADataPath() {
-        if (DEBUG) return DEBUG_APPDATA+"illumina/humanMethylation.txt";
-        return ILLUMINA_DATA;
-    }
-    
-    private static final String ENSEMBL_DATA = "./appdata/ensembl/Homo_sapiens.GRCh38.77.gtf";
-    public static String getENSEMBLDataPath() {
-        if (DEBUG) return DEBUG_APPDATA+"ensembl/Homo_sapiens.GRCh38.77.gtf";
-        return ENSEMBL_DATA;
     }
 
     private static final String GENCODE_DATA = "./appdata/gencode/gencode.v22.annotation.gtf";
