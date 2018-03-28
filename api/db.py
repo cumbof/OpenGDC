@@ -29,5 +29,6 @@ def initializeDB():
             with open(db_schema_file_path, 'rt') as f:
                 schema = f.read();
                 conn.executescript(schema);
-                print 'Populating DB';
-                importSQL();
+                if os.path.exists(db_data_file_path):
+                    print 'Populating DB';
+                    importSQL();

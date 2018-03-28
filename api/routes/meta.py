@@ -48,7 +48,7 @@ def meta_id_endpoint(opengdc_id):
         data['hits'][opengdc_obj[1]] = opengdc_obj[2];
     for opengdc_obj in query_db('select * from opengdc_manually_curated where opengdc_id=\''+opengdc_id+'\''):
         data['hits'][opengdc_obj[1]] = opengdc_obj[2];
-    if not data:
+    if not data['hits']:
         data['message'] = "The specified opengdc_id does not exist."
         status = 400;
     js = json.dumps(data, indent=4, sort_keys=True);
@@ -67,7 +67,7 @@ def meta_id_attribute_endpoint(opengdc_id, meta_attribute):
         data['hits'][opengdc_obj[1]] = opengdc_obj[2];
     for opengdc_obj in query_db('select * from opengdc_manually_curated where opengdc_id=\''+opengdc_id+'\' and meta_attribute=\''+meta_attribute+'\''):
         data['hits'][opengdc_obj[1]] = opengdc_obj[2];
-    if not data:
+    if not data['hits']:
         data['message'] = "The specified opengdc_id or meta_attribute does not exist."
         status = 400;
     js = json.dumps(data, indent=4, sort_keys=True);
@@ -86,7 +86,7 @@ def meta_attribute_endpoint(meta_attribute):
         data['hits'][opengdc_obj[1]].append(opengdc_obj[2]);
     for opengdc_obj in query_db('select * from opengdc_manually_curated where meta_attribute=\''+meta_attribute+'\''):
         data['hits'][opengdc_obj[1]].append(opengdc_obj[2]);
-    if not data:
+    if not data['hits']:
         data['message'] = "The specified opengdc_id or meta_attribute does not exist."
         status = 400;
     js = json.dumps(data, indent=4, sort_keys=True);

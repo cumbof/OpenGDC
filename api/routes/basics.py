@@ -26,6 +26,7 @@ def routes():
                 '/data/tumor/<tumor_name>',
                 '/data/tumor/_list',
                 '/data/experiment/<experiment_type>',
+                '/data/experiment/<experiment_type>/_header',
                 '/data/experiment/_list'
             ],
             'meta': [
@@ -34,6 +35,11 @@ def routes():
                 '/meta/id/<opengdc_id>',
                 '/meta/id/<opengdc_id>/attribute/<meta_attribute>',
                 '/meta/attribute/<meta_attribute>'
+            ],
+            'annotation': [
+                'annotation/_experiments',
+                'annotation/<experiment_type>/_all',
+                'annotation/<experiment_type>/<annotation_id>'
             ]
         }
     };

@@ -41,7 +41,7 @@ def data_id_endpoint(opengdc_id):
         res['data_url'] = opengdc_obj[7];
         res['source'] = opengdc_obj[8];
         data['hits'].append(res);
-    if not data:
+    if not data['hits']:
         data['message'] = "The specified opengdc_id does not exist."
         status = 400;
     js = json.dumps(data, indent=4, sort_keys=True);
@@ -65,7 +65,7 @@ def data_tumor_endpoint(tumor_name):
         res['data_url'] = opengdc_obj[7];
         res['source'] = opengdc_obj[8];
         data['hits'].append(res);
-    if not data:
+    if not data['hits']:
         data['message'] = "The specified tumor_name does not exist."
         status = 400;
     js = json.dumps(data, indent=4, sort_keys=True);
@@ -77,7 +77,7 @@ def data_tumor_list_endpoint():
     data = { 
         'hits': []
     };
-    for opengdc_obj in query_db('select distinct tumor_abbreviation from opengdc_data '):
+    for opengdc_obj in query_db('select distinct tumor_abbreviation from opengdc_data'):
         data['hits'].append(opengdc_obj[1]);
     js = json.dumps(data, indent=4, sort_keys=True);
     resp = Response(js, status=200, mimetype='application/json');
@@ -100,7 +100,7 @@ def data_experiment_endpoint(experiment_type):
         res['data_url'] = opengdc_obj[7];
         res['source'] = opengdc_obj[8];
         data['hits'].append(res);
-    if not data:
+    if not data['hits']:
         data['message'] = "The specified tumor_name does not exist."
         status = 400;
     js = json.dumps(data, indent=4, sort_keys=True);
@@ -112,8 +112,22 @@ def data_experiment_list_endpoint():
     data = { 
         'hits': []
     };
-    for opengdc_obj in query_db('select distinct experiment_type from opengdc_data '):
+    for opengdc_obj in query_db('select distinct experiment_type from opengdc_data'):
         data['hits'].append(opengdc_obj[2]);
     js = json.dumps(data, indent=4, sort_keys=True);
+    resp = Response(js, status=200, mimetype='application/json');
+    return resp;
+
+@blueprint.route("/data/experiment/<experiment_type>/_header")
+def data_experiment_list_endpoint(experiment_type):
+    data = { 
+        'hits': []
+    };
+    for opengdc_obj in query_db('select * from opengdc_experiment_header where experiment_type=\''+experiment_type+'\' order by header_position;'):
+        res = { };
+        res['position'] = opengdc_obj[2];
+        res['content'] = opengdc_obj[1];
+        data['hits'].append(res);
+    js = json.dumps(data, indent=4);
     resp = Response(js, status=200, mimetype='application/json');
     return resp;
