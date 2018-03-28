@@ -19,8 +19,8 @@ def readGeneExpressionAnnotations(annotations_dir_path):
         if file.endswith('.bed'):
             with open(os.path.join(annotations_dir_path, file)) as f:
                 for line in f:
-                    line = line.strip();
-                    if line is not "":
+                    #line = line.strip();
+                    if line.strip() is not "":
                         line_split = line.split("\t");
                         chrom = line_split[0];
                         start_position = line_split[1];
@@ -43,8 +43,8 @@ def readHumanMethylationAnnotations(annotations_dir_path):
         if file.endswith('.bed'):
             with open(os.path.join(annotations_dir_path, file)) as f:
                 for line in f:
-                    line = line.strip();
-                    if line is not "":
+                    #line = line.strip();
+                    if line.strip() is not "":
                         line_split = line.split("\t");
                         chrom = line_split[0];
                         start_position = line_split[1];
@@ -63,7 +63,7 @@ def readHumanMethylationAnnotations(annotations_dir_path):
                         all_positions_to_tss = line_split[14];
                         cgi_coordinate = line_split[15];
                         feature_type = line_split[16];
-                        query_db('insert into opengdc_annotation_geneexpression (chrom, start_position, end_position, strand, composite_element_ref, gene_symbol, entrez_gene_id, gene_type, ensembl_transcript_id, position_to_tss, all_gene_symbols, all_entrez_gene_ids, all_gene_types, all_ensembl_transcript_ids, all_positions_to_tss, cgi_coordinate, feature_type, platform) values (\''+chrom+'\', '+start_position+', '+end_position+', \''+strand+'\', \''+composite_element_ref+'\', \''+gene_symbol+'\', \''+entrez_gene_id+'\', \''+gene_type+'\', \''+ensembl_transcript_id+'\', \''+position_to_tss+'\', \''+all_gene_symbols+'\', \''+all_entrez_gene_ids+'\', \''+all_gene_types+'\', \''+all_ensembl_transcript_ids+'\', \''+all_positions_to_tss+'\', \''+cgi_coordinate+'\', \''+feature_type+'\', \''+platform+'\');');
+                        query_db('insert into opengdc_annotation_humanmethylation (chrom, start_position, end_position, strand, composite_element_ref, gene_symbol, entrez_gene_id, gene_type, ensembl_transcript_id, position_to_tss, all_gene_symbols, all_entrez_gene_ids, all_gene_types, all_ensembl_transcript_ids, all_positions_to_tss, cgi_coordinate, feature_type, platform) values (\''+chrom+'\', '+start_position+', '+end_position+', \''+strand+'\', \''+composite_element_ref+'\', \''+gene_symbol+'\', \''+entrez_gene_id+'\', \''+gene_type+'\', \''+ensembl_transcript_id+'\', \''+position_to_tss+'\', \''+all_gene_symbols+'\', \''+all_entrez_gene_ids+'\', \''+all_gene_types+'\', \''+all_ensembl_transcript_ids+'\', \''+all_positions_to_tss+'\', \''+cgi_coordinate+'\', \''+feature_type+'\', \''+platform+'\');');
 
 def storeAnnotations(annotations_dir_path):
     for folder in os.listdir(annotations_dir_path):

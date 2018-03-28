@@ -16,24 +16,24 @@ create table opengdc_data (
 
 -- 'opengdc_biospecimen' table
 create table opengdc_biospecimen (
-    opengdc_id                  primary key text,
+    opengdc_id                  text primary key,
     meta_attribute              text,
     meta_value                  text
-)
+);
 
 -- 'opengdc_clinical' table
 create table opengdc_clinical (
-    opengdc_id                  primary key text,
+    opengdc_id                  text primary key,
     meta_attribute              text,
     meta_value                  text
-)
+);
 
 -- 'opengdc_manually_curated' table
 create table opengdc_manually_curated (
-    opengdc_id                  primary key text,
+    opengdc_id                  text primary key,
     meta_attribute              text,
     meta_value                  text
-)
+);
 
 -- 'opengdc_experiment_header' table
 create table opengdc_experiment_header (
@@ -41,7 +41,7 @@ create table opengdc_experiment_header (
     header_name                 text,
     header_position             int,
     primary key (experiment_type, header_name)
-)
+);
 
 -- 'opengdc_annotation_geneexpression' table
 create table opengdc_annotation_geneexpression (
@@ -49,10 +49,10 @@ create table opengdc_annotation_geneexpression (
     start_position              bigint,
     end_position                bigint,
     strand                      text,
-    ensembl_gene_id             primary key text,
+    ensembl_gene_id             text primary key,
     entrez_gene_id              text,
     gene_symbol                 text
-)
+);
 
 -- 'opengdc_annotation_humanmethylation' table
 create table opengdc_annotation_humanmethylation (
@@ -75,9 +75,9 @@ create table opengdc_annotation_humanmethylation (
     feature_type                text,
     platform                    text,
     primary key (composite_element_ref, platform)
-)
+);
 
 -- 'opengdc_annotation_experiments' table
 create table opengdc_annotation_experiments (
-    experiment_name             primary key text
-)
+    experiment_name             text primary key
+);
