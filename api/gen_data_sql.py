@@ -68,14 +68,14 @@ def readHumanMethylationAnnotations(annotations_dir_path):
 def storeAnnotations(annotations_dir_path):
     for folder in os.listdir(annotations_dir_path):
         if os.path.isdir(os.path.join(annotations_dir_path, folder)):
-            if folder is 'GeneExpression':
+            if folder.startswith('GeneExpression'):
                 print 'Processing annotation ' + folder;
                 readGeneExpressionAnnotations(os.path.join(annotations_dir_path, folder));
             elif folder.startswith('HumanMethylation'):
                 print 'Processing annotation ' + folder;
                 readHumanMethylationAnnotations(os.path.join(annotations_dir_path, folder));
 
-def storeMeta(dir_path, file_name):
+def storeMeta(dir_path, file_name, opengdc_id):
     with open(os.path.join(dir_path, file_name)) as file:
         for line in file:
             if line.strip() is not "":
@@ -94,12 +94,12 @@ def storeMeta(dir_path, file_name):
 
 def getChecksum(dir_path, file_name):
     md5_checksum_filepath = os.path.join(dir_path, md5_checksum_filename);
-    checksum = None;
+    checksum = "";
     with open(md5_checksum_filepath) as file:
        for line in file:
            if line.strip() is not "":
                line_split = line.strip().split("\t");
-               if line_split[0] is file_name:
+               if line_split[0] == file_name:
                    checksum = line_split[1];
                    break;
     return checksum;
@@ -119,9 +119,9 @@ def processDataType(program, tumor, datatype, bedfiles_root):
             data_url = base_url + program + '/' + tumor + '/' + datatype + '/' + file;
             source = static_source;
             query_db('insert into opengdc_data (opengdc_id, tumor_abbreviation, experiment_type, data_name, data_type, md5_checksum, last_update_timestamp, data_url, source) values (\''+opengdc_id+'\', \''+tumor_abbreviation+'\', \''+experiment_type+'\', \''+data_name+'\', \''+data_type+'\', \''+md5_checksum+'\', \''+last_update_timestamp+'\', \''+data_url+'\', \''+source+'\');');
-        # if the current file is metadata -> take trace of its content
-        if file_extension in metadata_data_types:
-            storeMeta(bedfiles_root, file);
+            # if the current file is metadata -> take trace of its content
+            if file_extension in metadata_data_types:
+                storeMeta(bedfiles_root, file, opengdc_id);
 
 def walkDirs(programs_root):
     # just for bed data

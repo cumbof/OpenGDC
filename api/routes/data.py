@@ -2,6 +2,7 @@ from flask import Response, redirect
 from . import blueprint
 
 import json
+from db import *
 
 @blueprint.route("/data/_all")
 def data_all():
@@ -119,7 +120,7 @@ def data_experiment_list_endpoint():
     return resp;
 
 @blueprint.route("/data/experiment/<experiment_type>/_header")
-def data_experiment_list_endpoint(experiment_type):
+def data_experiment_header_endpoint(experiment_type):
     data = { 
         'hits': []
     };

@@ -2,6 +2,7 @@ from flask import Response, redirect
 from . import blueprint
 
 import json
+from db import *
 
 @blueprint.route("/meta/_all")
 def meta_all():
@@ -19,18 +20,18 @@ def meta_all():
     return resp;
 
 @blueprint.route("/meta/_dictionary")
-def meta_all():
+def meta_dictionary():
     data = {
         'hits': { }
     };
     for opengdc_obj in query_db('select * from opengdc_clinical'):
-        if opengdc_obj[2] not in data['hits'][opengdc_obj[1]]
+        if opengdc_obj[2] not in data['hits'][opengdc_obj[1]]:
             data['hits'][opengdc_obj[1]].append(opengdc_obj[2]);
     for opengdc_obj in query_db('select * from opengdc_biospecimen'):
-        if opengdc_obj[2] not in data['hits'][opengdc_obj[1]]
+        if opengdc_obj[2] not in data['hits'][opengdc_obj[1]]:
             data['hits'][opengdc_obj[1]].append(opengdc_obj[2]);
     for opengdc_obj in query_db('select * from opengdc_manually_curated'):
-        if opengdc_obj[2] not in data['hits'][opengdc_obj[1]]
+        if opengdc_obj[2] not in data['hits'][opengdc_obj[1]]:
             data['hits'][opengdc_obj[1]].append(opengdc_obj[2]);
     js = json.dumps(data, indent=4, sort_keys=True);
     resp = Response(js, status=200, mimetype='application/json');
