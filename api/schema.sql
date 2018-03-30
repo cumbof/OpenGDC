@@ -16,23 +16,26 @@ create table opengdc_data (
 
 -- 'opengdc_biospecimen' table
 create table opengdc_biospecimen (
-    opengdc_id                  text primary key,
+    opengdc_id                  text,
     meta_attribute              text,
-    meta_value                  text
+    meta_value                  text,
+    primary key (opengdc_id, meta_attribute)
 );
 
 -- 'opengdc_clinical' table
 create table opengdc_clinical (
-    opengdc_id                  text primary key,
+    opengdc_id                  text,
     meta_attribute              text,
-    meta_value                  text
+    meta_value                  text,
+    primary key (opengdc_id, meta_attribute)
 );
 
 -- 'opengdc_manually_curated' table
 create table opengdc_manually_curated (
-    opengdc_id                  text primary key,
+    opengdc_id                  text,
     meta_attribute              text,
-    meta_value                  text
+    meta_value                  text,
+    primary key (opengdc_id, meta_attribute)
 );
 
 -- 'opengdc_experiment_header' table

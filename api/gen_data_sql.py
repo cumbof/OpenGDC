@@ -1,4 +1,4 @@
-import os, datetime, pytz
+import os, datetime, pytz, re
 from db import *
 
 root = '/FTP/ftp-root/opengdc/bed/';
@@ -89,8 +89,10 @@ def storeMeta(dir_path, file_name, opengdc_id):
                 elif meta_attribute.startswith('manually_curated'):
                     table = 'opengdc_manually_curated';
                 if table.strip() is not "":
-                    meta_value = line_split[1];
-                    query_db('insert into '+table+' (opengdc_id, meta_attribute, meta_value) values (\''+opengdc_id+'\', \''+meta_attribute+'\', \''+meta_value+'\');');
+                    meta_value = re.escape(line_split[1]);
+                    #meta_value = line_split[1];
+                    #print 'insert into '+table+' (opengdc_id, meta_attribute, meta_value) values (\''+opengdc_id+'\', \''+meta_attribute+'\', \''+meta_value+'\');';
+                    query_db('insert into '+table+' (opengdc_id, meta_attribute, meta_value) values (?, ?, ?);', (opengdc_id, meta_attribute, meta_value));
 
 def getChecksum(dir_path, file_name):
     md5_checksum_filepath = os.path.join(dir_path, md5_checksum_filename);
