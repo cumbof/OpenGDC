@@ -212,7 +212,8 @@ public class MetadataParserXLSX extends BioParser {
                                                     attribute_parsed = metakey + "__cases__" + attribute.replaceAll("\\.", "__");
                                                 else
                                                     attribute_parsed = metakey + "__" + attribute.replaceAll("\\.", "__");
-                                                if (additional_attributes_tmp.containsKey(attribute) && !file_info.containsKey(attribute) && attribute2required.containsKey(attribute)) {
+                                                String[] attribute_split = attribute.split("\\.");
+                                                if (additional_attributes_tmp.containsKey(attribute) && !file_info.containsKey(attribute_split[attribute_split.length-1]) && attribute2required.containsKey(attribute)) {
                                                     if (attribute2required.get(attribute))
                                                         missing_required_attributes.add(attribute_parsed);
                                                 }

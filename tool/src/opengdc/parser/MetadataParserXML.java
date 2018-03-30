@@ -168,8 +168,8 @@ public class MetadataParserXML extends BioParser {
                                                             String[] add_attr_split = add_attr.split("\\.");
                                                             String last_val = add_attr_split[add_attr_split.length-1];
                                                             if (last_val.toLowerCase().equals(kmap.toLowerCase())) {
-                                                                files_info_res.put(add_attr, String.valueOf(map.get(kmap)));
-                                                                add_attr_curr = add_attr;
+                                                                files_info_res.put(last_val, String.valueOf(map.get(kmap)));
+                                                                add_attr_curr = last_val;
                                                                 break;
                                                             }
                                                         }
@@ -209,8 +209,16 @@ public class MetadataParserXML extends BioParser {
                                         //start warning missing attribute
                                         for (String attribute: additional_attributes_tmp.keySet()) {
                                             String attribute_parsed;
-                                            if (manually_without_cases.contains(attribute))
-                                                attribute_parsed = metakey + "__cases__" + attribute.replaceAll("\\.", "__");
+                                            String attribute_tmp = "";
+                                            for (String attr: manually_without_cases) {
+                                                if (attr.contains(attribute)) {
+                                                    attribute_tmp = attr;
+                                                    break;
+                                                }
+                                            }
+                                            
+                                            if (!attribute_tmp.equals(""))
+                                                attribute_parsed = metakey + "__cases__" + attribute_tmp.replaceAll("\\.", "__");
                                             else
                                                 attribute_parsed = metakey + "__" + attribute.replaceAll("\\.", "__");
                                             String[] attribute_split = attribute.split("\\.");
@@ -220,28 +228,40 @@ public class MetadataParserXML extends BioParser {
                                             }
                                         } //end warning missing attribute
                                         
-                                        for (String attribute: file_info_sorted) {
+                                        for (String attribute: additional_attributes_tmp.keySet()) {
+                                        //for (String attribute: file_info_sorted) {
                                             //String attribute_parsed = FSUtils.stringToValidJavaIdentifier(metakey + "__" + attribute.replaceAll("\\.", "__"));
-                                            String attribute_parsed;
-                                            if (manually_without_cases.contains(attribute))
-                                                attribute_parsed = metakey + "__cases__" + attribute.replaceAll("\\.", "__");
-                                            else
-                                                attribute_parsed = metakey + "__" + attribute.replaceAll("\\.", "__");
-                                            /*************************************************************/
-                                            /** patch for the attribute 'manually_curated__data_format' **/
-                                            if (attribute_parsed.trim().toLowerCase().equals("manually_curated__data_format"))
-                                                attribute_parsed = "manually_curated__source_data_format";
-                                            /*************************************************************/
-                                            String value_parsed = checkForNAs(file_info.get(attribute));
-                                            if (!value_parsed.trim().equals(""))
-                                                manually_curated.put(attribute_parsed, value_parsed);
-                                            else {
-                                                for (String attr: additional_attributes_files_tmp.keySet()) {
-                                                    if (attr.toLowerCase().equals(attribute.toLowerCase())) {
-                                                        if (additional_attributes_files_tmp.get(attr)) // if attribute is required
-                                                            missing_required_attributes.add(attribute_parsed);
+                                            String attribute_spitted = attribute.split("\\.")[attribute.split("\\.").length-1];
+                                            if (file_info_sorted.contains(attribute_spitted)){
+                                                String attribute_parsed;
+                                                String attribute_tmp = "";
+                                                for (String attr: manually_without_cases) {
+                                                    if (attr.contains(attribute)) {
+                                                        attribute_tmp = attr;
+                                                        break;
                                                     }
                                                 }
+
+                                                if (!attribute_tmp.equals(""))
+                                                    attribute_parsed = metakey + "__cases__" + attribute_tmp.replaceAll("\\.", "__");
+                                                else
+                                                    attribute_parsed = metakey + "__" + attribute.replaceAll("\\.", "__");
+                                                /*************************************************************/
+                                                /** patch for the attribute 'manually_curated__data_format' **/
+                                                if (attribute_parsed.trim().toLowerCase().equals("manually_curated__data_format"))
+                                                    attribute_parsed = "manually_curated__source_data_format";
+                                                /*************************************************************/
+                                                String value_parsed = checkForNAs(file_info.get(attribute_spitted));
+                                                if (!value_parsed.trim().equals(""))
+                                                    manually_curated.put(attribute_parsed, value_parsed);
+                                                /*else {
+                                                    for (String attr: additional_attributes_files_tmp.keySet()) {
+                                                        if (attr.toLowerCase().equals(attribute.toLowerCase())) {
+                                                            if (additional_attributes_files_tmp.get(attr)) // if attribute is required
+                                                                missing_required_attributes.add(attribute_parsed);
+                                                        }
+                                                    }
+                                                }*/
                                             }
                                         }
 
