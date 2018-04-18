@@ -9,7 +9,7 @@ import java.io.File;
 public class Settings {
     
     // debug flag
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     
     public static boolean isDebug() {
         return DEBUG;
@@ -34,7 +34,7 @@ public class Settings {
         String tmpDir = TMP_DIR;
         if (DEBUG) tmpDir = DEBUG_TMP;
         if (!(new File(tmpDir)).exists())
-            (new File(tmpDir)).mkdir();
+            (new File(tmpDir)).mkdirs();
         return tmpDir;
     }
     // *********************************************
@@ -150,6 +150,12 @@ public class Settings {
     public static String getGENCODEDataPath() {
         if (DEBUG) return DEBUG_APPDATA+"gencode/gencode.v22.annotation.gtf";
         return GENCODE_DATA;
+    }
+    
+    private static final String ADDITIONAL_META_ATTRIBUTES = "./appdata/meta/additional_attributes.tsv";
+    public static String getAdditionalMetaAttributesPath() {
+        if (DEBUG) return DEBUG_APPDATA+"meta/additional_attributes.tsv";
+        return ADDITIONAL_META_ATTRIBUTES;
     }
     
 }

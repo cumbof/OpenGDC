@@ -3,6 +3,7 @@ package opengdc.util;
 import opengdc.GUI;
 import opengdc.Settings;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -12,7 +13,6 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.text.SimpleDateFormat;
@@ -40,50 +40,76 @@ public class GDCQuery {
     private static final int SIZE_LIMIT = 10000; // 10000 starting from 0 -> 9999
     //private static final String FIELDS = "\"file_id,file_name,cases.submitter_id,cases.case_id,data_category,data_type,cases.samples.tumor_descriptor,cases.samples.tissue_type,cases.samples.sample_type,cases.samples.submitter_id,cases.samples.sample_id,cases.samples.portions.analytes.aliquots.aliquot_id,cases.samples.portions.analytes.aliquots.submitter_id\"";
     //private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&fields="+FIELDS+"&filters=";
-    private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&filters=";
-    private static final String BASE_DOWNLOAD_URL = "https://gdc-api.nci.nih.gov/data/";
+    //private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&filters=";
+    private static final String BASE_URL = "https://gdc-api.nci.nih.gov/";
+    private static final String BASE_SEARCH_URL = BASE_URL+"files";
+    private static final String BASE_DOWNLOAD_URL = BASE_URL+"data/";
     private static final int RECURSIVE_LIMIT = 100;
-    private static final int BUFFER_SIZE = 4096;
+    //private static final int BUFFER_SIZE = 4096;
+    private static final String USER_AGENT = "Mozilla/5.0";
     
     public static String query(String disease, String dataType, int recursive_iteration) {
         try {
-            String json_str = "{" +
-                                  "\"op\":\"and\"," +
-                                  "\"content\":[" +
-                                      "{" +
-                                          "\"op\":\"=\"," +
-                                          "\"content\":{" +
-                                              "\"field\":\"cases.project.project_id\"," +
-                                              "\"value\":[" +
-                                                  "\""+disease+"\"" +
-                                              "]" + 
-                                          "}" +
-                                      "}," +
-                                      "{" +
-                                          "\"op\":\"=\"," +
-                                          "\"content\":{" +
-                                              "\"field\":\"files.data_type\"," +
-                                              "\"value\":[" +
-                                                  "\""+dataType+"\"" +
-                                              "]" + 
-                                          "}" +
-                                      "}," +
-                                      "{" +
-                                          "\"op\":\"=\"," +
-                                          "\"content\":{" +
-                                              "\"field\":\"access\"," +
-                                              "\"value\":[" +
-                                                  "\"open\"" +
-                                              "]" + 
-                                          "}" +
-                                      "}" +
-                                  "]" +
+            String payload = "{" +
+                                "\"filters\":{" +
+                                    "\"op\":\"and\"," +
+                                    "\"content\":[" +
+                                        "{" +
+                                            "\"op\":\"=\"," +
+                                            "\"content\":{" +
+                                                "\"field\":\"cases.project.project_id\"," +
+                                                "\"value\":[" +
+                                                    "\""+disease+"\"" +
+                                                "]" + 
+                                            "}" +
+                                        "}," +
+                                        "{" +
+                                            "\"op\":\"=\"," +
+                                            "\"content\":{" +
+                                                "\"field\":\"files.data_type\"," +
+                                                "\"value\":[" +
+                                                    "\""+dataType+"\"" +
+                                                "]" + 
+                                            "}" +
+                                        "}," +
+                                        "{" +
+                                            "\"op\":\"=\"," +
+                                            "\"content\":{" +
+                                                "\"field\":\"access\"," +
+                                                "\"value\":[" +
+                                                    "\"open\"" +
+                                                "]" + 
+                                            "}" +
+                                        "}" +
+                                    "]" +
+                                "}" +
+                                "\"format\":\"json\"," +
+                                "\"size\":\""+SIZE_LIMIT+"\"," +
+                                "\"pretty\":\"true\"" +
                               "}";
             
-            String conn_str = BASE_SEARCH_URL + URLEncoder.encode(json_str, "UTF-8");            
-            HttpURLConnection conn = (HttpURLConnection) (new URL(conn_str)).openConnection();
-            conn.setRequestProperty("Content-Type", "application/json");
-            
+            String url = BASE_SEARCH_URL;
+            URL obj = new URL(url);
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+            // Setting basic post request
+            con.setRequestMethod("POST");
+            con.setRequestProperty("User-Agent", USER_AGENT);
+            con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+            con.setRequestProperty("Content-Type","application/json");
+
+            // Send post request
+            con.setDoOutput(true);
+            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+            wr.writeBytes(payload);
+            wr.flush();
+            wr.close();
+
+            int responseCode = con.getResponseCode();
+            System.out.println("Sending 'POST' request to URL : " + url);
+            //System.out.println("Post Data : " + payload);
+            System.out.println("Response Code : " + responseCode);
+
             Date now = new Date();
             SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
             String query_file_name = "query_"+ft.format(now)+".json";
@@ -92,9 +118,10 @@ public class GDCQuery {
             if (outFile.exists())
                 outFile.delete();
             
+
             FileOutputStream fos = new FileOutputStream(Settings.getTmpDir() + query_file_name);
             PrintStream out = new PrintStream(fos);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
             for (String line; (line = reader.readLine()) != null;) {
                 //System.err.println(line);
                 out.println(line);
@@ -103,7 +130,7 @@ public class GDCQuery {
             out.close();
             fos.close();
             
-            conn.disconnect();
+            con.disconnect();
             
             return Settings.getTmpDir() + query_file_name;
         }
@@ -117,28 +144,43 @@ public class GDCQuery {
         return null;
     }
     
-    public static HashMap<String, ArrayList<Object>> searchFor(HashSet<String> keys, Object current_obj, HashMap<String, ArrayList<Object>> results) {
+    public static HashMap<String, ArrayList<Object>> searchFor(HashSet<String> keys, String current_key, Object current_obj, HashMap<String, ArrayList<Object>> results) {
         if (results == null)
             results = new HashMap<>();
+        if (current_key == null)
+            current_key = "";
         
         if (current_obj instanceof HashMap) {
             HashMap<String, Object> hashmap = (HashMap<String, Object>)current_obj;
             for (String k: hashmap.keySet()) {
-                if (keys.contains(k.toLowerCase().trim())) {
+                String curr_key = "";
+                if (current_key.trim().equals(""))
+                    curr_key = k;
+                else
+                    curr_key = current_key+"."+k;
+                if (keys.contains(curr_key.toLowerCase().trim())) {
                     HashMap<String, Object> reduced_hashmap = new HashMap<>();
                     for (String key: hashmap.keySet()) {
-                        if (!(hashmap.get(key) instanceof HashMap) && !(hashmap.get(key) instanceof List))
-                            reduced_hashmap.put(key, hashmap.get(key));
+                        if (!(hashmap.get(key) instanceof HashMap) && !(hashmap.get(key) instanceof List)) {
+                            if (current_key.trim().equals(""))
+                                reduced_hashmap.put(key, hashmap.get(key));
+                            else
+                                reduced_hashmap.put(current_key+"."+key, hashmap.get(key));
+                        }
                     }
                     ArrayList<Object> val = new ArrayList<>();
-                    if (results.containsKey(k.toLowerCase().trim()))
-                        val = results.get(k.toLowerCase().trim());
+                    if (results.containsKey(curr_key.toLowerCase().trim()))
+                        val = results.get(curr_key.toLowerCase().trim());
                     val.add(reduced_hashmap);
-                    results.put(k.toLowerCase().trim(), val);
+                    results.put(curr_key.toLowerCase().trim(), val);
                 }
                 else {
-                    if ((hashmap.get(k) instanceof HashMap) || (hashmap.get(k) instanceof List))
-                        results.putAll(searchFor(keys, hashmap.get(k), results));
+                    if ((hashmap.get(k) instanceof HashMap) || (hashmap.get(k) instanceof List)) {
+                        if (current_key.trim().equals(""))
+                            results.putAll(searchFor(keys, k, hashmap.get(k), results));
+                        else
+                            results.putAll(searchFor(keys, current_key+"."+k, hashmap.get(k), results));
+                    }
                 }
                 
             }
@@ -147,7 +189,7 @@ public class GDCQuery {
             ArrayList<Object> list = (ArrayList<Object>)current_obj;
             for (Object o: list) {
                 if ((o instanceof HashMap) || (o instanceof List))
-                    results.putAll(searchFor(keys, o, results));
+                    results.putAll(searchFor(keys, current_key, o, results));
             }
         }
         return results;
@@ -284,30 +326,59 @@ public class GDCQuery {
                         info = new ArrayList<>();
                     //String fields = "\"file_id,file_name,cases.submitter_id,cases.case_id,data_category,data_type,cases.samples.tumor_descriptor,cases.samples.tissue_type,cases.samples.sample_type,cases.samples.submitter_id,cases.samples.sample_id,cases.samples.portions.analytes.aliquots.aliquot_id,cases.samples.portions.analytes.aliquots.submitter_id,experimental_strategy,platform,analysis.workflow_link,data_format,file_size\"";
                     //String fields = "\"";
-                    String fields = "\",";
+                    //String fields = "\",";
+                    String fields = "";
                     for (String attr: attributes)
                         fields += attr + ",";
                     //fields = fields.substring(0, fields.length()-1) + "\"";
-                    
-                    String conn_str = "https://gdc-api.nci.nih.gov/"+endpoint+"?from="+from+"&size="+SIZE_LIMIT+"&pretty=true&fields="+fields+"&format=JSON&filters=";
-                    String json_str = "{" +
-                                            "\"op\":\"in\"," +
-                                            "\"content\":{" +
-                                                "\"field\":\""+field+"\"," +
-                                                "\"value\":[" +
-                                                    "\""+value+"\"" +
+                    fields = fields.substring(0, fields.length()-1);
+                                        
+                    String payload = "{" +
+                                            "\"filters\":{" +
+                                                "\"op\":\"and\"," +
+                                                "\"content\":[" +
+                                                    "{" +
+                                                        "\"op\":\"in\"," +
+                                                        "\"content\":{" +
+                                                            "\"field\":\""+field+"\"," +
+                                                            "\"value\":[" +
+                                                                "\""+value+"\"" +
+                                                            "]" +
+                                                        "}" +
+                                                    "}" +
                                                 "]" +
-                                            "}" +
+                                            "}," +
+                                            "\"format\":\"json\"," +
+                                            "\"size\":\""+SIZE_LIMIT+"\"," +
+                                            "\"pretty\":\"true\"," +
+                                            "\"fields\":\""+fields+"\"" +
                                         "}";
-
-                    conn_str += URLEncoder.encode(json_str, "UTF-8");
-                    System.err.println(conn_str);
-                    HttpURLConnection conn = (HttpURLConnection) (new URL(conn_str)).openConnection();
-                    conn.connect();
                     
+                    String url = BASE_URL+endpoint;
+                    URL obj = new URL(url);
+                    HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                    // Setting basic post request
+                    con.setRequestMethod("POST");
+                    con.setRequestProperty("User-Agent", USER_AGENT);
+                    con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+                    con.setRequestProperty("Content-Type","application/json");
+
+                    // Send post request
+                    con.setDoOutput(true);
+                    DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                    wr.writeBytes(payload);
+                    wr.flush();
+                    wr.close();
+
+                    int responseCode = con.getResponseCode();
+                    System.out.println("Sending 'POST' request to URL : " + url);
+                    //System.out.println("Post Data : " + payload);
+                    System.out.println("Response Code : " + responseCode);
+
                     FileOutputStream fos = new FileOutputStream(query_file_path);
                     PrintStream out = new PrintStream(fos);
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
                     for (String line; (line = reader.readLine()) != null;) {
                         //System.err.println(line);
                         out.println(line);
@@ -317,7 +388,7 @@ public class GDCQuery {
                     out.close();
                     fos.close();
                     
-                    conn.disconnect();
+                    con.disconnect();
 
                     File jsonFile = new File(query_file_path);
                     URI uri = jsonFile.toURI();
@@ -338,11 +409,12 @@ public class GDCQuery {
                         HashMap<String, ArrayList<Object>> data_node = new HashMap<>();
                         HashSet<String> keys = new HashSet<>();
                         for (String attribute: attributes) {
-                            String[] attribute_split = attribute.split("\\.");
+                            /*String[] attribute_split = attribute.split("\\.");
                             String searchForKey = attribute_split[attribute_split.length-1];
-                            keys.add(searchForKey);
+                            keys.add(searchForKey);*/
+                            keys.add(attribute);
                         }
-                        HashMap<String, ArrayList<Object>> values = searchFor(keys, node, null);
+                        HashMap<String, ArrayList<Object>> values = searchFor(keys, null, node, null);
                         for (String attr: values.keySet())
                             data_node.put(attr, values.get(attr));
                         info.add(data_node);

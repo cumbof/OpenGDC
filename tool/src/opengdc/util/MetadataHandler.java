@@ -513,51 +513,39 @@ public class MetadataHandler {
     
     public static HashMap<String, HashMap<String, Boolean>> getAdditionalAttributes(String endpoint) {
         HashMap<String, HashMap<String, Boolean>> additionalAttributes = new HashMap<>();
-        // <'attribute:string', 'required:boolean'>
-        HashMap<String, Boolean> attributes = new HashMap<>();
-        attributes.put("data_category", true);
-        attributes.put("data_format", true);
-        attributes.put("data_type", true);
-        attributes.put("experimental_strategy", true);
-        attributes.put("file_id", true);
-        attributes.put("file_name", true);
-        attributes.put("file_size", true);
-        attributes.put("platform", true);
-        attributes.put("analysis.analysis_id", true);
-        attributes.put("analysis.workflow_link", true);
-        attributes.put("analysis.workflow_type", true);
-        if (endpoint.trim().toLowerCase().equals("files")) {
-            attributes.put("cases.case_id", true);
-            attributes.put("cases.disease_type", true);
-            attributes.put("cases.primary_site", true);
-            attributes.put("cases.demographic.year_of_birth", true);
-            attributes.put("cases.project.program.program_id", true);
-            attributes.put("cases.project.program.name", true);
-            // other gdc attributes
-            attributes.put("cases.submitter_id", true);
-            attributes.put("cases.samples.sample_id", true);
+        String additional_attribute_file_path = Settings.getAdditionalMetaAttributesPath();
+        File additional_attribute_file = new File(additional_attribute_file_path);
+        if (additional_attribute_file.exists()) {
+            try {
+                InputStream fstream = new FileInputStream(additional_attribute_file);
+                DataInputStream in = new DataInputStream(fstream);
+                BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    if (!line.trim().equals("")) {
+                        String[] line_split = line.split("\t");
+                        String in_file_endpoint = line_split[1];
+                        if (in_file_endpoint.trim().toLowerCase().equals(endpoint.trim().toLowerCase())) {
+                            String map_name = line_split[0];
+                            HashMap<String, Boolean> attributes = new HashMap<>();
+                            if (additionalAttributes.containsKey(map_name))
+                                attributes = additionalAttributes.get(map_name);
+                            String attribute = line_split[2];
+                            boolean required = line_split[3].equals("true");
+                            attributes.put(attribute, required);
+                            additionalAttributes.put(map_name, attributes);
+                        }
+                         
+                    }
+                }
+                br.close();
+                in.close();
+                fstream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        else if (endpoint.trim().toLowerCase().equals("cases")) {
-            attributes.put("case_id", true);
-            attributes.put("disease_type", true);
-            attributes.put("primary_site", true);
-            attributes.put("demographic.year_of_birth", true);
-            attributes.put("project.program.program_id", true);
-            attributes.put("project.program.name", true);
-            // other gdc attributes
-            attributes.put("submitter_id", true);
-            attributes.put("samples.sample_id", true);
-        }
-
-        //attributes.put("cases.samples.tumor_descriptor", false);
-        //attributes.put("cases.samples.tissue_type", false);
-        //attributes.put("cases.samples.sample_type", false);
-        //attributes.put("cases.samples.submitter_id", false);
-        //attributes.put("cases.samples.sample_id", false);
-        //attributes.put("cases.samples.portions.analytes.aliquots.aliquot_id", false);
-        //attributes.put("cases.samples.portions.analytes.aliquots.submitter_id", false);
         
-        additionalAttributes.put("manually_curated", attributes);
         return additionalAttributes;
     }
     
@@ -640,11 +628,10 @@ public class MetadataHandler {
                         for (Object obj: attribute_tmp_list) {
                             try {
                                 HashMap<String, Object> map_tmp = (HashMap<String, Object>)obj;
-                                
-                                String[] attribute_split = attribute.split("\\.");
+                                /*String[] attribute_split = attribute.split("\\.");
                                 String last_val = attribute_split[attribute_split.length-1];
-                                
-                                attribute_tmp = String.valueOf(map_tmp.get(last_val));
+                                attribute_tmp = String.valueOf(map_tmp.get(last_val));*/
+                                attribute_tmp = String.valueOf(map_tmp.get(attribute));
                                 break;
                             }
                             catch (Exception e) { }
@@ -659,11 +646,10 @@ public class MetadataHandler {
                             for (Object obj: value_tmp_list) {
                                 try {
                                     HashMap<String, Object> map_tmp = (HashMap<String, Object>)obj;
-                                    
-                                    String[] attribute_split = attribute.split("\\.");
+                                    /*String[] attribute_split = attribute.split("\\.");
                                     String last_val = attribute_split[attribute_split.length-1];
-                                    
-                                    value_tmp = String.valueOf(map_tmp.get(last_val));
+                                    value_tmp = String.valueOf(map_tmp.get(last_val));*/
+                                    value_tmp = String.valueOf(map_tmp.get(attribute));
                                     break;
                                 }
                                 catch (Exception e) { }
