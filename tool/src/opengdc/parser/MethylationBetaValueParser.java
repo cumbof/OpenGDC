@@ -56,6 +56,15 @@ public class MethylationBetaValueParser extends BioParser {
         HashMap<String, String> error_inputFile2outputFile = new HashMap<>();
         HashSet<String> filesPathConverted = new HashSet<>();
         
+        HashSet<String> dataTypes = new HashSet<>();
+        dataTypes.add("Gene Expression Quantification");
+        dataTypes.add("Copy Number Segment");
+        dataTypes.add("Masked Copy Number Segment");
+        dataTypes.add("Methylation Beta Value");
+        dataTypes.add("Isoform Expression Quantification");
+        dataTypes.add("miRNA Expression Quantification");
+        dataTypes.add("Masked Somatic Mutation");
+        
         File[] files = (new File(inPath)).listFiles();
         for (File f: files) {
             if (f.isFile()) {
@@ -68,7 +77,7 @@ public class MethylationBetaValueParser extends BioParser {
                     HashSet<String> attributes = new HashSet<>();
                     String aliquot_id_path = "cases.samples.portions.analytes.aliquots.aliquot_id";
                     attributes.add(aliquot_id_path);
-                    HashMap<String, ArrayList<Object>> file_info = GDCQuery.retrieveExpInfoFromAttribute("files", "files.file_id", file_uuid, attributes, 0, 0, null).get(0);
+                    HashMap<String, ArrayList<Object>> file_info = GDCQuery.retrieveExpInfoFromAttribute("files", "files.file_id", file_uuid, dataTypes, attributes, 0, 0, null).get(0);
                     String aliquot_uuid = "";
                     if (file_info != null) {
                         if (file_info.containsKey("aliquot_id")) {

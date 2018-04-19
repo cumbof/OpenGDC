@@ -50,6 +50,15 @@ public class MetadataParserTSV extends BioParser {
         HashMap<String, HashMap<String, String>> clinicalBigMap = new HashMap<>();
         HashMap<String, HashMap<String, String>> biospecimenBigMap = new HashMap<>();
         
+        HashSet<String> dataTypes = new HashSet<>();
+        dataTypes.add("Gene Expression Quantification");
+        dataTypes.add("Copy Number Segment");
+        dataTypes.add("Masked Copy Number Segment");
+        dataTypes.add("Methylation Beta Value");
+        dataTypes.add("Isoform Expression Quantification");
+        dataTypes.add("miRNA Expression Quantification");
+        dataTypes.add("Masked Somatic Mutation");
+        
         File[] files = (new File(inPath)).listFiles();
         for (File f: files) {
             if (f.isFile()) {
@@ -90,7 +99,9 @@ public class MetadataParserTSV extends BioParser {
                         ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes.keySet());
                         Collections.sort(additional_attributes_sorted);
                         for (String metakey: additional_attributes_sorted) {
-                            ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
+                            
+                            
+                            ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), dataTypes, new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
                             ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
 
                             for (HashMap<String, String> file_info: aggregated_files_info) {

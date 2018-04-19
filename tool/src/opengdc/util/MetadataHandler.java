@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.JTextPane;
@@ -469,7 +470,7 @@ public class MetadataHandler {
         values = new HashMap<>();
         String expDataType = "";
         for (String man_attr: manually_curated.keySet()) {
-            if (man_attr.trim().toLowerCase().contains("data_type")) {
+            if (man_attr.trim().toLowerCase().equals("manually_curated__data_type")) {
                 expDataType = manually_curated.get(man_attr);
                 break;
             }
@@ -641,6 +642,10 @@ public class MetadataHandler {
                     else {
                         if (aggregatedAdditionalAttributes.contains(attribute)) {
                             String value = tmp.get(attribute);
+                            String[] value_split = value.split(",");
+                            HashSet<String> values_set = new HashSet<>();
+                            for (String val: value_split)
+                                values_set.add(val);
                             ArrayList<Object> value_tmp_list = map.get(attribute);
                             String value_tmp = "";
                             for (Object obj: value_tmp_list) {
@@ -650,12 +655,16 @@ public class MetadataHandler {
                                     String last_val = attribute_split[attribute_split.length-1];
                                     value_tmp = String.valueOf(map_tmp.get(last_val));*/
                                     value_tmp = String.valueOf(map_tmp.get(attribute));
+                                    values_set.add(value_tmp);
                                     break;
                                 }
                                 catch (Exception e) { }
                             }
-                            value = value + "," + value_tmp;
-                            tmp.put(attribute, value);
+                            String final_value = "";
+                            for (String val: values_set)
+                                final_value = val+ ",";
+                            final_value = final_value.substring(0, final_value.length()-1);
+                            tmp.put(attribute, final_value);
                         }
                     }
                 }

@@ -49,6 +49,15 @@ public class MetadataParserXLSX extends BioParser {
         HashMap<String, HashMap<String, String>> clinicalBigMap = new HashMap<>();
         HashMap<String, HashMap<String, String>> biospecimenBigMap = new HashMap<>();
 
+        HashSet<String> dataTypes = new HashSet<>();
+        dataTypes.add("Gene Expression Quantification");
+        dataTypes.add("Copy Number Segment");
+        dataTypes.add("Masked Copy Number Segment");
+        dataTypes.add("Methylation Beta Value");
+        dataTypes.add("Isoform Expression Quantification");
+        dataTypes.add("miRNA Expression Quantification");
+        dataTypes.add("Masked Somatic Mutation");
+        
         File[] files = (new File(inPath)).listFiles();
         for (File f: files) {
             if (f.isFile()) {
@@ -115,7 +124,7 @@ public class MetadataParserXLSX extends BioParser {
                                 additional_attributes_cases_tmp.put("samples.portions.analytes.aliquots.aliquot_id", false);
                                 additional_attributes_cases_tmp.put("samples.portions.analytes.aliquots.submitter_id", false);
                                 /***********************************/
-                                ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.submitter_id", aliquot_brc, new HashSet<>(additional_attributes_files_tmp.keySet()), 0, 0, null);
+                                ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.submitter_id", aliquot_brc, dataTypes, new HashSet<>(additional_attributes_files_tmp.keySet()), 0, 0, null);
                                 ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
 
                                 String aliquot_uuid = "";
@@ -128,7 +137,7 @@ public class MetadataParserXLSX extends BioParser {
 
                                 if (aliquot_uuid.trim().equals("")) {
                                     HashSet<String> additional_attributes_tmp = new HashSet<>(additional_attributes_cases_tmp.keySet());
-                                    files_info = GDCQuery.retrieveExpInfoFromAttribute("cases", "samples.portions.analytes.aliquots.submitter_id", aliquot_brc, additional_attributes_tmp, 0, 0, null);
+                                    files_info = GDCQuery.retrieveExpInfoFromAttribute("cases", "samples.portions.analytes.aliquots.submitter_id", aliquot_brc, dataTypes, additional_attributes_tmp, 0, 0, null);
                                     if (!files_info.isEmpty()) {
                                         HashMap<String, String> files_info_res = new HashMap<>();
                                         for (HashMap<String, ArrayList<Object>> file_info: files_info) {

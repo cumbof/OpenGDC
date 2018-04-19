@@ -105,7 +105,16 @@ public class MetadataParserXML extends BioParser {
     private ArrayList<String> convertProcedure(String program, String disease, String dataType, String outPath, HashMap<String, HashMap<String, String>> clinicalBigMap, HashMap<String, HashMap<String, String>> biospecimenBigMap, ArrayList<String> skippedAliquots) {
         ArrayList<String> currentSkippedAliquots = new ArrayList<>();
         // merge clinical and biospecimen info (plus additional metadata)
-        if (!biospecimenBigMap.isEmpty()) {            
+        if (!biospecimenBigMap.isEmpty()) {
+            HashSet<String> dataTypes = new HashSet<>();
+            dataTypes.add("Gene Expression Quantification");
+            dataTypes.add("Copy Number Segment");
+            dataTypes.add("Masked Copy Number Segment");
+            dataTypes.add("Methylation Beta Value");
+            dataTypes.add("Isoform Expression Quantification");
+            dataTypes.add("miRNA Expression Quantification");
+            dataTypes.add("Masked Somatic Mutation");
+            
             HashMap<String, HashMap<String, Boolean>> additional_attributes_files = MetadataHandler.getAdditionalAttributes("files");
             HashMap<String, HashMap<String, Boolean>> additional_attributes_cases = MetadataHandler.getAdditionalAttributes("cases");
             
@@ -148,14 +157,16 @@ public class MetadataParserXML extends BioParser {
                                 additional_attributes_files_tmp.remove("cases.samples.sample_id");
                                 additional_attributes_cases_tmp.remove("samples.sample_id");
                                 
-                                ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes_files.get(metakey).keySet()), 0, 0, null);
+                                //ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes_files.get(metakey).keySet()), 0, 0, null);
+                                ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), dataTypes, new HashSet<>(additional_attributes_files.get(metakey).keySet()), 0, 0, null);
                                 ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
+                                //ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, new ArrayList<>(MetadataHandler.getAdditionalAttributes("files").get("manually_curated").keySet()));
 
                                 boolean use_files_endpoint = true;
                                 if (aggregated_files_info.isEmpty()) {
                                     use_files_endpoint = false;
                                     HashSet<String> additional_attributes_tmp = new HashSet<>(additional_attributes_cases_tmp.keySet());
-                                    files_info = GDCQuery.retrieveExpInfoFromAttribute("cases", "samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid, additional_attributes_tmp, 0, 0, null);
+                                    files_info = GDCQuery.retrieveExpInfoFromAttribute("cases", "samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid, dataTypes, additional_attributes_tmp, 0, 0, null);
                                     if (!files_info.isEmpty()) {
                                         HashMap<String, String> files_info_res = new HashMap<>();
                                         for (HashMap<String, ArrayList<Object>> file_info: files_info) {
@@ -273,7 +284,7 @@ public class MetadataParserXML extends BioParser {
                                         // generate additional manually curated metadata
                                         String manually_curated_data_type = "";
                                         for (String mcattr: manually_curated.keySet()) {
-                                            if (mcattr.toLowerCase().contains("data_type")) {
+                                            if (mcattr.toLowerCase().contains("manually_curated__data_type")) {
                                                 manually_curated_data_type = manually_curated.get(mcattr);
                                                 break;
                                             }

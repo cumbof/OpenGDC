@@ -19,6 +19,9 @@ public class RetrieveExpInfoFromAttribute {
     
     public static void main(String[] args) {
         String submitter_id = "TARGET-40-PANVJJ-01A-01D";
+        String dataType = "Masked Somatic Mutation";
+        HashSet<String> dataTypes = new HashSet<>();
+        dataTypes.add(dataType);
         HashMap<String, HashMap<String, Boolean>> additional_attributes = MetadataHandler.getAdditionalAttributes("cases");
         HashMap<String, Boolean> add_attr_tmp = additional_attributes.get("manually_curated");
         add_attr_tmp.put("samples.portions.analytes.aliquots.aliquot_id", false);
@@ -27,7 +30,7 @@ public class RetrieveExpInfoFromAttribute {
         Collections.sort(additional_attributes_sorted);
         for (String metakey: additional_attributes_sorted) {
             HashSet<String> additional_attributes_tmp = new HashSet<>(additional_attributes.get(metakey).keySet());
-            ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("cases", "samples.portions.analytes.aliquots.submitter_id", submitter_id, additional_attributes_tmp, 0, 0, null);
+            ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("cases", "samples.portions.analytes.aliquots.submitter_id", submitter_id, dataTypes, additional_attributes_tmp, 0, 0, null);
             System.err.println("files_info: "+files_info.size());
             if (!files_info.isEmpty()) {
                 HashMap<String, String> files_info_res = new HashMap<>();

@@ -314,7 +314,7 @@ public class GDCQuery {
             - cases.samples.portions.analytes.aliquots.aliquot_id
     */
     // endpoint: {files, cases}
-    public static ArrayList<HashMap<String, ArrayList<Object>>> retrieveExpInfoFromAttribute(String endpoint, String field, String value, HashSet<String> attributes, int recursive_iteration, int from, ArrayList<HashMap<String, ArrayList<Object>>> info) {
+    public static ArrayList<HashMap<String, ArrayList<Object>>> retrieveExpInfoFromAttribute(String endpoint, String field_aliquot, String value_aliquot, HashSet<String> dataTypes, HashSet<String> attributes, int recursive_iteration, int from, ArrayList<HashMap<String, ArrayList<Object>>> info) {
         Date now = new Date();
         SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
         String query_file_name = "query_"+ft.format(now)+".json";
@@ -332,27 +332,41 @@ public class GDCQuery {
                         fields += attr + ",";
                     //fields = fields.substring(0, fields.length()-1) + "\"";
                     fields = fields.substring(0, fields.length()-1);
-                                        
+                    
+                    String dataType_list = "";
+                    for (String dt: dataTypes)
+                        dataType_list += "\""+dt+"\"" + ",";
+                    dataType_list = dataType_list.substring(0, dataType_list.length()-1);
+                    
+                    String dataType_field = (endpoint.toLowerCase().equals("files")) ? "data_type" : "files.data_type";
+                    
                     String payload = "{" +
-                                            "\"filters\":{" +
-                                                "\"op\":\"and\"," +
-                                                "\"content\":[" +
-                                                    "{" +
-                                                        "\"op\":\"in\"," +
-                                                        "\"content\":{" +
-                                                            "\"field\":\""+field+"\"," +
-                                                            "\"value\":[" +
-                                                                "\""+value+"\"" +
-                                                            "]" +
-                                                        "}" +
+                                        "\"filters\":{" +
+                                            "\"op\":\"and\"," +
+                                            "\"content\":[" +
+                                                "{" +
+                                                    "\"op\":\"=\"," +
+                                                    "\"content\":{" +
+                                                        "\"field\":\""+field_aliquot+"\"," +
+                                                        "\"value\":\""+value_aliquot+"\"" +
                                                     "}" +
-                                                "]" +
-                                            "}," +
-                                            "\"format\":\"json\"," +
-                                            "\"size\":\""+SIZE_LIMIT+"\"," +
-                                            "\"pretty\":\"true\"," +
-                                            "\"fields\":\""+fields+"\"" +
-                                        "}";
+                                                "}," +
+                                                "{" +
+                                                    "\"op\":\"in\"," +
+                                                    "\"content\":{" +
+                                                        "\"field\":\""+dataType_field+"\"," +
+                                                        "\"value\":[" +
+                                                            dataType_list +
+                                                        "]" +
+                                                    "}" +
+                                                "}" +
+                                            "]" +
+                                        "}," +
+                                        "\"format\":\"json\"," +
+                                        "\"size\":\""+SIZE_LIMIT+"\"," +
+                                        "\"pretty\":\"true\"," +
+                                        "\"fields\":\""+fields+"\"" +
+                                    "}";
                     
                     String url = BASE_URL+endpoint;
                     URL obj = new URL(url);
@@ -427,14 +441,14 @@ public class GDCQuery {
                         from = ((recursive_iteration+1)*SIZE_LIMIT)+1;
                         recursive_iteration++;
                         //System.err.println(from);
-                        return retrieveExpInfoFromAttribute(endpoint, field, value, attributes, recursive_iteration, from, info);
+                        return retrieveExpInfoFromAttribute(endpoint, field_aliquot, value_aliquot, dataTypes, attributes, recursive_iteration, from, info);
                     }
                     else return info;
                 }
                 catch (Exception e) {
                     recursive_iteration++;
                     if (recursive_iteration < RECURSIVE_LIMIT)
-                        return retrieveExpInfoFromAttribute(endpoint, field, value, attributes, recursive_iteration, from, info);
+                        return retrieveExpInfoFromAttribute(endpoint, field_aliquot, value_aliquot, dataTypes, attributes, recursive_iteration, from, info);
                     else {
                         e.printStackTrace();
                         return new ArrayList<>();

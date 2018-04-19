@@ -1,5 +1,5 @@
 manually_curated	files	data_category	true
-manually_curated	files	data_format	true
+manually_curated	files	data_format	false
 manually_curated	files	data_type	true
 manually_curated	files	experimental_strategy	true
 manually_curated	files	file_id	true
