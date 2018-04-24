@@ -82,7 +82,7 @@ public class GDCQuery {
                                             "}" +
                                         "}" +
                                     "]" +
-                                "}" +
+                                "}," +
                                 "\"format\":\"json\"," +
                                 "\"size\":\""+SIZE_LIMIT+"\"," +
                                 "\"pretty\":\"true\"" +

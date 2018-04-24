@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import javax.swing.JTextPane;
 import javax.xml.parsers.DocumentBuilder;
@@ -580,7 +581,7 @@ public class MetadataHandler {
     
     public static ArrayList<HashMap<String, String>> aggregateSameDataTypeInfo(ArrayList<HashMap<String, ArrayList<Object>>> files_info, ArrayList<String> aggregatedAdditionalAttributes) {
         HashMap<String, ArrayList<HashMap<String, ArrayList<Object>>>> aggregated = new HashMap<>();
-        String platform_tmp = "";
+        //String platform_tmp = "";
         for (HashMap<String, ArrayList<Object>> file_info: files_info) {
             if (file_info != null) {
                 if (file_info.containsKey("data_type")) {
@@ -599,7 +600,7 @@ public class MetadataHandler {
                         values = aggregated.get(data_type);
                     values.add(file_info);
                     aggregated.put(data_type, values);
-                    if (data_type.trim().toLowerCase().equals("aligned reads")) {
+                    /*if (data_type.trim().toLowerCase().equals("aligned reads")) {
                         if (file_info.containsKey("platform")) {
                             ArrayList<Object> platform_tmp_list = file_info.get("platform");
                             platform_tmp = "";
@@ -612,7 +613,7 @@ public class MetadataHandler {
                                 catch (Exception e) { }
                             }
                         }
-                    }
+                    }*/
                 }
             }
         }
@@ -622,50 +623,37 @@ public class MetadataHandler {
             HashMap<String, String> tmp = new HashMap<>();
             ArrayList<HashMap<String, ArrayList<Object>>> mapList = aggregated.get(key);
             for (HashMap<String, ArrayList<Object>> map: mapList){
-                for (String attribute: map.keySet()){
-                    if (!tmp.containsKey(attribute)) {
-                        ArrayList<Object> attribute_tmp_list = map.get(attribute);
-                        String attribute_tmp = "";
-                        for (Object obj: attribute_tmp_list) {
-                            try {
-                                HashMap<String, Object> map_tmp = (HashMap<String, Object>)obj;
-                                /*String[] attribute_split = attribute.split("\\.");
-                                String last_val = attribute_split[attribute_split.length-1];
-                                attribute_tmp = String.valueOf(map_tmp.get(last_val));*/
-                                attribute_tmp = String.valueOf(map_tmp.get(attribute));
-                                break;
-                            }
-                            catch (Exception e) { }
-                        }                        
-                        tmp.put(attribute, attribute_tmp);
+                for (String attribute: map.keySet()) {
+                    String value = "";
+                    if (tmp.containsKey(attribute))
+                        value = tmp.get(attribute);
+                    LinkedHashSet<String> values_set = new LinkedHashSet<>();
+                    if (!value.trim().equals("")) {
+                        String[] value_split = value.split(",");
+                        for (String val: value_split)
+                            values_set.add(val);
                     }
-                    else {
+                    ArrayList<Object> value_tmp_list = map.get(attribute);
+                    String value_tmp = "";
+                    for (Object obj: value_tmp_list) {
+                        try {
+                            HashMap<String, Object> map_tmp = (HashMap<String, Object>)obj;
+                            value_tmp = String.valueOf(map_tmp.get(attribute));
+                            values_set.add(value_tmp);
+                            break;
+                        }
+                        catch (Exception e) { }
+                    }
+                    if (!value_tmp.trim().equals("")) {
                         if (aggregatedAdditionalAttributes.contains(attribute)) {
-                            String value = tmp.get(attribute);
-                            String[] value_split = value.split(",");
-                            HashSet<String> values_set = new HashSet<>();
-                            for (String val: value_split)
-                                values_set.add(val);
-                            ArrayList<Object> value_tmp_list = map.get(attribute);
-                            String value_tmp = "";
-                            for (Object obj: value_tmp_list) {
-                                try {
-                                    HashMap<String, Object> map_tmp = (HashMap<String, Object>)obj;
-                                    /*String[] attribute_split = attribute.split("\\.");
-                                    String last_val = attribute_split[attribute_split.length-1];
-                                    value_tmp = String.valueOf(map_tmp.get(last_val));*/
-                                    value_tmp = String.valueOf(map_tmp.get(attribute));
-                                    values_set.add(value_tmp);
-                                    break;
-                                }
-                                catch (Exception e) { }
-                            }
                             String final_value = "";
                             for (String val: values_set)
-                                final_value = val+ ",";
+                                final_value = final_value + val + ",";
                             final_value = final_value.substring(0, final_value.length()-1);
                             tmp.put(attribute, final_value);
                         }
+                        else
+                            tmp.put(attribute, value_tmp);
                     }
                 }
             }
@@ -673,12 +661,12 @@ public class MetadataHandler {
             // platform control
             // if platform does not exist or is empty
             // set the same platform of the Aligned Reads
-            if (!tmp.containsKey("platform"))
+            /*if (!tmp.containsKey("platform"))
                 tmp.put("platform", platform_tmp);
             else {
                 if (tmp.get("platform").trim().equals(""))
                     tmp.put("platform", platform_tmp);
-            }
+            }*/
             
             // populate compressedMap
             compressedMap.add(tmp);

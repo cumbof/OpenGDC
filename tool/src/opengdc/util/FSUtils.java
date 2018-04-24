@@ -74,5 +74,11 @@ public class FSUtils {
         }
         return null;
     }
+    
+    public static void main(String[] args) {
+        String test = "clinical__cases__aliquot_id";
+        System.err.println("Original String: " + test);
+        System.err.println("Valid Java Identifier: " + stringToValidJavaIdentifier(test));
+    }
 
 }

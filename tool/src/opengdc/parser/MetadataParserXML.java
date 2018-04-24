@@ -159,8 +159,8 @@ public class MetadataParserXML extends BioParser {
                                 
                                 //ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes_files.get(metakey).keySet()), 0, 0, null);
                                 ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), dataTypes, new HashSet<>(additional_attributes_files.get(metakey).keySet()), 0, 0, null);
-                                ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
-                                //ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, new ArrayList<>(MetadataHandler.getAdditionalAttributes("files").get("manually_curated").keySet()));
+                                //ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
+                                ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, new ArrayList<>(MetadataHandler.getAdditionalAttributes("files").get("manually_curated").keySet()));
 
                                 boolean use_files_endpoint = true;
                                 if (aggregated_files_info.isEmpty()) {
@@ -319,7 +319,11 @@ public class MetadataParserXML extends BioParser {
 
                                             // biospecimen
                                             for (String attribute: biospecimen_sorted) {
-                                                String attribute_parsed = FSUtils.stringToValidJavaIdentifier("biospecimen__" + attribute);
+                                                String[] attribute_split = attribute.split("__");
+                                                String attribute_parsed = "";
+                                                for (String attr: attribute_split)
+                                                    attribute_parsed = attribute_parsed + FSUtils.stringToValidJavaIdentifier(attr) + "__";
+                                                attribute_parsed = "biospecimen__" + attribute_parsed.substring(0, attribute_parsed.length()-2);
                                                 String value_parsed = checkForNAs(biospecimen_map.get(attribute));
                                                 if (!value_parsed.trim().equals(""))
                                                     out.println(attribute_parsed + "\t" + value_parsed);
@@ -327,7 +331,11 @@ public class MetadataParserXML extends BioParser {
 
                                             // clinical
                                             for (String attribute: clinical_sorted) {
-                                                String attribute_parsed = FSUtils.stringToValidJavaIdentifier("clinical__" + attribute);
+                                                String[] attribute_split = attribute.split("__");
+                                                String attribute_parsed = "";
+                                                for (String attr: attribute_split)
+                                                    attribute_parsed = attribute_parsed + FSUtils.stringToValidJavaIdentifier(attr) + "__";
+                                                attribute_parsed = "clinical__" + attribute_parsed.substring(0, attribute_parsed.length()-2);
                                                 String value_parsed = checkForNAs(clinical_map.get(attribute));
                                                 if (!value_parsed.trim().equals(""))
                                                     out.println(attribute_parsed + "\t" + value_parsed);

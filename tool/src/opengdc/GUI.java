@@ -417,6 +417,7 @@ public class GUI extends javax.swing.JFrame {
             }
         });
 
+        jTextField3.setEditable(false);
         jTextField3.setEnabled(false);
 
         jButton3.setText("Clear");
