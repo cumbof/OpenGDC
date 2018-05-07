@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,19 +24,25 @@ import java.util.HashMap;
 public class DetectRedundantMetadata {
     
     public static final String META_DIR_PATH = "/Users/fabio/Desktop/ov_meta/";
+    public static final String REDUNDANT_META_FILE_PATH = "/Users/fabio/Desktop/redundant_attributes.tsv";
     
     public static void main(String args[]) {
+        HashMap<String, HashMap<String, String>> redundantValues = new HashMap<>();
         for (File metafile: (new File(META_DIR_PATH)).listFiles()) {
             if (metafile.isFile() && metafile.getName().toLowerCase().endsWith("meta")) {
-                HashMap<String, HashMap<String, String>> redundantValues = detectRedundantMetadata(metafile);
-                redundantValues = removeEmptyAttributes(redundantValues);
-                printData(metafile, redundantValues);
+                redundantValues = new HashMap<>();
+                redundantValues = detectRedundantMetadata(metafile, redundantValues);
+                //redundantValues = removeEmptyAttributes(redundantValues);
+                //printData(metafile, redundantValues);
             }
         }
+        redundantValues = removeEmptyAttributes(redundantValues);
+        printData(REDUNDANT_META_FILE_PATH, redundantValues);
     }
 
-    private static HashMap<String, HashMap<String, String>> detectRedundantMetadata(File metafile) {
-        HashMap<String, HashMap<String, String>> redundantValues = new HashMap<>();
+    //private static HashMap<String, HashMap<String, String>> detectRedundantMetadata(File metafile) {
+    private static HashMap<String, HashMap<String, String>> detectRedundantMetadata(File metafile, HashMap<String, HashMap<String, String>> redundantValues) {
+        //HashMap<String, HashMap<String, String>> redundantValues = new HashMap<>();
         try {
             InputStream fstream = new FileInputStream(metafile.getAbsolutePath());
             DataInputStream in = new DataInputStream(fstream);
@@ -78,18 +86,28 @@ public class DetectRedundantMetadata {
         return redundantValuesMod;
     }
 
-    private static void printData(File metafile, HashMap<String, HashMap<String, String>> redundantValues) {
-        System.err.println(metafile.getName());
-        ArrayList<String> sortedKeys = new ArrayList<>(redundantValues.keySet());
-        Collections.sort(sortedKeys);
-        for (String stripped_attribute: sortedKeys) {
-            System.err.println("\t" + stripped_attribute);
-            ArrayList<String> sortedAttributes = new ArrayList<>(redundantValues.get(stripped_attribute).keySet());
-            Collections.sort(sortedAttributes);
-            for (String attribute: sortedAttributes)
-                System.err.println("\t\t" + attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute));
+    //private static void printData(File metafile, HashMap<String, HashMap<String, String>> redundantValues) {
+    private static void printData(String redundant_meta_file_path, HashMap<String, HashMap<String, String>> redundantValues) {
+        try {
+            Files.write((new File(redundant_meta_file_path)).toPath(), ("").getBytes("UTF-8"), StandardOpenOption.CREATE);
+            //System.err.println(metafile.getName());
+            ArrayList<String> sortedKeys = new ArrayList<>(redundantValues.keySet());
+            Collections.sort(sortedKeys);
+            for (String stripped_attribute: sortedKeys) {
+                //System.err.println("\t" + stripped_attribute);
+                //System.err.println(stripped_attribute);
+                Files.write((new File(redundant_meta_file_path)).toPath(), (stripped_attribute + "\t\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
+                ArrayList<String> sortedAttributes = new ArrayList<>(redundantValues.get(stripped_attribute).keySet());
+                Collections.sort(sortedAttributes);
+                for (String attribute: sortedAttributes) {
+                    //System.err.println("\t\t" + attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute));
+                    //System.err.println("\t" + attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute));
+                    Files.write((new File(redundant_meta_file_path)).toPath(), (attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute) + "\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
+                }
+            }
+            Files.write((new File(redundant_meta_file_path)).toPath(), ("\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
         }
-        System.err.println("----------------------");
+        catch (Exception e) { }
     }
 
 }
