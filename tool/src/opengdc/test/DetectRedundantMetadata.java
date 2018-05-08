@@ -52,7 +52,7 @@ public class DetectRedundantMetadata {
                 if (!line.trim().equals("")) {
                     String[] line_split = line.split("\t");
                     String attribute = line_split[0];
-                    String value = line_split[1];
+                    String value = line_split[1].toLowerCase();
                     String[] attribute_split = line_split[0].split("__");
                     String stripped_attribute = attribute_split[attribute_split.length-1];
                     HashMap<String, String> attr_list = new HashMap<>();
