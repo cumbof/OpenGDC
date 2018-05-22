@@ -160,7 +160,7 @@ public class MetadataParserXML extends BioParser {
                                 //ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes_files.get(metakey).keySet()), 0, 0, null);
                                 ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), dataTypes, new HashSet<>(additional_attributes_files.get(metakey).keySet()), 0, 0, null);
                                 //ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
-                                ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, new ArrayList<>(MetadataHandler.getAdditionalAttributes("files").get("manually_curated").keySet()));
+                                ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, new ArrayList<>(MetadataHandler.getAdditionalAttributes("files").get("gdc").keySet()));
 
                                 boolean use_files_endpoint = true;
                                 if (aggregated_files_info.isEmpty()) {
