@@ -47,7 +47,7 @@ public class RunTest extends Action {
 		/*clinical and biospecimen*/ //String[] tumors ={"UVM","UCS","UCEC","MESO","LUAD","LIHC","GBM","CESC","BLCA"};
 		/*methylation*/ //String[] tumors ={"HNSC","PRAD","STAD"}; //{"KIRC","SKCM"};
 		/*mirna*/ //String[] tumors = {"SARC","THYM","STAD","LUSC"};
-		/*missing*/ String [] tumors = {"OV"};//{"UVM","UCS","UCEC","TGCT","PCPG","MESO","LUAD","LIHC","KIRP","GBM","CESC","BLCA"};
+		/*missing*/ String [] tumors = {"BRCA"};//{"UVM","UCS","UCEC","TGCT","PCPG","MESO","LUAD","LIHC","KIRP","GBM","CESC","BLCA"};
 		/*isoform*/  //String[] tumors = {"STAD","LAML","HNSC","KIRC", "LUSC"};
 		String[] experiments = {"Clinical and Biospecimen Supplements"};//{"Gene Expression Quantification", "miRNA Expression Quantification", "Isoform Expression Quantification"};//, "Copy Number Segment", "Masked Copy Number Segment", "Masked Somatic Mutation"};
 		for(String tumor: tumors){
@@ -57,10 +57,11 @@ public class RunTest extends Action {
 			for(String dataType: experiments){
 				System.out.println("\t "+dataType);
 				String format = "META";//args[4];
-//				String input_path = "/FTP/ftp-root/opengdc/original/tcga/tcga-"+tumor.toLowerCase()+"/"+dataType.replaceAll(" ", "_").toLowerCase()+"/" ;//Settings.getOutputConvertedFolder();*/
-//				String output_path = "/FTP/ftp-root/opengdc/bed/tcga/tcga-"+tumor.toLowerCase()+"/"+dataType.replaceAll(" ", "_").toLowerCase()+"/" ;//Settings.getOutputConvertedFolder();*/
-								String input_path = "/FTP/originalMetaOV/";
-								String output_path = "/FTP/metaOV/";
+				String input_path = "/FTP/ftp-root/opengdc/original/tcga/tcga-"+tumor.toLowerCase()+"/"+dataType.replaceAll(" ", "_").toLowerCase()+"/" ;//Settings.getOutputConvertedFolder();*/
+				//String output_path = "/FTP/ftp-root/opengdc/bed/tcga/tcga-"+tumor.toLowerCase()+"/"+dataType.replaceAll(" ", "_").toLowerCase()+"/" ;//Settings.getOutputConvertedFolder();*/
+								//String input_path = "/Users/fabio/Downloads/test/";
+								//String output_path = "/Users/fabio/Downloads/test_out/";
+                                                                String output_path = "/FTP/tcga-"+tumor.toLowerCase()+"/"+dataType.replaceAll(" ", "_").toLowerCase()+"/" ;//Settings.getOutputConvertedFolder();
 				File f = new File(output_path.substring(0,output_path.length()-1));
 				if (!f.exists()){
 					f.mkdirs();

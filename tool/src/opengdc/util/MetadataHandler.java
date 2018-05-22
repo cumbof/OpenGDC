@@ -759,25 +759,29 @@ public class MetadataHandler {
     }
         
     public static String selectAttribute(ArrayList<String> attributes) {
-        ArrayList<String> remaining_attributes = new ArrayList<>(attributes);
-        if (attributes.size() == 1)
-            return attributes.get(0);
+        ArrayList<String> remaining_attributes = new ArrayList<>();
         for (String attr: attributes) {
-            if (attr.toLowerCase().contains("annotations"))
-                remaining_attributes.remove(attr);
+            if (attr.toLowerCase().endsWith("__state"))
+                continue;
+            else if (attr.toLowerCase().contains("annotations"))
+                continue;
+            else if (attr.toLowerCase().contains("input_files"))
+                continue;
             else if (attr.toLowerCase().contains("cases__project"))
-                remaining_attributes.remove(attr);
+                continue;
             else if (attr.toLowerCase().contains("analytes") && !attr.toLowerCase().contains("analytes__aliquots"))
-                remaining_attributes.remove(attr);
+                continue;
+            else
+                remaining_attributes.add(attr);
         }
         if (remaining_attributes.size() == 1)
             return remaining_attributes.get(0);
         else {
             String attribute = "";
             int attribute_size = 0;
-            for (String attr: attributes) {
+            for (String attr: remaining_attributes) {
                 int attr_size = attr.split("__").length;
-                if (attr_size > attribute_size) {
+                if (attr_size > attribute_size && !attr.toLowerCase().contains("associated_entities")) {
                     attribute = attr;
                     attribute_size = attr_size;
                 }
