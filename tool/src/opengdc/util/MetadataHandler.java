@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -38,48 +37,46 @@ import org.xml.sax.SAXParseException;
  * @author fabio
  */
 public class MetadataHandler {
-    
+
     public static final String __OPENGDCSEP__ = "__opengdcsep__";
-    
+
     // for createMap function only
     private static int keyPrefixCounterForUniqueness = 0;
+
     // cast to HashMap<String, Object>
     private static Object createMap(Node source, boolean restartKeyPrefixCounter) {
-        if (restartKeyPrefixCounter)
+        if (restartKeyPrefixCounter) {
             keyPrefixCounterForUniqueness = 0;
+        }
         HashMap<String, Object> tmpMap = new HashMap<>();
         try {
-            int childs = source.getChildNodes().getLength();        
+            int childs = source.getChildNodes().getLength();
             if (childs == 0) {
-                if (source.getTextContent().trim().equals(""))
+                if (source.getTextContent().trim().equals("")) {
                     return "NA";
+                }
                 return source.getTextContent();
-            }
-            else {
+            } else {
                 HashMap<String, Object> dataTmp = new HashMap<>();
-                for (int i=0; i<childs; i++) {
+                for (int i = 0; i < childs; i++) {
                     Node child = source.getChildNodes().item(i);
                     Object child_data = createMap(child, false);
-                    if (child.getNodeName().toLowerCase().trim().contains("#text") && childs<=1) {
-                        return ((String)child_data).replaceAll("\t", " ");
-                    }
-                    else {
-                        if (!child.getNodeName().toLowerCase().trim().contains("#text")) {
-                            dataTmp.put(keyPrefixCounterForUniqueness + "_" + child.getNodeName(), child_data);
-                            keyPrefixCounterForUniqueness++;
-                        }
+                    if (child.getNodeName().toLowerCase().trim().contains("#text") && childs <= 1) {
+                        return ((String) child_data).replaceAll("\t", " ");
+                    } else if (!child.getNodeName().toLowerCase().trim().contains("#text")) {
+                        dataTmp.put(keyPrefixCounterForUniqueness + "_" + child.getNodeName(), child_data);
+                        keyPrefixCounterForUniqueness++;
                     }
                 }
                 tmpMap.put(keyPrefixCounterForUniqueness + "_" + source.getNodeName(), dataTmp);
                 keyPrefixCounterForUniqueness++;
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return tmpMap;
     }
-    
+
     /*private static void printMap(Object map, int level) {
         String level_tab = "";
         for (int i=0; i<level; i++)
@@ -99,7 +96,6 @@ public class MetadataHandler {
             }
         }
     }*/
-    
     public static HashMap<String, Object> getXMLMap(String file_path) {
         HashMap<String, Object> result = new HashMap<>();
         try {
@@ -114,7 +110,7 @@ public class MetadataHandler {
 
             for (int i = 0; i < roots.getLength(); i++) {
                 Node node = roots.item(i);
-                result = (HashMap<String, Object>)createMap(node, true);
+                result = (HashMap<String, Object>) createMap(node, true);
                 break;
             }
         } catch (SAXParseException err) {
@@ -129,10 +125,10 @@ public class MetadataHandler {
 
         return result;
     }
-    
+
     public static HashMap<String, HashMap<String, String>> getTSVMap(String file_path, String indexBy) {
         HashMap<String, HashMap<String, String>> result = new HashMap<>();
-        
+
         try {
             InputStream fstream = new FileInputStream(file_path);
             DataInputStream in = new DataInputStream(fstream);
@@ -146,19 +142,19 @@ public class MetadataHandler {
                     String[] line_split = line.split("\t");
                     if (line_count == 0) { // header
                         header = line_split;
-                        for (int i=0; i<header.length; i++) {
+                        for (int i = 0; i < header.length; i++) {
                             if (header[i].toLowerCase().trim().equals(indexBy)) {
                                 index_position = i;
                                 break;
                             }
                         }
-                    }
-                    else { // content
+                    } else { // content
                         String key = line_split[index_position];
                         HashMap<String, String> values = new HashMap<>();
-                        for (int i=0; i<line_split.length; i++) {
-                            if (i != index_position)
+                        for (int i = 0; i < line_split.length; i++) {
+                            if (i != index_position) {
                                 values.put(header[i], line_split[i].replaceAll("\t", " "));
+                            }
                         }
                         result.put(key, values);
                     }
@@ -171,26 +167,26 @@ public class MetadataHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         return result;
     }
-    
+
     // https://gist.github.com/madan712/3912272
     public static HashMap<String, HashMap<String, String>> getXLSXMap(JTextPane pane, String file_path, String indexBy) {
         HashMap<String, HashMap<String, String>> result = new HashMap<>();
-        
+
         try {
             InputStream excelFileToRead = new FileInputStream(file_path);
             XSSFWorkbook wb = new XSSFWorkbook(excelFileToRead);
 
             int sheets = wb.getNumberOfSheets();
-            for (int sheet_index=0; sheet_index<sheets; sheet_index++) {
+            for (int sheet_index = 0; sheet_index < sheets; sheet_index++) {
                 XSSFSheet sheet = wb.getSheetAt(sheet_index);
-                
+
                 String sheet_name = sheet.getSheetName();
-                if (!sheet_name.toLowerCase().trim().contains("criteria") &&
-                    !sheet_name.toLowerCase().trim().contains("original")) { // skip sheets
-                    XSSFRow row; 
+                if (!sheet_name.toLowerCase().trim().contains("criteria")
+                        && !sheet_name.toLowerCase().trim().contains("original")) { // skip sheets
+                    XSSFRow row;
                     XSSFCell cell;
                     Iterator rows = sheet.rowIterator();
 
@@ -200,10 +196,10 @@ public class MetadataHandler {
 
                     ArrayList<String> header = new ArrayList<>();
                     int indexBy_position = 0;
-                                        
+
                     while (rows.hasNext()) {
-                        row = (XSSFRow)rows.next();
-                                                
+                        row = (XSSFRow) rows.next();
+
                         Iterator cells = row.cellIterator();
                         //String row_str = "";
                         HashMap<String, String> content_map = new HashMap<>();
@@ -211,79 +207,81 @@ public class MetadataHandler {
 
                         int cell_index = 0;
                         while (cells.hasNext()) {
-                            cell = (XSSFCell)cells.next();
-                            
+                            cell = (XSSFCell) cells.next();
+
                             String cellValue = "";
-                            if (cell.getCellTypeEnum() == CellType.STRING)
+                            if (cell.getCellTypeEnum() == CellType.STRING) {
                                 cellValue = cell.getStringCellValue();
-                            else if (cell.getCellTypeEnum() == CellType.NUMERIC)
+                            } else if (cell.getCellTypeEnum() == CellType.NUMERIC) {
                                 cellValue = String.valueOf(cell.getNumericCellValue());
+                            }
                             cellValue = cellValue.replaceAll("\r\n", " ").replaceAll("\n", " ").replaceAll("\t", " ");
-                            
+
                             if (!cellValue.trim().equals("")) {
-                            
+
                                 //String cellValue = cell.getRawValue();
                                 //System.err.println(cellValue);
-
                                 // cell is in merged region?
                                 int cellIterations = 1;
                                 List<CellRangeAddress> mergedRegionsInSheet = sheet.getMergedRegions();
-                                if (mergedRegionsInSheet.size() > 0)
+                                if (mergedRegionsInSheet.size() > 0) {
                                     header_rows = 2;
-                                for (CellRangeAddress mergedRegion: mergedRegionsInSheet) {
+                                }
+                                for (CellRangeAddress mergedRegion : mergedRegionsInSheet) {
                                     if (mergedRegion.isInRange(cell)) {
                                         cellIterations = mergedRegion.getNumberOfCells();
                                         //if (mergedRegion.containsRow(current_row-1))
-                                            //cellIterations = cellIterations/2;
-                                        cellIterations = cellIterations / (((mergedRegion.getLastRow()+1) - (mergedRegion.getFirstRow()+1)) + 1);
+                                        //cellIterations = cellIterations/2;
+                                        cellIterations = cellIterations / (((mergedRegion.getLastRow() + 1) - (mergedRegion.getFirstRow() + 1)) + 1);
                                         break;
                                     }
                                 }
-                                
+
                                 if (current_row < header_rows) { //header
-                                    for (int cell_iter=0; cell_iter<cellIterations; cell_iter++) {
+                                    for (int cell_iter = 0; cell_iter < cellIterations; cell_iter++) {
                                         String prefix_header = "";
-                                        try { prefix_header = header.get(cell_index + cell_iter); }
-                                        catch (Exception e) { /* first line - prefix_header does not yet exist */ };
+                                        try {
+                                            prefix_header = header.get(cell_index + cell_iter);
+                                        } catch (Exception e) {
+                                            /* first line - prefix_header does not yet exist */ };
                                         String suffix_header = cellValue;
 
                                         String header_str = "";
-                                        if (prefix_header.trim().equals("") && !suffix_header.trim().equals(""))
+                                        if (prefix_header.trim().equals("") && !suffix_header.trim().equals("")) {
                                             header_str = suffix_header;
-                                        else if (!prefix_header.trim().equals("") && suffix_header.trim().equals(""))
+                                        } else if (!prefix_header.trim().equals("") && suffix_header.trim().equals("")) {
                                             header_str = prefix_header;
-                                        else if (prefix_header.trim().equals(suffix_header.trim()))
+                                        } else if (prefix_header.trim().equals(suffix_header.trim())) {
                                             header_str = prefix_header;
-                                        else if (!prefix_header.trim().equals("") && !suffix_header.trim().equals(""))
-                                            header_str = prefix_header+__OPENGDCSEP__+suffix_header;
+                                        } else if (!prefix_header.trim().equals("") && !suffix_header.trim().equals("")) {
+                                            header_str = prefix_header + __OPENGDCSEP__ + suffix_header;
+                                        }
 
                                         //System.err.println(header_str + "\t" + cellIterations);
-
-                                        if (header_str.toLowerCase().trim().equals(indexBy))
+                                        if (header_str.toLowerCase().trim().equals(indexBy)) {
                                             indexBy_position = cell_index + cell_iter;
+                                        }
 
                                         try {
                                             header.remove(cell_index + cell_iter);
                                             header.add(cell_index + cell_iter, header_str);
                                             /*if (current_row == 1)
                                                 System.err.println(header_str);*/
-                                        }
-                                        catch (Exception e) {
+                                        } catch (Exception e) {
                                             header.add(header_str);
                                         }
 
                                         //cell_index++;
                                         cell_index += cellIterations;
                                     }
-                                }
-                                else { // content
+                                } else { // content
                                     try {
                                         content_map.put(sheet_name + __OPENGDCSEP__ + header.get(cell_index), cellValue);
-                                        if (cell_index == indexBy_position)
+                                        if (cell_index == indexBy_position) {
                                             indexBy_value = cellValue;
+                                        }
                                         cell_index++;
-                                    }
-                                    catch (Exception e) {
+                                    } catch (Exception e) {
                                         wb.close();
                                         excelFileToRead.close();
                                         File xlsxFile = new File(file_path);
@@ -292,15 +290,16 @@ public class MetadataHandler {
                                         return new HashMap<>();
                                     }
                                 }
-                            }
-                            else
+                            } else {
                                 cell_index++;
+                            }
                         }
-                        
+
                         if (current_row >= header_rows) { // content
                             if (!indexBy_value.trim().equals("")) {
-                                if (result.containsKey(indexBy_value))
+                                if (result.containsKey(indexBy_value)) {
                                     content_map.putAll(result.get(indexBy_value));
+                                }
                                 result.put(indexBy_value, content_map);
                             }
                         }
@@ -318,64 +317,62 @@ public class MetadataHandler {
             }
             wb.close();
             excelFileToRead.close();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         return result;
     }
-    
+
     public static HashMap<String, String> extractAdminInfo(HashMap<String, Object> xml_map) {
         HashMap<String, String> admin_map = new HashMap<>();
         HashMap<String, String> dataMap = getDataMap(xml_map, null);
-        for (String key: dataMap.keySet()){
-            if (key.contains("admin"))
+        for (String key : dataMap.keySet()) {
+            if (key.contains("admin")) {
                 admin_map.put(key, dataMap.get(key));
+            }
         }
         return admin_map;
     }
-    
+
     public static HashMap<String, String> getDataMap(HashMap<String, Object> map, HashMap<String, String> dataMap) {
-        if (dataMap == null)
+        if (dataMap == null) {
             dataMap = new HashMap<>();
-        for (String k: map.keySet()) {
+        }
+        for (String k : map.keySet()) {
             if (map.get(k) instanceof HashMap) {
-                HashMap<String, Object> values = (HashMap<String, Object>)map.get(k);
-                if (!values.isEmpty())
+                HashMap<String, Object> values = (HashMap<String, Object>) map.get(k);
+                if (!values.isEmpty()) {
                     getDataMap(values, dataMap);
-            }
-            else if (map.get(k) instanceof String) {
-                String value = (String)map.get(k);
+                }
+            } else if (map.get(k) instanceof String) {
+                String value = (String) map.get(k);
                 dataMap.put(k, value);
             }
         }
         return dataMap;
     }
-    
+
     public static String findKey(HashMap<String, String> map, String searchCondition, String str) {
         String value = "";
         if (!map.isEmpty()) {
-            for (String k: map.keySet()) {
+            for (String k : map.keySet()) {
                 if (searchCondition.toLowerCase().trim().equals("endswith")) {
                     if (k.toLowerCase().trim().endsWith(str)) {
                         value = map.get(k);
                         break;
                     }
-                }
-                else if (searchCondition.toLowerCase().trim().equals("startswith")) {
+                } else if (searchCondition.toLowerCase().trim().equals("startswith")) {
                     if (getAttributeFromKey(k).toLowerCase().trim().startsWith(str)) {
                         value = map.get(k);
                         break;
                     }
-                }
-                else if (searchCondition.toLowerCase().trim().equals("contains")) {
+                } else if (searchCondition.toLowerCase().trim().equals("contains")) {
                     if (k.toLowerCase().trim().contains(str)) {
                         value = map.get(k);
                         break;
                     }
-                }
-                else if (searchCondition.toLowerCase().trim().equals("equals")) {
+                } else if (searchCondition.toLowerCase().trim().equals("equals")) {
                     if (getAttributeFromKey(k).toLowerCase().trim().equals(str)) {
                         value = map.get(k);
                         break;
@@ -385,69 +382,73 @@ public class MetadataHandler {
         }
         return value;
     }
-    
+
     private static ArrayList<XMLNode> aliquotNodes = new ArrayList<>();
+
     public static void searchForAliquots(XMLNode root) {
-        if (root.getLabel().toLowerCase().trim().endsWith("bio:aliquot") && root.getAttributes().size()>0) {
+        if (root.getLabel().toLowerCase().trim().endsWith("bio:aliquot") && root.getAttributes().size() > 0) {
             aliquotNodes.add(root);
             //System.err.println(root.getLabel() + "\t" + "attributes: " + root.getAttributes().size());
-        }
-        else {
-            if (root.hasChilds()) {
-                for (XMLNode child: root.getChilds())
-                    searchForAliquots(child);
+        } else if (root.hasChilds()) {
+            for (XMLNode child : root.getChilds()) {
+                searchForAliquots(child);
             }
         }
     }
+
     public static ArrayList<XMLNode> getAliquotNodes() {
         return aliquotNodes;
     }
+
     public static void emptyAliquotNodes() {
         aliquotNodes = new ArrayList<>();
     }
-    
+
     public static XMLNode convertMapToIndexedTree(HashMap<String, Object> map, XMLNode root) {
-        for (String k: map.keySet()) {
+        for (String k : map.keySet()) {
             if (map.get(k) instanceof HashMap) {
                 XMLNode child = new XMLNode();
                 child.setLabel(k);
                 child.setParent(root);
-                root.addChild(convertMapToIndexedTree((HashMap<String, Object>)map.get(k), child));
-            }
-            else if (map.get(k) instanceof String) {
-                String value = (String)map.get(k);
+                root.addChild(convertMapToIndexedTree((HashMap<String, Object>) map.get(k), child));
+            } else if (map.get(k) instanceof String) {
+                String value = (String) map.get(k);
                 root.addAttribute(k, value);
             }
         }
         return root;
     }
-    
+
     public static HashMap<String, String> extractParentMetadata(XMLNode node, HashMap<String, String> meta) {
-        if (meta == null)
+        if (meta == null) {
             meta = new HashMap<>();
+        }
         meta.putAll(node.getAttributes());
-        
-        if (node.getParent() == null)
+
+        if (node.getParent() == null) {
             return meta;
+        }
         return extractParentMetadata(node.getParent(), meta);
     }
-    
+
     public static String getAttributeFromKey(String key) {
         String[] key_split = key.split("_");
-        return key.substring(key_split[0].length()+1, key.length());
+        return key.substring(key_split[0].length() + 1, key.length());
     }
-    
+
     // the attributes in this methods are all required 
-    public static HashMap<String, HashMap<String, Object>> getAdditionalManuallyCuratedAttributes(String program, String disease, String dataType, String format, String aliquot_uuid, String aliquot_brc, HashMap<String, String> biospecimen_attributes, HashMap<String, String> clinical_attributes, HashMap<String, String> manually_curated, String suffix_id) {
+    public static HashMap<String, HashMap<String, Object>> getAdditionalManuallyCuratedAttributes(String program, String disease, String dataType, String format, String aliquot_uuid, String aliquot_brc, HashMap<String, String> biospecimen_attributes, HashMap<String, String> clinical_attributes, HashMap<String, String> gdc_attributes, String suffix_id) {
         String attributes_prefix = "manually_curated";
         String category_separator = "__";
-        
-        /******* tissue_status *******/
+
+        /**
+         * ***** tissue_status ******
+         */
         // retrieve 'manually_curated__tissue_status' from 'biospecimen__bio__sample_type_id'
         HashMap<String, HashMap<String, Object>> additional_attributes = new HashMap<>();
         String tissue_id = "";
         boolean sample_type_id_found = false;
-        for (String bio_attr: biospecimen_attributes.keySet()) {
+        for (String bio_attr : biospecimen_attributes.keySet()) {
             if (bio_attr.trim().toLowerCase().contains("sample_type_id")) {
                 tissue_id = biospecimen_attributes.get(bio_attr);
                 sample_type_id_found = true;
@@ -455,64 +456,76 @@ public class MetadataHandler {
             }
         }
         if (!sample_type_id_found) {
-            if (!aliquot_brc.trim().equals(""))
-                tissue_id = aliquot_brc.split("-")[3].substring(0,2);
+            if (!aliquot_brc.trim().equals("")) {
+                tissue_id = aliquot_brc.split("-")[3].substring(0, 2);
+            }
         }
-        
+
         HashMap<String, Object> values = new HashMap<>();
         String tissue_status = "";
-        if (!tissue_id.trim().equals(""))
+        if (!tissue_id.trim().equals("")) {
             tissue_status = BioParser.getTissueStatus(tissue_id);
+        }
         values.put("value", tissue_status);
         values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"tissue_status", values);
-        
-        /******* exp_data_bed_url *******/
+        additional_attributes.put(attributes_prefix + category_separator + "tissue_status", values);
+
+        /**
+         * ***** exp_data_bed_url ******
+         */
         values = new HashMap<>();
         String expDataType = "";
-        for (String man_attr: manually_curated.keySet()) {
-            if (man_attr.trim().toLowerCase().equals("manually_curated__data_type")) {
-                expDataType = manually_curated.get(man_attr);
+        for (String man_attr : gdc_attributes.keySet()) {
+            if (man_attr.trim().toLowerCase().equals("gdc__data_type")) {
+                expDataType = gdc_attributes.get(man_attr);
                 break;
             }
         }
         if (!expDataType.trim().equals("")) {
             if (GDCData.getGDCData2FTPFolderName().containsKey(expDataType.trim().toLowerCase())) {
                 String opengdc_data_folder_name = GDCData.getGDCData2FTPFolderName().get(expDataType.trim().toLowerCase());
-                expDataType = Settings.getOpenGDCFTPRepoProgram(program, false)+disease.trim().toLowerCase()+"/"+opengdc_data_folder_name+"/"+aliquot_uuid.trim().toLowerCase()+"-"+suffix_id+"."+Settings.getOpenGDCFTPConvertedDataFormat();
+                expDataType = Settings.getOpenGDCFTPRepoProgram(program, false) + disease.trim().toLowerCase() + "/" + opengdc_data_folder_name + "/" + aliquot_uuid.trim().toLowerCase() + "-" + suffix_id + "." + Settings.getOpenGDCFTPConvertedDataFormat();
+            } else {
+                expDataType = "";
             }
-            else expDataType = "";
         }
         values.put("value", expDataType);
         values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"exp_data_"+Settings.getOpenGDCFTPConvertedDataFormat()+"_url", values);
-        
-        /******* opengdc_id *******/
+        additional_attributes.put(attributes_prefix + category_separator + "exp_data_" + Settings.getOpenGDCFTPConvertedDataFormat() + "_url", values);
+
+        /**
+         * ***** opengdc_id ******
+         */
         values = new HashMap<>();
         String opengdcId = "";
-        opengdcId = aliquot_uuid.trim().toLowerCase()+"-"+suffix_id;
+        opengdcId = aliquot_uuid.trim().toLowerCase() + "-" + suffix_id;
         values.put("value", opengdcId);
         values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"opengdc_id", values);
+        additional_attributes.put(attributes_prefix + category_separator + "opengdc_id", values);
 
-        /******* data_format *******/
+        /**
+         * ***** data_format ******
+         */
         values = new HashMap<>();
         String data_format = "";
-        if (!expDataType.trim().equals(""))
+        if (!expDataType.trim().equals("")) {
             data_format = Settings.getOpenGDCFTPConvertedDataFormat().toUpperCase();
+        }
         values.put("value", data_format);
         values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"data_format", values);
-        
-        /******* exp_metadata_url *******/
+        additional_attributes.put(attributes_prefix + category_separator + "data_format", values);
+
+        /**
+         * ***** exp_metadata_url ******
+         */
         values = new HashMap<>();
-        values.put("value", Settings.getOpenGDCFTPRepoProgram(program, false)+disease.trim().toLowerCase()+"/"+GDCData.getGDCData2FTPFolderName().get(dataType.trim().toLowerCase())+"/"+aliquot_uuid.trim().toLowerCase()+"-"+suffix_id+"."+Settings.getOpenGDCFTPConvertedDataFormat()+"."+format);
+        values.put("value", Settings.getOpenGDCFTPRepoProgram(program, false) + disease.trim().toLowerCase() + "/" + GDCData.getGDCData2FTPFolderName().get(dataType.trim().toLowerCase()) + "/" + aliquot_uuid.trim().toLowerCase() + "-" + suffix_id + "." + Settings.getOpenGDCFTPConvertedDataFormat() + "." + format);
         values.put("required", true);
-        additional_attributes.put(attributes_prefix+category_separator+"exp_metadata_url", values);
-                
+        additional_attributes.put(attributes_prefix + category_separator + "exp_metadata_url", values);
+
         return additional_attributes;
     }
-    
+
     public static HashMap<String, HashMap<String, Boolean>> getAdditionalAttributes(String endpoint) {
         HashMap<String, HashMap<String, Boolean>> additionalAttributes = new HashMap<>();
         String additional_attribute_file_path = Settings.getAdditionalMetaAttributesPath();
@@ -530,14 +543,15 @@ public class MetadataHandler {
                         if (in_file_endpoint.trim().toLowerCase().equals(endpoint.trim().toLowerCase())) {
                             String map_name = line_split[0];
                             HashMap<String, Boolean> attributes = new HashMap<>();
-                            if (additionalAttributes.containsKey(map_name))
+                            if (additionalAttributes.containsKey(map_name)) {
                                 attributes = additionalAttributes.get(map_name);
+                            }
                             String attribute = line_split[2];
                             boolean required = line_split[3].equals("true");
                             attributes.put(attribute, required);
                             additionalAttributes.put(map_name, attributes);
                         }
-                         
+
                     }
                 }
                 br.close();
@@ -547,11 +561,11 @@ public class MetadataHandler {
                 e.printStackTrace();
             }
         }
-        
+
         return additionalAttributes;
     }
-    
-    public static ArrayList<String> getManuallyCuratedAttributesWithNoCases(){
+
+    public static ArrayList<String> getManuallyCuratedAttributesWithNoCases() {
         ArrayList<String> attributes = new ArrayList<>();
         attributes.add("case_id");
         attributes.add("disease_type");
@@ -567,7 +581,7 @@ public class MetadataHandler {
 
         return attributes;
     }
-    
+
     public static ArrayList<String> getAggregatedAdditionalAttributes() {
         ArrayList<String> attributes = new ArrayList<>();
         attributes.add("file_id");
@@ -578,26 +592,27 @@ public class MetadataHandler {
 
         return attributes;
     }
-    
+
     public static ArrayList<HashMap<String, String>> aggregateSameDataTypeInfo(ArrayList<HashMap<String, ArrayList<Object>>> files_info, ArrayList<String> aggregatedAdditionalAttributes) {
         HashMap<String, ArrayList<HashMap<String, ArrayList<Object>>>> aggregated = new HashMap<>();
         //String platform_tmp = "";
-        for (HashMap<String, ArrayList<Object>> file_info: files_info) {
+        for (HashMap<String, ArrayList<Object>> file_info : files_info) {
             if (file_info != null) {
                 if (file_info.containsKey("data_type")) {
                     ArrayList<Object> data_type_list = file_info.get("data_type");
                     ArrayList<HashMap<String, ArrayList<Object>>> values = new ArrayList<>();
                     String data_type = "";
-                    for (Object obj: data_type_list) {
+                    for (Object obj : data_type_list) {
                         try {
-                            HashMap<String, Object> map = (HashMap<String, Object>)obj;
+                            HashMap<String, Object> map = (HashMap<String, Object>) obj;
                             data_type = String.valueOf(map.get("data_type"));
                             break;
+                        } catch (Exception e) {
                         }
-                        catch (Exception e) { }
                     }
-                    if (aggregated.containsKey(data_type))
+                    if (aggregated.containsKey(data_type)) {
                         values = aggregated.get(data_type);
+                    }
                     values.add(file_info);
                     aggregated.put(data_type, values);
                     /*if (data_type.trim().toLowerCase().equals("aligned reads")) {
@@ -618,42 +633,45 @@ public class MetadataHandler {
             }
         }
 
-        ArrayList<HashMap<String,String>> compressedMap = new ArrayList<>();
-        for(String key: aggregated.keySet()){
+        ArrayList<HashMap<String, String>> compressedMap = new ArrayList<>();
+        for (String key : aggregated.keySet()) {
             HashMap<String, String> tmp = new HashMap<>();
             ArrayList<HashMap<String, ArrayList<Object>>> mapList = aggregated.get(key);
-            for (HashMap<String, ArrayList<Object>> map: mapList){
-                for (String attribute: map.keySet()) {
+            for (HashMap<String, ArrayList<Object>> map : mapList) {
+                for (String attribute : map.keySet()) {
                     String value = "";
-                    if (tmp.containsKey(attribute))
+                    if (tmp.containsKey(attribute)) {
                         value = tmp.get(attribute);
+                    }
                     LinkedHashSet<String> values_set = new LinkedHashSet<>();
                     if (!value.trim().equals("")) {
                         String[] value_split = value.split(",");
-                        for (String val: value_split)
+                        for (String val : value_split) {
                             values_set.add(val);
+                        }
                     }
                     ArrayList<Object> value_tmp_list = map.get(attribute);
                     String value_tmp = "";
-                    for (Object obj: value_tmp_list) {
+                    for (Object obj : value_tmp_list) {
                         try {
-                            HashMap<String, Object> map_tmp = (HashMap<String, Object>)obj;
+                            HashMap<String, Object> map_tmp = (HashMap<String, Object>) obj;
                             value_tmp = String.valueOf(map_tmp.get(attribute));
                             values_set.add(value_tmp);
                             break;
+                        } catch (Exception e) {
                         }
-                        catch (Exception e) { }
                     }
                     if (!value_tmp.trim().equals("")) {
                         if (aggregatedAdditionalAttributes.contains(attribute)) {
                             String final_value = "";
-                            for (String val: values_set)
+                            for (String val : values_set) {
                                 final_value = final_value + val + ",";
-                            final_value = final_value.substring(0, final_value.length()-1);
+                            }
+                            final_value = final_value.substring(0, final_value.length() - 1);
                             tmp.put(attribute, final_value);
-                        }
-                        else
+                        } else {
                             tmp.put(attribute, value_tmp);
+                        }
                     }
                 }
             }
@@ -667,14 +685,107 @@ public class MetadataHandler {
                 if (tmp.get("platform").trim().equals(""))
                     tmp.put("platform", platform_tmp);
             }*/
-            
             // populate compressedMap
             compressedMap.add(tmp);
         }
 
         return compressedMap;
     }
-    
+
+    public static HashMap<String, HashMap<String, String>> detectRedundantMetadata(HashMap<String, String> meta_map) {
+        HashMap<String, HashMap<String, String>> redundantValues = new HashMap<>();
+        for (String attribute : meta_map.keySet()) {
+            String[] attribute_split = attribute.split("__");
+            String value = meta_map.get(attribute);
+            String stripped_attribute = attribute_split[attribute_split.length - 1];
+            HashMap<String, String> attr_list = new HashMap<>();
+            if (redundantValues.containsKey(stripped_attribute)) {
+                attr_list = redundantValues.get(stripped_attribute);
+                for (String attr : attr_list.keySet()) {
+                    if ((attr_list.get(attr)).toLowerCase().equals(value.toLowerCase())) {
+                        attr_list.put(attribute, value);
+                        break;
+                    }
+                }
+            } else {
+                attr_list.put(attribute, value);
+            }
+            redundantValues.put(stripped_attribute, attr_list);
+        }
+        return redundantValues;
+    }
+
+    public static HashMap<String, String> filterOutRedundantMetadata(HashMap<String, HashMap<String, String>> redundant_map, String program) {
+        HashMap<String, String> metadata = new HashMap<>();
+        if (program.trim().toLowerCase().equals("tcga")) {
+            for (String last_attr : redundant_map.keySet()) {
+                ArrayList<String> biospecimen_attrs = new ArrayList<>();
+                ArrayList<String> clinical_attrs = new ArrayList<>();
+                ArrayList<String> gdc_attrs = new ArrayList<>();
+                ArrayList<String> manually_curated_attrs = new ArrayList<>();
+                for (String attribute_path : redundant_map.get(last_attr).keySet()) {
+                    if (attribute_path.toLowerCase().startsWith("biospecimen"))
+                        biospecimen_attrs.add(attribute_path);
+                    else if (attribute_path.toLowerCase().startsWith("clinical"))
+                        clinical_attrs.add(attribute_path);
+                    else if (attribute_path.toLowerCase().startsWith("gdc"))
+                        gdc_attrs.add(attribute_path);
+                    else if (attribute_path.toLowerCase().startsWith("manually_curated"))
+                        manually_curated_attrs.add(attribute_path);
+                }
+                
+                if (manually_curated_attrs.size() > 0) { // if manually_curated -> no redundancy
+                    String selectedAttribute = selectAttribute(manually_curated_attrs);
+                    metadata.put(selectedAttribute, redundant_map.get(last_attr).get(selectedAttribute));
+                }
+                else {
+                    String selectedAttribute = null;
+                    if (biospecimen_attrs.size()>0 && clinical_attrs.isEmpty() && gdc_attrs.isEmpty()) // biospecimen only
+                        selectedAttribute = selectAttribute(biospecimen_attrs);
+                    else if (biospecimen_attrs.isEmpty() && clinical_attrs.size()>0 && gdc_attrs.isEmpty()) // clinical only
+                        selectedAttribute = selectAttribute(clinical_attrs);
+                    else if (biospecimen_attrs.isEmpty() && clinical_attrs.isEmpty() && gdc_attrs.size()>0) // gdc only
+                        selectedAttribute = selectAttribute(gdc_attrs);                        
+                    else if (biospecimen_attrs.size()>0 && clinical_attrs.size()>0 && gdc_attrs.isEmpty())
+                        selectedAttribute = selectAttribute(biospecimen_attrs);
+                    else if ((biospecimen_attrs.size()>0 && clinical_attrs.isEmpty() && gdc_attrs.size()>0) || (biospecimen_attrs.isEmpty() && clinical_attrs.size()>0 && gdc_attrs.size()>0)) // (biospecimen and gdc) or (clinical and gdc)
+                        selectedAttribute = selectAttribute(gdc_attrs);
+                    if (selectedAttribute != null)
+                        metadata.put(selectedAttribute, redundant_map.get(last_attr).get(selectedAttribute));
+                }
+            }
+        }
+        return metadata;
+    }
+        
+    public static String selectAttribute(ArrayList<String> attributes) {
+        ArrayList<String> remaining_attributes = new ArrayList<>(attributes);
+        if (attributes.size() == 1)
+            return attributes.get(0);
+        for (String attr: attributes) {
+            if (attr.toLowerCase().contains("annotations"))
+                remaining_attributes.remove(attr);
+            else if (attr.toLowerCase().contains("cases__project"))
+                remaining_attributes.remove(attr);
+            else if (attr.toLowerCase().contains("analytes") && !attr.toLowerCase().contains("analytes__aliquots"))
+                remaining_attributes.remove(attr);
+        }
+        if (remaining_attributes.size() == 1)
+            return remaining_attributes.get(0);
+        else {
+            String attribute = "";
+            int attribute_size = 0;
+            for (String attr: attributes) {
+                int attr_size = attr.split("__").length;
+                if (attr_size > attribute_size) {
+                    attribute = attr;
+                    attribute_size = attr_size;
+                }
+            }
+            return attribute;
+        }
+    }
+
     /*public static void main(String[] args) {
         System.err.println("Biospecimen sample");
         String biospecimen_xml_path = "/Users/fabio/Downloads/test_gdc_download/ACC-biospecimen/nationwidechildrens.org_biospecimen.TCGA-OR-A5J1.xml";
@@ -694,5 +805,4 @@ public class MetadataHandler {
         System.err.println("Data size: " + clinical_data.size()+"\n");
         printMap(clinical_data, 0);
     }*/
-    
 }

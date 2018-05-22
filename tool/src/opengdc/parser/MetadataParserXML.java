@@ -201,7 +201,7 @@ public class MetadataParserXML extends BioParser {
                                     if (file_info != null) {
                                         // handle missing required attributes
                                         HashSet<String> missing_required_attributes = new HashSet<>();
-                                        HashMap<String, String> manually_curated = new HashMap<>();
+                                        HashMap<String, String> gdc_map = new HashMap<>();
                                         HashMap<String, Boolean> attribute2required;
                                         HashMap<String, Boolean> additional_attributes_tmp;
 
@@ -264,12 +264,12 @@ public class MetadataParserXML extends BioParser {
                                                 /*************************************************************/
                                                 /** patch for the attribute 'manually_curated__data_format' **/
                                                 if (attribute_parsed.trim().toLowerCase().equals("manually_curated__data_format"))
-                                                    attribute_parsed = "manually_curated__source_data_format";
+                                                    attribute_parsed = "gdc__source_data_format";
                                                 /*************************************************************/
                                                 //String value_parsed = checkForNAs(file_info.get(attribute_spitted));
                                                 String value_parsed = checkForNAs(file_info.get(attribute));
                                                 if (!value_parsed.trim().equals(""))
-                                                    manually_curated.put(attribute_parsed, value_parsed);
+                                                    gdc_map.put(attribute_parsed, value_parsed);
                                                 /*else {
                                                     for (String attr: additional_attributes_files_tmp.keySet()) {
                                                         if (attr.toLowerCase().equals(attribute.toLowerCase())) {
@@ -283,16 +283,16 @@ public class MetadataParserXML extends BioParser {
 
                                         // generate additional manually curated metadata
                                         String manually_curated_data_type = "";
-                                        for (String mcattr: manually_curated.keySet()) {
-                                            if (mcattr.toLowerCase().contains("manually_curated__data_type")) {
-                                                manually_curated_data_type = manually_curated.get(mcattr);
+                                        for (String mcattr: gdc_map.keySet()) {
+                                            if (mcattr.toLowerCase().contains("gdc__data_type")) {
+                                                manually_curated_data_type = gdc_map.get(mcattr);
                                                 break;
                                             }
                                         }
 
                                         // create a suffix to append to the aliquot id
                                         String suffix_id = this.getOpenGDCSuffix(manually_curated_data_type, false);
-
+                                        HashMap<String, String> manually_curated = new HashMap<>();
                                         HashMap<String, HashMap<String, Object>> additional_manually_curated = MetadataHandler.getAdditionalManuallyCuratedAttributes(program, disease, dataType, this.getFormat(), aliquot_uuid, "", biospecimenBigMap.get(aliquot_uuid), clinicalBigMap.get(patient_uuid), manually_curated, suffix_id);
                                         if (!additional_manually_curated.isEmpty()) {
                                             for (String attr: additional_manually_curated.keySet()) {
@@ -310,12 +310,11 @@ public class MetadataParserXML extends BioParser {
                                                 }
                                             }
                                         }
-
+                                        
                                         // create file if it does not exist
                                         File out_file = new File(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
                                         if (!out_file.exists()) {
-                                            FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
-                                            PrintStream out = new PrintStream(fos);
+                                            HashMap<String, String> bigMap = new HashMap<>();
 
                                             // biospecimen
                                             for (String attribute: biospecimen_sorted) {
@@ -325,8 +324,10 @@ public class MetadataParserXML extends BioParser {
                                                     attribute_parsed = attribute_parsed + FSUtils.stringToValidJavaIdentifier(attr) + "__";
                                                 attribute_parsed = "biospecimen__" + attribute_parsed.substring(0, attribute_parsed.length()-2);
                                                 String value_parsed = checkForNAs(biospecimen_map.get(attribute));
-                                                if (!value_parsed.trim().equals(""))
-                                                    out.println(attribute_parsed + "\t" + value_parsed);
+                                                if (!value_parsed.trim().equals("")) {
+                                                    //out.println(attribute_parsed + "\t" + value_parsed);
+                                                    bigMap.put(attribute_parsed, value_parsed);
+                                                }
                                             }
 
                                             // clinical
@@ -337,8 +338,18 @@ public class MetadataParserXML extends BioParser {
                                                     attribute_parsed = attribute_parsed + FSUtils.stringToValidJavaIdentifier(attr) + "__";
                                                 attribute_parsed = "clinical__" + attribute_parsed.substring(0, attribute_parsed.length()-2);
                                                 String value_parsed = checkForNAs(clinical_map.get(attribute));
-                                                if (!value_parsed.trim().equals(""))
-                                                    out.println(attribute_parsed + "\t" + value_parsed);
+                                                if (!value_parsed.trim().equals("")) {
+                                                    //out.println(attribute_parsed + "\t" + value_parsed);
+                                                    bigMap.put(attribute_parsed, value_parsed);
+                                                }
+                                            }
+
+                                            // gdc attributes
+                                            ArrayList<String> gdc_attributes_sorted = new ArrayList<>(gdc_map.keySet());
+                                            Collections.sort(gdc_attributes_sorted);
+                                            for (String attr: gdc_attributes_sorted) {
+                                                //out.println(attr + "\t" + manually_curated.get(attr));
+                                                bigMap.put(attr, gdc_map.get(attr));
                                             }
 
                                             // generate audit_warning
@@ -348,15 +359,28 @@ public class MetadataParserXML extends BioParser {
                                                     missed_attributes_list += ma+", ";
                                                 manually_curated.put("manually_curated__audit_warning", "missed the following required metadata: ["+missed_attributes_list.substring(0, missed_attributes_list.length()-2)+"]");
                                             }
-
+                                            
                                             //if (!manually_curated_data_type.equals("")) {
                                             // sort and print manually_curated attributes
                                             ArrayList<String> manually_curated_attributes_sorted = new ArrayList<>(manually_curated.keySet());
                                             Collections.sort(manually_curated_attributes_sorted);
-                                            for (String attr: manually_curated_attributes_sorted)
-                                                out.println(attr + "\t" + manually_curated.get(attr));
+                                            for (String attr: manually_curated_attributes_sorted) {
+                                                //out.println(attr + "\t" + manually_curated.get(attr));
+                                                bigMap.put(attr, manually_curated.get(attr));
+                                            }
                                             //}
-
+                                            
+                                            // remove redundant attributes
+                                            HashMap<String, HashMap<String, String>> redundant_map = MetadataHandler.detectRedundantMetadata(bigMap);
+                                            HashMap<String, String> final_map = MetadataHandler.filterOutRedundantMetadata(redundant_map, "tcga");
+                                            ArrayList<String> final_map_attributes_sorted = new ArrayList<>(final_map.keySet());
+                                            Collections.sort(final_map_attributes_sorted);
+                                            
+                                            // print all
+                                            FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
+                                            PrintStream out = new PrintStream(fos);
+                                            for (String attr: final_map_attributes_sorted)
+                                                out.println(attr + "\t" + final_map.get(attr));                                            
                                             out.close();
                                             fos.close();
                                         }
