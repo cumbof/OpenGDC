@@ -70,13 +70,13 @@ public class IsoformExpressionQuantificationParser extends BioParser {
                     HashMap<String, ArrayList<Object>> file_info = GDCQuery.retrieveExpInfoFromAttribute("files", "files.file_id", file_uuid, dataTypes, attributes, 0, 0, null).get(0);
                     String aliquot_uuid = "";
                     if (file_info != null) {
-                        if (file_info.containsKey("aliquot_id")) {
+                        if (file_info.containsKey("cases.samples.portions.analytes.aliquots.aliquot_id")) {
                             for (String k: file_info.keySet()) {
                                 for (Object obj: file_info.get(k)) {
                                     HashMap<String, Object> map = (HashMap<String, Object>)obj;
                                     for (String kmap: map.keySet()) {
                                         try {
-                                            if (kmap.toLowerCase().equals("aliquot_id"))
+                                            if (kmap.toLowerCase().equals("cases.samples.portions.analytes.aliquots.aliquot_id"))
                                                 aliquot_uuid = String.valueOf(map.get(kmap));
                                         }
                                         catch (Exception e) { }
