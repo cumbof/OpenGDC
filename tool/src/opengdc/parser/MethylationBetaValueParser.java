@@ -161,7 +161,7 @@ public class MethylationBetaValueParser extends BioParser {
                                                     values.add(parseValue(chr, 0));
                                                     values.add(parseValue(start, 1));
                                                     values.add(parseValue(end, 2));
-                                                    values.add(parseValue(strand, 3));
+                                                    values.add(strand);
                                                     values.add(parseValue(composite_element_ref, 4));
                                                     values.add(parseValue(beta_value, 5));
                                                     values.add(parseValue(gene_symbol, 6));
@@ -252,7 +252,7 @@ public class MethylationBetaValueParser extends BioParser {
         String position_to_TSS = ""; 
         String gene_type = "";
         String gene_symbol = "";
-        String strand = "";
+        String strand = "*";
         String entrez = "";
         String all_entrez_ids = "";
         String all_gene_symbols = "";
