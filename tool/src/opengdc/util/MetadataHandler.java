@@ -761,27 +761,44 @@ public class MetadataHandler {
     public static String selectAttribute(ArrayList<String> attributes) {
         ArrayList<String> remaining_attributes = new ArrayList<>();
         for (String attr: attributes) {
+            //state e annotation sempre eliminati
             if (attr.toLowerCase().endsWith("__state"))
                 continue;
             else if (attr.toLowerCase().contains("annotations"))
                 continue;
-            else if (attr.toLowerCase().contains("input_files"))
-                continue;
-            else if (attr.toLowerCase().contains("cases__project"))
-                continue;
-            else if (attr.toLowerCase().contains("analytes") && !attr.toLowerCase().contains("analytes__aliquots"))
-                continue;
+            //1) eliminati perchè vedi punto 2)
+            //          else if (attr.toLowerCase().contains("input_files"))
+            //              continue;
+            //          else if (attr.toLowerCase().contains("cases__project"))
+            //              continue;
+            //non considera ....analytes__analyte_type. Questo caso comunque è incluso alla fine perchè prendiamo l'attributo più lungo
+            //          else if (attr.toLowerCase().contains("analytes") && !attr.toLowerCase().contains("analytes__aliquots")) 
+            //              continue;
             else
                 remaining_attributes.add(attr);
         }
+        //2) input_files, cases__project e associated_entities li dobbiamo considerare solo nel caso rimangano solamente come singolo elemento nella lista. ES:
+        /*ORIGINAL attributes
+            gdc__cases__project__program__name
+          FINAL attributes
+            gdc__cases__project__program__name
+         * */
         if (remaining_attributes.size() == 1)
             return remaining_attributes.get(0);
-        else {
-            String attribute = "";
+        else { //3) se non sono elementi singoli della lista allora andiamo a considerare l'altro. ES: 
+            /*ORIGINAL attributes
+                gdc__cases__project__disease_type
+                gdc__cases__disease_type
+              FINAL attributes
+                gdc__cases__disease_type
+             * */
+
+            //se remaining_attributes è vuota? va nell'else e mi torna attribute = "", quindi lo pongo  a null perchè alla riga 753 controllo se è diverso da null
+            String attribute = null;
             int attribute_size = 0;
             for (String attr: remaining_attributes) {
                 int attr_size = attr.split("__").length;
-                if (attr_size > attribute_size && !attr.toLowerCase().contains("associated_entities")) {
+                if (attr_size > attribute_size && !attr.toLowerCase().contains("associated_entities") && !attr.toLowerCase().contains("input_files") && !attr.toLowerCase().contains("cases__project")) {
                     attribute = attr;
                     attribute_size = attr_size;
                 }
