@@ -41,7 +41,7 @@ public class GDCQuery {
     //private static final String FIELDS = "\"file_id,file_name,cases.submitter_id,cases.case_id,data_category,data_type,cases.samples.tumor_descriptor,cases.samples.tissue_type,cases.samples.sample_type,cases.samples.submitter_id,cases.samples.sample_id,cases.samples.portions.analytes.aliquots.aliquot_id,cases.samples.portions.analytes.aliquots.submitter_id\"";
     //private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&fields="+FIELDS+"&filters=";
     //private static final String BASE_SEARCH_URL = "https://gdc-api.nci.nih.gov/files?from=0&size="+SIZE_LIMIT+"&pretty=true&filters=";
-    private static final String BASE_URL = "https://gdc-api.nci.nih.gov/";
+    private static final String BASE_URL = "https://api.gdc.cancer.gov/";
     private static final String BASE_SEARCH_URL = BASE_URL+"files";
     private static final String BASE_DOWNLOAD_URL = BASE_URL+"data/";
     private static final int RECURSIVE_LIMIT = 100;
