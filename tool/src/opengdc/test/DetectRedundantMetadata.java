@@ -119,13 +119,13 @@ public class DetectRedundantMetadata {
                 for (String attribute: sortedAttributes) {
                     //System.err.println("\t\t" + attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute));
                     //System.err.println("\t" + attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute));
-                    if (attribute.equals(selectedAttributes.get(stripped_attribute))) {
+                    if (selectedAttributes.containsKey(attribute)) {
                         //Files.write((new File(redundant_meta_file_path)).toPath(), (attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute) + "\t" + "X" + "\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
-                        Files.write((new File(redundant_meta_file_path)).toPath(), (attribute + "\t" + "X" + "\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
+                        Files.write((new File(redundant_meta_file_path)).toPath(), ("\t" + attribute + "\t" + "X" + "\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
                     }
                     else {
                         //Files.write((new File(redundant_meta_file_path)).toPath(), (attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute) + "\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
-                        Files.write((new File(redundant_meta_file_path)).toPath(), (attribute + "\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
+                        Files.write((new File(redundant_meta_file_path)).toPath(), ("\t" + attribute + "\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
                     }
                 }
             }
