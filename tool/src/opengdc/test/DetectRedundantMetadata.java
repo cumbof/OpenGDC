@@ -16,6 +16,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import opengdc.util.MetadataHandler;
 
 /**
  *
@@ -23,21 +24,37 @@ import java.util.HashMap;
  */
 public class DetectRedundantMetadata {
     
-    public static final String META_DIR_PATH = "/Users/fabio/Desktop/ov_meta/";
-    public static final String REDUNDANT_META_FILE_PATH = "/Users/fabio/Desktop/redundant_attributes.tsv";
+    public static final String META_DIR_PATH = "/Users/fabio/Desktop/brca_meta/";
+    public static final String PROGRAM = "tcga";
+    public static final String REDUNDANT_META_FILE_PATH = "/Users/fabio/Desktop/brca_meta/redundant_attributes.tsv";
     
     public static void main(String args[]) {
         HashMap<String, HashMap<String, String>> redundantValues = new HashMap<>();
         for (File metafile: (new File(META_DIR_PATH)).listFiles()) {
             if (metafile.isFile() && metafile.getName().toLowerCase().endsWith("meta")) {
-                redundantValues = new HashMap<>();
-                redundantValues = detectRedundantMetadata(metafile, redundantValues);
+                //redundantValues = new HashMap<>();
+                HashMap<String, HashMap<String, String>> partialRedundantValues = detectRedundantMetadata(metafile, redundantValues);
+                for (String last_attr: partialRedundantValues.keySet()) {
+                    if (redundantValues.containsKey(last_attr)) {
+                        HashMap<String, String> alreadyExistingValues = redundantValues.get(last_attr);
+                        for (String complete_attr: partialRedundantValues.get(last_attr).keySet()) {
+                            if (!alreadyExistingValues.containsKey(complete_attr)) {
+                                alreadyExistingValues.put(complete_attr, partialRedundantValues.get(last_attr).get(complete_attr));
+                            }
+                        }
+                        redundantValues.put(last_attr, alreadyExistingValues);
+                    }
+                    else {
+                        redundantValues.put(last_attr, partialRedundantValues.get(last_attr));
+                    }
+                }
                 //redundantValues = removeEmptyAttributes(redundantValues);
                 //printData(metafile, redundantValues);
             }
         }
         redundantValues = removeEmptyAttributes(redundantValues);
-        printData(REDUNDANT_META_FILE_PATH, redundantValues);
+        HashMap<String, String> selectedAttributes = MetadataHandler.filterOutRedundantMetadata(redundantValues, PROGRAM);
+        printData(REDUNDANT_META_FILE_PATH, redundantValues, selectedAttributes);
     }
 
     //private static HashMap<String, HashMap<String, String>> detectRedundantMetadata(File metafile) {
@@ -87,7 +104,7 @@ public class DetectRedundantMetadata {
     }
 
     //private static void printData(File metafile, HashMap<String, HashMap<String, String>> redundantValues) {
-    private static void printData(String redundant_meta_file_path, HashMap<String, HashMap<String, String>> redundantValues) {
+    private static void printData(String redundant_meta_file_path, HashMap<String, HashMap<String, String>> redundantValues, HashMap<String, String> selectedAttributes) {
         try {
             Files.write((new File(redundant_meta_file_path)).toPath(), ("").getBytes("UTF-8"), StandardOpenOption.CREATE);
             //System.err.println(metafile.getName());
@@ -102,7 +119,14 @@ public class DetectRedundantMetadata {
                 for (String attribute: sortedAttributes) {
                     //System.err.println("\t\t" + attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute));
                     //System.err.println("\t" + attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute));
-                    Files.write((new File(redundant_meta_file_path)).toPath(), (attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute) + "\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
+                    if (attribute.equals(selectedAttributes.get(stripped_attribute))) {
+                        //Files.write((new File(redundant_meta_file_path)).toPath(), (attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute) + "\t" + "X" + "\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
+                        Files.write((new File(redundant_meta_file_path)).toPath(), (attribute + "\t" + "X" + "\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
+                    }
+                    else {
+                        //Files.write((new File(redundant_meta_file_path)).toPath(), (attribute + "\t" + redundantValues.get(stripped_attribute).get(attribute) + "\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
+                        Files.write((new File(redundant_meta_file_path)).toPath(), (attribute + "\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
+                    }
                 }
             }
             Files.write((new File(redundant_meta_file_path)).toPath(), ("\n").getBytes("UTF-8"), StandardOpenOption.APPEND);
