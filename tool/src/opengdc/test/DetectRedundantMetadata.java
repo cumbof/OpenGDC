@@ -28,6 +28,21 @@ public class DetectRedundantMetadata {
     public static final String PROGRAM = "tcga";
     public static final String REDUNDANT_META_FILE_PATH = "/Users/fabio/Desktop/brca_meta/redundant_attributes.tsv";
     
+    /*public static void main(String[] args) {
+        HashMap<String, HashMap<String, String>> redundantValues = new HashMap<>();
+        HashMap<String, String> values = new HashMap<>();
+        String gdc = "gdc__cases__demographic__gender";
+        String biospecimen = "biospecimen__shared__gender";
+        String clinical = "clinical__shared__gender";
+        values.put(gdc, "male");
+        values.put(biospecimen, "male");
+        values.put(clinical, "male");
+        redundantValues.put("gender", values);
+        redundantValues = removeEmptyAttributes(redundantValues);
+        HashMap<String, String> selectedAttributes = MetadataHandler.filterOutRedundantMetadata(redundantValues, PROGRAM);
+        printData(REDUNDANT_META_FILE_PATH, redundantValues, selectedAttributes);
+    }*/
+    
     public static void main(String args[]) {
         HashMap<String, HashMap<String, String>> redundantValues = new HashMap<>();
         for (File metafile: (new File(META_DIR_PATH)).listFiles()) {

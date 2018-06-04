@@ -748,6 +748,8 @@ public class MetadataHandler {
                         selectedAttribute = selectAttribute(gdc_attrs);                        
                     else if (biospecimen_attrs.size()>0 && clinical_attrs.size()>0 && gdc_attrs.isEmpty())
                         selectedAttribute = selectAttribute(biospecimen_attrs);
+                    else if (biospecimen_attrs.size()>0 && clinical_attrs.size()>0 && gdc_attrs.size()>0)
+                        selectedAttribute = selectAttribute(gdc_attrs);
                     else if ((biospecimen_attrs.size()>0 && clinical_attrs.isEmpty() && gdc_attrs.size()>0) || (biospecimen_attrs.isEmpty() && clinical_attrs.size()>0 && gdc_attrs.size()>0)) // (biospecimen and gdc) or (clinical and gdc)
                         selectedAttribute = selectAttribute(gdc_attrs);
                     if (selectedAttribute != null)
