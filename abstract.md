@@ -25,7 +25,7 @@ biospecimen data merging these information in a single tabular file
 with additional data retrieved exploiting the public GDC APIs. 
 It is also able to automatically manage data redundancy that is inevitably 
 inferred during the merge of these meta information (e.g., the 'gender' 
-of the pationt related to a particular tissue is often replicated in both 
+of the patient related to a particular tissue is often replicated in both 
 clinical and biospecimen sources).
 
 Our data are fully supported by frameworks like GeCo that exploits a SQL-like 
