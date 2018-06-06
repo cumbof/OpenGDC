@@ -699,8 +699,8 @@ public class MetadataHandler {
             String value = meta_map.get(attribute);
             String stripped_attribute = attribute_split[attribute_split.length - 1];
             HashMap<String, String> attr_list = new HashMap<>();
-            if (redundantValues.containsKey(stripped_attribute)) {
-                attr_list = redundantValues.get(stripped_attribute);
+            if (redundantValues.containsKey(stripped_attribute+"_"+value)) {
+                attr_list = redundantValues.get(stripped_attribute+"_"+value);
                 for (String attr : attr_list.keySet()) {
                     if ((attr_list.get(attr)).toLowerCase().equals(value.toLowerCase())) {
                         attr_list.put(attribute, value);
@@ -710,7 +710,7 @@ public class MetadataHandler {
             } else {
                 attr_list.put(attribute, value);
             }
-            redundantValues.put(stripped_attribute, attr_list);
+            redundantValues.put(stripped_attribute+"_"+value, attr_list);
         }
         return redundantValues;
     }
