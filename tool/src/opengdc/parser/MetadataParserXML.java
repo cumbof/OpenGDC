@@ -154,8 +154,8 @@ public class MetadataParserXML extends BioParser {
                             for (String metakey: additional_attributes_sorted) {
                                 HashMap<String, Boolean> additional_attributes_files_tmp = additional_attributes_files.get(metakey);
                                 HashMap<String, Boolean> additional_attributes_cases_tmp = additional_attributes_cases.get(metakey);
-                                additional_attributes_files_tmp.remove("cases.samples.sample_id");
-                                additional_attributes_cases_tmp.remove("samples.sample_id");
+                                //additional_attributes_files_tmp.remove("cases.samples.sample_id");
+                                //additional_attributes_cases_tmp.remove("samples.sample_id");
                                 
                                 //ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), new HashSet<>(additional_attributes_files.get(metakey).keySet()), 0, 0, null);
                                 ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), dataTypes, new HashSet<>(additional_attributes_files.get(metakey).keySet()), 0, 0, null);
