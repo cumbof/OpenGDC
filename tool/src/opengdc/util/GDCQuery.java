@@ -167,6 +167,22 @@ public class GDCQuery {
                             else
                                 reduced_hashmap.put(current_key+"."+key, hashmap.get(key));
                         }
+                        else if (hashmap.get(key) instanceof List){
+                                ArrayList<Object> list_obj =  (ArrayList<Object>)hashmap.get(key);
+                                boolean is_string = false;
+                                for(Object o: list_obj){
+                                    if(o instanceof String){
+                                        is_string = true;
+                                        break;
+                                    }
+                                }
+                                if(is_string){
+                                    if (current_key.trim().equals(""))
+                                        results.putAll(searchFor(keys, key, hashmap.get(key), results));
+                                    else
+                                        results.putAll(searchFor(keys, current_key+"."+key, hashmap.get(key), results));
+                                }
+                            }
                     }
                     ArrayList<Object> val = new ArrayList<>();
                     if (results.containsKey(curr_key.toLowerCase().trim()))
@@ -191,6 +207,11 @@ public class GDCQuery {
                 if ((o instanceof HashMap) || (o instanceof List))
                     results.putAll(searchFor(keys, current_key, o, results));
             }
+        }
+        else if (current_obj instanceof String) {
+                ArrayList<Object> list_string = new ArrayList<>();
+                list_string.add((String)current_obj);
+                results.put(current_key, list_string);
         }
         return results;
     }
