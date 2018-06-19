@@ -209,9 +209,9 @@ public class GDCQuery {
             }
         }
         else if (current_obj instanceof String) {
-                ArrayList<Object> list_string = new ArrayList<>();
-                list_string.add((String)current_obj);
-                results.put(current_key, list_string);
+            ArrayList<Object> list_string = new ArrayList<>();
+            list_string.add((String)current_obj);
+            results.put(current_key, list_string);
         }
         return results;
     }
