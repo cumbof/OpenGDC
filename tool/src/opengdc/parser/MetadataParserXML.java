@@ -224,7 +224,7 @@ public class MetadataParserXML extends BioParser {
                                             String attribute_parsed;
                                             String attribute_tmp = "";
                                             for (String attr: manually_without_cases) {
-                                                if (attr.contains(attribute)) {
+                                                if (attr.equals(attribute)) {
                                                     attribute_tmp = attr;
                                                     break;
                                                 }
@@ -251,7 +251,7 @@ public class MetadataParserXML extends BioParser {
                                                 String attribute_parsed;
                                                 String attribute_tmp = "";
                                                 for (String attr: manually_without_cases) {
-                                                    if (attr.contains(attribute)) {
+                                                    if (attr.equals(attribute)) {
                                                         attribute_tmp = attr;
                                                         break;
                                                     }
