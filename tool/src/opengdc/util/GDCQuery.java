@@ -167,22 +167,22 @@ public class GDCQuery {
                             else
                                 reduced_hashmap.put(current_key+"."+key, hashmap.get(key));
                         }
-                        else if (hashmap.get(key) instanceof List){
-                                ArrayList<Object> list_obj =  (ArrayList<Object>)hashmap.get(key);
-                                boolean is_string = false;
-                                for(Object o: list_obj){
-                                    if(o instanceof String){
-                                        is_string = true;
-                                        break;
-                                    }
-                                }
-                                if(is_string){
-                                    if (current_key.trim().equals(""))
-                                        results.putAll(searchFor(keys, key, hashmap.get(key), results));
-                                    else
-                                        results.putAll(searchFor(keys, current_key+"."+key, hashmap.get(key), results));
+                        else if (hashmap.get(key) instanceof List) {
+                            ArrayList<Object> list_obj = (ArrayList<Object>)hashmap.get(key);
+                            boolean is_string = false;
+                            for (Object o: list_obj){
+                                if (o instanceof String) {
+                                    is_string = true;
+                                    break;
                                 }
                             }
+                            if (is_string) {
+                                if (current_key.trim().equals(""))
+                                    results.putAll(searchFor(keys, key, hashmap.get(key), results));
+                                else
+                                    results.putAll(searchFor(keys, current_key+"."+key, hashmap.get(key), results));
+                            }
+                        }
                     }
                     ArrayList<Object> val = new ArrayList<>();
                     if (results.containsKey(curr_key.toLowerCase().trim()))
