@@ -1,11 +1,11 @@
-eliminare:
+### eliminare:
 
 annotations
 state
 file_state
 associated_entities
 
-ridondanze:
+### ridondanze:
 
 api-biospecimen/clinical —> file di mapping e teniamo api
 biospecimen-clinical —> biospecimen.
@@ -25,6 +25,6 @@ input_files —> non applicare regole ridondanza
 
 cases.diagnoses.days_to_death e cases.diagnoses.days_to_birth sono campi deprecati (che confluiranno negli equivalenti cases.demographic.days_to_birth e cases.demographic.days_to_death --- la documentazione punta a questi). Quindi io consiglierei di includere anche i due nuovi nella vostra chiamata API e di mettere priorità a quello (tra demographic/diagnoses) che ha un valore
 
-creare:
+### creare:
 
 manually_curated__opengdc_file_size —> dimensione in byte del file bed
