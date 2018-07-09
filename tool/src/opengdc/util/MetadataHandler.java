@@ -473,6 +473,7 @@ public class MetadataHandler {
         /**
          * ***** exp_data_bed_url ******
          */
+        String exp_data_bed_url = "";
         values = new HashMap<>();
         String expDataType = "";
         for (String man_attr : gdc_attributes.keySet()) {
@@ -484,14 +485,32 @@ public class MetadataHandler {
         if (!expDataType.trim().equals("")) {
             if (GDCData.getGDCData2FTPFolderName().containsKey(expDataType.trim().toLowerCase())) {
                 String opengdc_data_folder_name = GDCData.getGDCData2FTPFolderName().get(expDataType.trim().toLowerCase());
-                expDataType = Settings.getOpenGDCFTPRepoProgram(program, false) + disease.trim().toLowerCase() + "/" + opengdc_data_folder_name + "/" + aliquot_uuid.trim().toLowerCase() + "-" + suffix_id + "." + Settings.getOpenGDCFTPConvertedDataFormat();
+                exp_data_bed_url = Settings.getOpenGDCFTPRepoProgram(program, false) + disease.trim().toLowerCase() + "/" + opengdc_data_folder_name + "/" + aliquot_uuid.trim().toLowerCase() + "-" + suffix_id + "." + Settings.getOpenGDCFTPConvertedDataFormat();
             } else {
-                expDataType = "";
+                exp_data_bed_url = "";
             }
         }
-        values.put("value", expDataType);
+        values.put("value", exp_data_bed_url);
         values.put("required", true);
         additional_attributes.put(attributes_prefix + category_separator + "exp_data_" + Settings.getOpenGDCFTPConvertedDataFormat() + "_url", values);
+
+        /**
+         * ***** opengdc_file_size ******
+         */
+        String opengdc_file_size = "";
+        values = new HashMap<>();
+        URL url = null;
+        try {
+            url = new URL(exp_data_bed_url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        opengdc_file_size = String.valueOf(getFileSize(url));
+        if(opengdc_file_size.equals("0"))
+            opengdc_file_size = "";
+        values.put("value", opengdc_file_size);
+        values.put("required", true);
+        additional_attributes.put(attributes_prefix + category_separator + "opengdc_file_size", values);
 
         /**
          * ***** opengdc_id ******
@@ -508,7 +527,7 @@ public class MetadataHandler {
          */
         values = new HashMap<>();
         String data_format = "";
-        if (!expDataType.trim().equals("")) {
+        if (!exp_data_bed_url.trim().equals("")) {
             data_format = Settings.getOpenGDCFTPConvertedDataFormat().toUpperCase();
         }
         values.put("value", data_format);
@@ -524,6 +543,24 @@ public class MetadataHandler {
         additional_attributes.put(attributes_prefix + category_separator + "exp_metadata_url", values);
 
         return additional_attributes;
+    }
+
+    private static int getFileSize(URL url) {
+        URLConnection conn = null;
+        try {
+            conn = url.openConnection();
+            if(conn instanceof HttpURLConnection) {
+                ((HttpURLConnection)conn).setRequestMethod("HEAD");
+            }
+            conn.getInputStream();
+            return conn.getContentLength();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if(conn instanceof HttpURLConnection) {
+                ((HttpURLConnection)conn).disconnect();
+            }
+        }
     }
 
     public static HashMap<String, HashMap<String, Boolean>> getAdditionalAttributes(String endpoint) {
@@ -694,13 +731,49 @@ public class MetadataHandler {
 
     public static HashMap<String, HashMap<String, String>> detectRedundantMetadata(HashMap<String, String> meta_map) {
         HashMap<String, HashMap<String, String>> redundantValues = new HashMap<>();
+        
+        HashMap<String, ArrayList<String>> mapping_file_attribute = YAMLreader.getMappingAttributes();
+        for (String attribute_mapping : mapping_file_attribute.keySet()) {
+            if(meta_map.containsKey(attribute_mapping)){
+                String[] attribute_split_mapping = attribute_mapping.split("__");
+                String stripped_attribute_mapping = attribute_split_mapping[attribute_split_mapping.length - 1];
+                String value_mapping = "";
+                ArrayList<String> reduntant_values_mapping = mapping_file_attribute.get(attribute_mapping);
+                value_mapping = meta_map.get(attribute_mapping);
+
+                HashMap<String, String> attr_list_mapping = new HashMap<>();
+                if (redundantValues.containsKey(stripped_attribute_mapping+"-"+value_mapping.toLowerCase())) {
+                    attr_list_mapping = redundantValues.get(stripped_attribute_mapping+"-"+value_mapping.toLowerCase());
+                }
+                for (String attr : reduntant_values_mapping) {
+                    String value_attr = "";
+                    if(meta_map.containsKey(attr)){
+                        value_attr = meta_map.get(attr);
+                        meta_map.remove(attr);
+                        attr_list_mapping.put(attr, value_attr);                    
+                    }
+                    //else {
+                    //stessoStripped_attribute_diversoValore = true;
+                    //}
+
+
+                }
+                attr_list_mapping.put(attribute_mapping, value_mapping);
+                redundantValues.put(stripped_attribute_mapping+"-"+value_mapping.toLowerCase(), attr_list_mapping);
+                meta_map.remove(attribute_mapping);
+            }
+        }
+
+
         for (String attribute : meta_map.keySet()) {
             String[] attribute_split = attribute.split("__");
             String value = meta_map.get(attribute);
             String stripped_attribute = attribute_split[attribute_split.length - 1];
             HashMap<String, String> attr_list = new HashMap<>();
-            if (redundantValues.containsKey(stripped_attribute+"_"+value)) {
-                attr_list = redundantValues.get(stripped_attribute+"_"+value);
+            if(attribute.contains("input_files"))
+                stripped_attribute = attribute;
+            if (redundantValues.containsKey(stripped_attribute+"_"+value.toLowerCase())) {
+                attr_list = redundantValues.get(stripped_attribute+"_"+value.toLowerCase());
                 for (String attr : attr_list.keySet()) {
                     if ((attr_list.get(attr)).toLowerCase().equals(value.toLowerCase())) {
                         attr_list.put(attribute, value);
@@ -710,7 +783,7 @@ public class MetadataHandler {
             } else {
                 attr_list.put(attribute, value);
             }
-            redundantValues.put(stripped_attribute+"_"+value, attr_list);
+            redundantValues.put(stripped_attribute+"_"+value.toLowerCase(), attr_list);
         }
         return redundantValues;
     }
@@ -803,7 +876,7 @@ public class MetadataHandler {
             int attribute_size = 0;
             for (String attr: remaining_attributes) {
                 int attr_size = attr.split("__").length;
-                if (attr_size > attribute_size && !attr.toLowerCase().contains("associated_entities") && !attr.toLowerCase().contains("input_files") && !attr.toLowerCase().contains("cases__project")) {
+                if (attr_size > attribute_size && !attr.toLowerCase().contains("associated_entities") && !attr.toLowerCase().contains("cases__project")) {
                     attribute = attr;
                     attribute_size = attr_size;
                 }
