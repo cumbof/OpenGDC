@@ -7,6 +7,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -755,15 +759,12 @@ public class MetadataHandler {
                     //else {
                     //stessoStripped_attribute_diversoValore = true;
                     //}
-
-
                 }
                 attr_list_mapping.put(attribute_mapping, value_mapping);
                 redundantValues.put(stripped_attribute_mapping+"-"+value_mapping.toLowerCase(), attr_list_mapping);
                 meta_map.remove(attribute_mapping);
             }
         }
-
 
         for (String attribute : meta_map.keySet()) {
             String[] attribute_split = attribute.split("__");

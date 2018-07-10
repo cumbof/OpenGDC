@@ -158,4 +158,16 @@ public class Settings {
         return ADDITIONAL_META_ATTRIBUTES;
     }
     
+    private static final String BIOSPECIMEN_YAML = "./appdata/meta/tcga_biospecimen.yaml";
+    public static String getBiospecimenYAML() {
+        if (DEBUG) return DEBUG_APPDATA+"meta/tcga_biospecimen.yaml";
+        return BIOSPECIMEN_YAML;
+    }
+    
+    private static final String CLINICAL_YAML = "./appdata/meta/tcga_clinical.yaml";
+    public static String getClinicalYAML() {
+        if (DEBUG) return DEBUG_APPDATA+"meta/tcga_clinical.yaml";
+        return CLINICAL_YAML;
+    }
+    
 }
