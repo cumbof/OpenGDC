@@ -501,17 +501,16 @@ public class MetadataHandler {
         /**
          * ***** opengdc_file_size ******
          */
-        String opengdc_file_size = "";
+        String opengdc_file_size = "null";
         values = new HashMap<>();
         URL url = null;
         try {
             url = new URL(exp_data_bed_url);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+            opengdc_file_size = String.valueOf(getFileSize(url));
+            if(opengdc_file_size.equals("0"))
+                opengdc_file_size = "";
+        } catch (Exception e) {
         }
-        opengdc_file_size = String.valueOf(getFileSize(url));
-        if(opengdc_file_size.equals("0"))
-            opengdc_file_size = "";
         values.put("value", opengdc_file_size);
         values.put("required", true);
         additional_attributes.put(attributes_prefix + category_separator + "opengdc_file_size", values);
@@ -739,30 +738,35 @@ public class MetadataHandler {
         HashMap<String, ArrayList<String>> mapping_file_attribute = YAMLreader.getMappingAttributes();
         for (String attribute_mapping : mapping_file_attribute.keySet()) {
             if(meta_map.containsKey(attribute_mapping)){
-                String[] attribute_split_mapping = attribute_mapping.split("__");
-                String stripped_attribute_mapping = attribute_split_mapping[attribute_split_mapping.length - 1];
-                String value_mapping = "";
+                ArrayList<String> list_attribute_forAllredundantGroup = new ArrayList<String>();
                 ArrayList<String> reduntant_values_mapping = mapping_file_attribute.get(attribute_mapping);
-                value_mapping = meta_map.get(attribute_mapping);
+                list_attribute_forAllredundantGroup.addAll(reduntant_values_mapping);
+                list_attribute_forAllredundantGroup.add(attribute_mapping);
 
-                HashMap<String, String> attr_list_mapping = new HashMap<>();
-                if (redundantValues.containsKey(stripped_attribute_mapping+"-"+value_mapping.toLowerCase())) {
-                    attr_list_mapping = redundantValues.get(stripped_attribute_mapping+"-"+value_mapping.toLowerCase());
+                HashMap<String, String> attr_list_mapping_fixed = new HashMap<>();
+                for (String attr : list_attribute_forAllredundantGroup) {
+                    String value = null;
+                    if(meta_map.containsKey(attr))
+                        value = meta_map.get(attr);
+                    if(value!=null)
+                        attr_list_mapping_fixed.put(attr, value);
                 }
-                for (String attr : reduntant_values_mapping) {
+
+                for (String attr : attr_list_mapping_fixed.keySet()) {
+                    String[] attribute_split_mapping = attr.split("__");
+                    String stripped_attribute_mapping = attribute_split_mapping[attribute_split_mapping.length - 1];
                     String value_attr = "";
-                    if(meta_map.containsKey(attr)){
-                        value_attr = meta_map.get(attr);
-                        meta_map.remove(attr);
-                        attr_list_mapping.put(attr, value_attr);                    
+
+                    HashMap<String, String> attr_list_mapping = new HashMap<>();
+                    value_attr = attr_list_mapping_fixed.get(attr);
+                    meta_map.remove(attr);
+                    if (redundantValues.containsKey(stripped_attribute_mapping+"-"+value_attr.toLowerCase())) {
+                        attr_list_mapping = redundantValues.get(stripped_attribute_mapping+"-"+value_attr.toLowerCase());
                     }
-                    //else {
-                    //stessoStripped_attribute_diversoValore = true;
-                    //}
+                    attr_list_mapping.putAll(attr_list_mapping_fixed);
+
+                    redundantValues.put(stripped_attribute_mapping+"-"+value_attr.toLowerCase(), attr_list_mapping);
                 }
-                attr_list_mapping.put(attribute_mapping, value_mapping);
-                redundantValues.put(stripped_attribute_mapping+"-"+value_mapping.toLowerCase(), attr_list_mapping);
-                meta_map.remove(attribute_mapping);
             }
         }
 
@@ -886,6 +890,43 @@ public class MetadataHandler {
         }
     }
 
+    public static HashMap<String, String> renameAttributes(HashMap<String, String> final_map) {
+        HashMap<String,String> map = new HashMap<String,String>();
+        for (String key: final_map.keySet()) {
+            if(key.toLowerCase().startsWith("gdc__analysis__input_files__"))
+                map.put(key.toLowerCase().replaceAll("gdc__analysis__input_files__", "gdc__input_files__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__samples__portions__analytes__aliquots__center__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__samples__portions__analytes__aliquots__center__", "gdc__center__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__samples__portions__analytes__aliquots__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__samples__portions__analytes__aliquots__", "gdc__aliquots__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__samples__portions__analytes__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__samples__portions__analytes__", "gdc__analytes__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__samples__portions__slides__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__samples__portions__slides__", "gdc__slides__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__samples__portions__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__samples__portions__", "gdc__portions__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__samples__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__samples__", "gdc__samples__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__project__program__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__project__program__", "gdc__program__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__project__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__project__", "gdc__project__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__diagnoses__treatments__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__diagnoses__treatments__", "gdc__treatments__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__diagnoses__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__diagnoses__", "gdc__diagnoses__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__demographic__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__demographic__", "gdc__demographic__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__tissue_source_site__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__tissue_source_site__", "gdc__tissue_source_site__"), final_map.get(key));
+            else if(key.toLowerCase().startsWith("gdc__cases__"))
+                map.put(key.toLowerCase().replaceAll("gdc__cases__", "gdc__"), final_map.get(key));
+            else 
+                map.put(key, final_map.get(key));
+        }
+        return map;
+    }
+    
     /*public static void main(String[] args) {
         System.err.println("Biospecimen sample");
         String biospecimen_xml_path = "/Users/fabio/Downloads/test_gdc_download/ACC-biospecimen/nationwidechildrens.org_biospecimen.TCGA-OR-A5J1.xml";
