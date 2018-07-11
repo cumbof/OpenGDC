@@ -6,10 +6,13 @@ import opengdc.reader.MaskedSomaticMutationReader;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.util.FormatUtils;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -26,22 +29,24 @@ public class MaskedSomaticMutationParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
-        // if the output folder is not empty, delete the most recent file
-        File folder = new File(outPath);
-        File[] files_out = folder.listFiles();
-        if (files_out.length != 0) {
-           File last_modified =files_out[0];
-           long time = 0;
-           for (File file : files_out) {
-              if (file.getName().endsWith(this.getFormat())) {
-                 if (file.lastModified() > time) {  
-                    time = file.lastModified();
-                    last_modified = file;
-                 }
-              }
-           }
-           System.err.println("File deleted: " + last_modified.getName());
-           last_modified.delete();
+        if (this.isRecoveryEnabled()) {
+            // if the output folder is not empty, delete the most recent file
+            File folder = new File(outPath);
+            File[] files_out = folder.listFiles();
+            if (files_out.length != 0) {
+               File last_modified =files_out[0];
+               long time = 0;
+               for (File file : files_out) {
+                  if (file.getName().endsWith(this.getFormat())) {
+                     if (file.lastModified() > time) {  
+                        time = file.lastModified();
+                        last_modified = file;
+                     }
+                  }
+               }
+               System.err.println("File deleted: " + last_modified.getName());
+               last_modified.delete();
+            }
         }
         
         HashMap<String, String> error_inputFile2outputFile = new HashMap<>();
@@ -49,14 +54,17 @@ public class MaskedSomaticMutationParser extends BioParser {
         HashMap<String, Object> uuid_dataMap = new HashMap<>();
         
         File[] files = (new File(inPath)).listFiles();
+        HashMap<String, HashSet<String>> fileUUID2aliquotUUIDs = new HashMap<>();
         for (File f: files) {
             if (f.isFile()) {
+                String file_uuid = f.getName().split("_")[0];
                 String extension = FSUtils.getFileExtension(f);
                 if (getAcceptedInputFileFormats().contains(extension)) {
                     System.err.println("Processing " + f.getName());
                     GUI.appendLog(this.getLogger(), "Processing " + f.getName() + "\n");
                     
                     HashSet<String> aliquot_uuids = MaskedSomaticMutationReader.getUUIDsFromMaf(f.getAbsolutePath());
+                    fileUUID2aliquotUUIDs.put(file_uuid, aliquot_uuids);
                     for (String aliquot_uuid: aliquot_uuids) {
                         HashMap<Integer, HashMap<String, String>> uuidData = MaskedSomaticMutationReader.getUUIDDataFromMaf(f.getAbsolutePath(), aliquot_uuid);
                         //System.err.println("data: "+uuidData.size());
@@ -243,6 +251,19 @@ public class MaskedSomaticMutationParser extends BioParser {
                     HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMapChr = (HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>>)uuid_dataMap.get(aliquot_uuid);
                     this.printData((new File(filesPathConverted.get(aliquot_uuid))).toPath(), dataMapChr, this.getFormat(), getHeader());
                     Files.write((new File(filesPathConverted.get(aliquot_uuid))).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                    
+                    if (this.isUpdateTableEnabled()) {
+                        MessageDigest md5digest = MessageDigest.getInstance("MD5");
+                        String file_uuid = null;
+                        for (String f_uuid: fileUUID2aliquotUUIDs.keySet()) {
+                            if (fileUUID2aliquotUUIDs.get(f_uuid).contains(aliquot_uuid)) {
+                                file_uuid = f_uuid;
+                                break;
+                            }
+                        }
+                        String updatetable_row = aliquot_uuid + "\t" + file_uuid + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(md5digest, new File(filesPathConverted.get(aliquot_uuid))) + "\t" + String.valueOf(FileUtils.sizeOf(new File(filesPathConverted.get(aliquot_uuid))));
+                        Files.write((new File(this.getUpdateTablePath())).toPath(), (updatetable_row).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                    }
                 }
                 catch (Exception e) {
                     e.printStackTrace();

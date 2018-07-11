@@ -501,16 +501,13 @@ public class MetadataHandler {
         /**
          * ***** opengdc_file_size ******
          */
-        String opengdc_file_size = "null";
         values = new HashMap<>();
-        URL url = null;
+        HashMap<String, String> dataType2FolderName = GDCData.getGDCData2FTPFolderName();
+        URL filesinfo_url_converted = null;
         try {
-            url = new URL(exp_data_bed_url);
-            opengdc_file_size = String.valueOf(getFileSize(url));
-            if(opengdc_file_size.equals("0"))
-                opengdc_file_size = "";
-        } catch (Exception e) {
-        }
+            filesinfo_url_converted = new URL(Settings.getUpdateTableURL(program, disease.toLowerCase(), dataType2FolderName.get(dataType), false));
+        } catch (Exception e) {}
+        String opengdc_file_size = UpdateGDCData.getUpdateTableAttribute(program.toLowerCase(), disease.toLowerCase(), dataType2FolderName.get(dataType), filesinfo_url_converted, aliquot_uuid.trim().toLowerCase(), "file_size", false);
         values.put("value", opengdc_file_size);
         values.put("required", true);
         additional_attributes.put(attributes_prefix + category_separator + "opengdc_file_size", values);
@@ -544,11 +541,33 @@ public class MetadataHandler {
         values.put("value", Settings.getOpenGDCFTPRepoProgram(program, false) + disease.trim().toLowerCase() + "/" + GDCData.getGDCData2FTPFolderName().get(dataType.trim().toLowerCase()) + "/" + aliquot_uuid.trim().toLowerCase() + "-" + suffix_id + "." + Settings.getOpenGDCFTPConvertedDataFormat() + "." + format);
         values.put("required", true);
         additional_attributes.put(attributes_prefix + category_separator + "exp_metadata_url", values);
+        
+        /**
+         * ***** genome_built ******
+         */
+        values = new HashMap<>();
+        values.put("value", "GRCh38");
+        values.put("required", true);
+        additional_attributes.put(attributes_prefix + category_separator + "genome_built", values);
+        
+        /**
+         * ***** opengdc_download_date ******
+         */
+        values = new HashMap<>();
+        String file_uuid = UpdateGDCData.getUpdateTableAttribute(program.toLowerCase(), disease.toLowerCase(), dataType2FolderName.get(dataType), filesinfo_url_converted, aliquot_uuid.trim().toLowerCase(), "file_uuid", false);
+        URL filesinfo_url_original = null;
+        try {
+            filesinfo_url_original = new URL(Settings.getUpdateTableURL(program, disease.toLowerCase(), dataType2FolderName.get(dataType), true));
+        } catch (Exception e) {}
+        String opengdc_download_date = UpdateGDCData.getUpdateTableAttribute(program.toLowerCase(), disease.toLowerCase(), dataType2FolderName.get(dataType), filesinfo_url_original, file_uuid.trim().toLowerCase(), "downloaded_datetime", true);
+        values.put("value", opengdc_download_date);
+        values.put("required", true);
+        additional_attributes.put(attributes_prefix + category_separator + "opengdc_download_date", values);
 
         return additional_attributes;
     }
 
-    private static int getFileSize(URL url) {
+    /*private static int getFileSize(URL url) {
         URLConnection conn = null;
         try {
             conn = url.openConnection();
@@ -564,7 +583,7 @@ public class MetadataHandler {
                 ((HttpURLConnection)conn).disconnect();
             }
         }
-    }
+    }*/
 
     public static HashMap<String, HashMap<String, Boolean>> getAdditionalAttributes(String endpoint) {
         HashMap<String, HashMap<String, Boolean>> additionalAttributes = new HashMap<>();

@@ -30,22 +30,24 @@ public class MetadataParserXML extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
-        // if the output folder is not empty, delete the most recent file
-        File folder = new File(outPath);
-        File[] files_out = folder.listFiles();
-        if (files_out.length != 0) {
-           File last_modified =files_out[0];
-           long time = 0;
-           for (File file : files_out) {
-              if (file.getName().endsWith(this.getFormat())) {
-                 if (file.lastModified() > time) {  
-                    time = file.lastModified();
-                    last_modified = file;
-                 }
-              }
-           }
-           System.err.println("File deleted: " + last_modified.getName());
-           last_modified.delete();
+        if (this.isRecoveryEnabled()) {
+            // if the output folder is not empty, delete the most recent file
+            File folder = new File(outPath);
+            File[] files_out = folder.listFiles();
+            if (files_out.length != 0) {
+               File last_modified =files_out[0];
+               long time = 0;
+               for (File file : files_out) {
+                  if (file.getName().endsWith(this.getFormat())) {
+                     if (file.lastModified() > time) {  
+                        time = file.lastModified();
+                        last_modified = file;
+                     }
+                  }
+               }
+               System.err.println("File deleted: " + last_modified.getName());
+               last_modified.delete();
+            }
         }
         
         HashMap<String, HashMap<String, String>> clinicalBigMap = new HashMap<>();
@@ -357,7 +359,7 @@ public class MetadataParserXML extends BioParser {
                                                 String missed_attributes_list = "";
                                                 for (String ma: missing_required_attributes)
                                                     missed_attributes_list += ma+", ";
-                                                manually_curated.put("manually_curated__audit_warning", "missed the following required metadata: ["+missed_attributes_list.substring(0, missed_attributes_list.length()-2)+"]");
+                                                manually_curated.put("manually_curated__audit_warning", "["+missed_attributes_list.substring(0, missed_attributes_list.length()-2)+"]");
                                             }
                                             
                                             //if (!manually_curated_data_type.equals("")) {
@@ -373,6 +375,7 @@ public class MetadataParserXML extends BioParser {
                                             // remove redundant attributes
                                             HashMap<String, HashMap<String, String>> redundant_map = MetadataHandler.detectRedundantMetadata(bigMap);
                                             HashMap<String, String> final_map = MetadataHandler.filterOutRedundantMetadata(redundant_map, "tcga");
+                                            final_map = MetadataHandler.renameAttributes(final_map);
                                             ArrayList<String> final_map_attributes_sorted = new ArrayList<>(final_map.keySet());
                                             Collections.sort(final_map_attributes_sorted);
                                             
@@ -380,7 +383,7 @@ public class MetadataParserXML extends BioParser {
                                             FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
                                             PrintStream out = new PrintStream(fos);
                                             for (String attr: final_map_attributes_sorted)
-                                                out.println(attr + "\t" + final_map.get(attr));                                            
+                                                out.println(attr + "\t" + final_map.get(attr));
                                             out.close();
                                             fos.close();
                                         }

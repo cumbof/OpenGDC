@@ -8,7 +8,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +21,7 @@ import opengdc.integration.NCBI;
 import opengdc.util.FSUtils;
 import opengdc.util.FormatUtils;
 import opengdc.util.GDCQuery;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -35,22 +38,24 @@ public class MethylationBetaValueParser extends BioParser {
         if (acceptedFiles == 0)
             return 1;
         
-        // if the output folder is not empty, delete the most recent file
-        File folder = new File(outPath);
-        File[] files_out = folder.listFiles();
-        if (files_out.length != 0) {
-           File last_modified =files_out[0];
-           long time = 0;
-           for (File file : files_out) {
-              if (file.getName().endsWith(this.getFormat())) {
-                 if (file.lastModified() > time) {  
-                    time = file.lastModified();
-                    last_modified = file;
-                 }
-              }
-           }
-           System.err.println("File deleted: " + last_modified.getName());
-           last_modified.delete();
+        if (this.isRecoveryEnabled()) {
+            // if the output folder is not empty, delete the most recent file
+            File folder = new File(outPath);
+            File[] files_out = folder.listFiles();
+            if (files_out.length != 0) {
+               File last_modified =files_out[0];
+               long time = 0;
+               for (File file : files_out) {
+                  if (file.getName().endsWith(this.getFormat())) {
+                     if (file.lastModified() > time) {  
+                        time = file.lastModified();
+                        last_modified = file;
+                     }
+                  }
+               }
+               System.err.println("File deleted: " + last_modified.getName());
+               last_modified.delete();
+            }
         }
 
         HashMap<String, String> error_inputFile2outputFile = new HashMap<>();
@@ -211,6 +216,12 @@ public class MethylationBetaValueParser extends BioParser {
 
                                 Files.write((new File(filePath)).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 filesPathConverted.add(filePath);
+                                
+                                if (this.isUpdateTableEnabled()) {
+                                    MessageDigest md5digest = MessageDigest.getInstance("MD5");
+                                    String updatetable_row = aliquot_uuid + "\t" + file_uuid + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(md5digest, f) + "\t" + String.valueOf(FileUtils.sizeOf(f));
+                                    Files.write((new File(this.getUpdateTablePath())).toPath(), (updatetable_row).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                }
                             }
                             catch (Exception e) {
                                 error_inputFile2outputFile.put(f.getAbsolutePath(), filePath);

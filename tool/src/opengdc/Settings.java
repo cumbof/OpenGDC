@@ -10,9 +10,13 @@ public class Settings {
     
     // debug flag
     private static final boolean DEBUG = true;
-    
     public static boolean isDebug() {
         return DEBUG;
+    }
+    
+    private static final int UPDATE_DAYS = 30;
+    public static int getUpdateDays() {
+        return UPDATE_DAYS;
     }
     
     // debug references local
@@ -168,6 +172,15 @@ public class Settings {
     public static String getClinicalYAML() {
         if (DEBUG) return DEBUG_APPDATA+"meta/tcga_clinical.yaml";
         return CLINICAL_YAML;
+    }
+    
+    private static final String UPDATE_TABLE_NAME = "updatetable.txt";
+    public static String getUpdateTableName() {
+        return UPDATE_TABLE_NAME;
+    }
+    
+    public static String getUpdateTableURL(String program, String disease, String dataType, boolean original) {
+        return getOpenGDCFTPRepoProgram(program, original) + disease.trim().toLowerCase() + "/" + dataType + "/" + getUpdateTableName();
     }
     
 }

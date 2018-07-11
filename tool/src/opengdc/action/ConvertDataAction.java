@@ -30,6 +30,17 @@ public class ConvertDataAction extends Action {
         String disease = args[2];
         String dataType = args[3];
         String format = args[4];
+        boolean enableRecoveryProcedure = true;
+        boolean enableUpdateTable = false;
+        String updatetable_path = null;
+        try {
+            if (args[5].trim().toLowerCase().equals("false"))
+                enableRecoveryProcedure = false;
+            if (args[6].trim().toLowerCase().equals("true"))
+                enableUpdateTable = true;
+            updatetable_path = args[7];
+        }
+        catch (Exception e) {}
         String input_path = Settings.getInputGDCFolder();
         String output_path = Settings.getOutputConvertedFolder();
         
@@ -93,6 +104,9 @@ public class ConvertDataAction extends Action {
         int exit_code = -1;
         
         if (parser != null) {
+            parser.enableRecovery(enableRecoveryProcedure);
+            parser.enableUpdateTable(enableUpdateTable);
+            parser.setUpdateTablePath(updatetable_path);
             parser.setFormat(format.toLowerCase());
             parser.setLogger(logPane);
             exit_code = parser.convert(program, disease, dataType, input_path, output_path);

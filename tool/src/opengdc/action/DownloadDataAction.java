@@ -18,7 +18,7 @@ import javax.swing.JTextPane;
  */
 public class DownloadDataAction extends Action {
     
-    private JTextPane logPane = null;
+    private static JTextPane logPane = null;
 
     @Override
     public void execute(String[] args) {
@@ -58,56 +58,59 @@ public class DownloadDataAction extends Action {
         // TODO activate progress bar
         
         /* DOWNLOAD (AND EXTRACT (AND REMOVE)) FILE BY FILE */
-        for (String uuid: dataMap.keySet()) {
-            // download data
-            String fileName = uuid + "_" + dataMap.get(uuid).get("file_name");
-            File data_file = new File(gdc_path + "/" + fileName);
-            if (!data_file.exists()) {
-                for (String s: dataMap.get(uuid).keySet())
-                    System.err.println(s + "\t" + dataMap.get(uuid).get(s));
+        for (String uuid: dataMap.keySet())
+            downloadSingleData(uuid, dataMap, gdc_path, autoextract, autoremove);
+    }
+    
+    public static void downloadSingleData(String uuid, HashMap<String, HashMap<String, String>> dataMap, String gdc_path, boolean autoextract, boolean autoremove) {
+        // download data
+        String fileName = uuid + "_" + dataMap.get(uuid).get("file_name");
+        File data_file = new File(gdc_path + "/" + fileName);
+        if (!data_file.exists()) {
+            for (String s: dataMap.get(uuid).keySet())
+                System.err.println(s + "\t" + dataMap.get(uuid).get(s));
 
-                GDCQuery.downloadFile(uuid, gdc_path, fileName, false, 0, logPane);
-                if (autoextract) {
-                    HashSet<String> uncompressed_folders_path = new HashSet<>();
-                    HashSet<String> experiments_path = new HashSet<>();
-                    if (data_file.exists()) {
-                        String destDirPath = gdc_path + "/" + data_file.getName() + "_/";
-                        File destDir = new File(destDirPath);
+            GDCQuery.downloadFile(uuid, gdc_path, fileName, false, 0, logPane);
+            if (autoextract) {
+                HashSet<String> uncompressed_folders_path = new HashSet<>();
+                HashSet<String> experiments_path = new HashSet<>();
+                if (data_file.exists()) {
+                    String destDirPath = gdc_path + "/" + data_file.getName() + "_/";
+                    File destDir = new File(destDirPath);
 
-                        // extract data
-                        boolean uncompressed = DataExtractionTool.uncompressData(data_file, destDir, false, true);
-                        //System.out.println("uncompressed: " + uncompressed);
-                        uncompressed_folders_path.addAll(DataExtractionTool.getUncompressedFoldersPathList());
-                        experiments_path.addAll(DataExtractionTool.getExperimentsPathList());
+                    // extract data
+                    boolean uncompressed = DataExtractionTool.uncompressData(data_file, destDir, false, true);
+                    //System.out.println("uncompressed: " + uncompressed);
+                    uncompressed_folders_path.addAll(DataExtractionTool.getUncompressedFoldersPathList());
+                    experiments_path.addAll(DataExtractionTool.getExperimentsPathList());
 
-                        // copy experiments to the gdc_path folder
-                        for (String exp: experiments_path) {
-                            try {
-                                File expFile = new File(exp);
-                                File newExpFile = new File(gdc_path + expFile.getName());
-                                Files.move(expFile.toPath(), newExpFile.toPath(), REPLACE_EXISTING);
-                            }
-                            catch (Exception e) {
-                                //e.printStackTrace();
-                            }
+                    // copy experiments to the gdc_path folder
+                    for (String exp: experiments_path) {
+                        try {
+                            File expFile = new File(exp);
+                            File newExpFile = new File(gdc_path + expFile.getName());
+                            Files.move(expFile.toPath(), newExpFile.toPath(), REPLACE_EXISTING);
                         }
-
-                        // remove other files and folders
-                        for (String dir: uncompressed_folders_path) {
-                            File dirFolder = new File(dir);
-                            FSUtils.deleteDir(dirFolder);
+                        catch (Exception e) {
+                            //e.printStackTrace();
                         }
+                    }
 
-                        // remove original data
-                        if (uncompressed && autoremove) {
-                            data_file.delete();
-                        }
+                    // remove other files and folders
+                    for (String dir: uncompressed_folders_path) {
+                        File dirFolder = new File(dir);
+                        FSUtils.deleteDir(dirFolder);
+                    }
+
+                    // remove original data
+                    if (uncompressed && autoremove) {
+                        data_file.delete();
                     }
                 }
             }
-            else
-                System.err.println("Skipping " + fileName + " [already exists]");
         }
+        else
+            System.err.println("Skipping " + fileName + " [already exists]");
     }
     
 }

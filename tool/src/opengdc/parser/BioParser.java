@@ -20,6 +20,36 @@ import opengdc.util.FormatUtils;
  */
 public abstract class BioParser {
     
+    private boolean updatetable_bool = false;
+    
+    public boolean isUpdateTableEnabled() {
+        return updatetable_bool;
+    }
+    
+    public void enableUpdateTable(boolean update) {
+        updatetable_bool = update;
+    }
+    
+    private String updatetable_path = null;
+    
+    public String getUpdateTablePath() {
+        return updatetable_path;
+    }
+    
+    public void setUpdateTablePath(String path) {
+        updatetable_path = path;
+    }
+    
+    private boolean recovery = true;
+    
+    public boolean isRecoveryEnabled() {
+        return recovery;
+    }
+    
+    public void enableRecovery(boolean enabled) {
+        recovery = enabled;
+    }
+    
     public HashSet<String> acceptedInputFileFormats = new HashSet<>();
     
     public JTextPane logPane = null;
