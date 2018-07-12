@@ -60,8 +60,11 @@ public class UpdateTask extends TimerTask {
                 for (String dataType: dataTypes) {
                     try {
                         String original_local_data_dir = ftp_root + "original" + "/" + program.toLowerCase() + "/" + dataType2DirName.get(tumor.toLowerCase()) + "/"; 
+                        (new File(original_local_data_dir)).mkdirs();
                         String converted_local_data_dir = ftp_root + "bed" + "/" + program.toLowerCase() + "/" + dataType2DirName.get(tumor.toLowerCase()) + "/"; 
+                        (new File(converted_local_data_dir)).mkdirs();
                         String downloadTmpDirPath = Settings.getTmpDir() + "_download/";
+                        (new File(downloadTmpDirPath)).mkdirs();
                         String updatetable_original_path = original_local_data_dir + Settings.getUpdateTableName();
                         if (!(new File(updatetable_original_path)).exists())
                             (new File(updatetable_original_path)).createNewFile();
