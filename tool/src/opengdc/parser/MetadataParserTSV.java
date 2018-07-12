@@ -3,14 +3,19 @@ package opengdc.parser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
 import opengdc.util.FSUtils;
 import opengdc.util.GDCQuery;
 import opengdc.util.MetadataHandler;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -51,6 +56,7 @@ public class MetadataParserTSV extends BioParser {
         
         HashMap<String, HashMap<String, String>> clinicalBigMap = new HashMap<>();
         HashMap<String, HashMap<String, String>> biospecimenBigMap = new HashMap<>();
+        HashMap<String, String> aliquotUUID2fileUUID = new HashMap<>();
         
         HashSet<String> dataTypes = new HashSet<>();
         dataTypes.add("Gene Expression Quantification");
@@ -66,6 +72,7 @@ public class MetadataParserTSV extends BioParser {
             if (f.isFile()) {
                 String extension = FSUtils.getFileExtension(f);
                 if (getAcceptedInputFileFormats().contains(extension)) {
+                    String file_uuid = f.getName().split("_")[0];
                     System.err.println("Processing " + f.getName());
                     GUI.appendLog(this.getLogger(), "Processing " + f.getName() + "\n");
                     
@@ -77,6 +84,8 @@ public class MetadataParserTSV extends BioParser {
                     else if (f.getName().toLowerCase().contains("biospecimen")) {                        
                         HashMap<String, HashMap<String, String>> metadata_from_tsv = MetadataHandler.getTSVMap(f.getAbsolutePath(), "aliquot_id");
                         biospecimenBigMap.putAll(metadata_from_tsv);
+                        for (String aliquot_uuid: metadata_from_tsv.keySet())
+                            aliquotUUID2fileUUID.put(aliquot_uuid, file_uuid);
                     }
                 }
             }
@@ -101,8 +110,6 @@ public class MetadataParserTSV extends BioParser {
                         ArrayList<String> additional_attributes_sorted = new ArrayList<>(additional_attributes.keySet());
                         Collections.sort(additional_attributes_sorted);
                         for (String metakey: additional_attributes_sorted) {
-                            
-                            
                             ArrayList<HashMap<String, ArrayList<Object>>> files_info = GDCQuery.retrieveExpInfoFromAttribute("files", "cases.samples.portions.analytes.aliquots.aliquot_id", aliquot_uuid.toLowerCase(), dataTypes, new HashSet<>(additional_attributes.get(metakey).keySet()), 0, 0, null);
                             ArrayList<HashMap<String, String>> aggregated_files_info = MetadataHandler.aggregateSameDataTypeInfo(files_info, MetadataHandler.getAggregatedAdditionalAttributes());
 
@@ -167,7 +174,7 @@ public class MetadataParserTSV extends BioParser {
                                     // create file if it does not exist
                                     File out_file = new File(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
                                     if (!out_file.exists()) {                                    
-                                        FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
+                                        FileOutputStream fos = new FileOutputStream(out_file);
                                         PrintStream out = new PrintStream(fos);
 
                                         // biospecimen
@@ -204,6 +211,12 @@ public class MetadataParserTSV extends BioParser {
 
                                         out.close();
                                         fos.close();
+                                        
+                                        if (this.isUpdateTableEnabled()) {
+                                            MessageDigest md5digest = MessageDigest.getInstance("MD5");
+                                            String updatetable_row = aliquot_uuid + "\t" + aliquotUUID2fileUUID.get(aliquot_uuid) + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(md5digest, out_file) + "\t" + String.valueOf(FileUtils.sizeOf(out_file));
+                                            Files.write((new File(this.getUpdateTablePath())).toPath(), (updatetable_row).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                        }
                                     }
                                 }
                             }

@@ -3,14 +3,19 @@ package opengdc.parser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
 import opengdc.util.FSUtils;
 import opengdc.util.GDCQuery;
 import opengdc.util.MetadataHandler;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -50,7 +55,8 @@ public class MetadataParserXLSX extends BioParser {
 
         HashMap<String, HashMap<String, String>> clinicalBigMap = new HashMap<>();
         HashMap<String, HashMap<String, String>> biospecimenBigMap = new HashMap<>();
-
+        HashMap<String, String> usi2fileUUID = new HashMap<>();
+        
         HashSet<String> dataTypes = new HashSet<>();
         dataTypes.add("Gene Expression Quantification");
         dataTypes.add("Copy Number Segment");
@@ -65,6 +71,7 @@ public class MetadataParserXLSX extends BioParser {
             if (f.isFile()) {
                 String extension = FSUtils.getFileExtension(f);
                 if (getAcceptedInputFileFormats().contains(extension)) {
+                    String file_uuid = f.getName().split("_")[0];
                     System.err.println("Processing " + f.getName());
                     GUI.appendLog(this.getLogger(), "Processing " + f.getName() + "\n");
 
@@ -75,6 +82,7 @@ public class MetadataParserXLSX extends BioParser {
                             if (clinicalBigMap.containsKey(key))
                                 values.putAll(clinicalBigMap.get(key));
                             clinicalBigMap.put(key, values);
+                            usi2fileUUID.put(key, file_uuid);
                         }
                     }
                     else if (f.getName().toLowerCase().contains("samplematrix")) {                        
@@ -84,6 +92,7 @@ public class MetadataParserXLSX extends BioParser {
                             if (biospecimenBigMap.containsKey(key))
                                 values.putAll(biospecimenBigMap.get(key));
                             biospecimenBigMap.put(key, values);
+                            usi2fileUUID.put(key, file_uuid);
                         }
                     }
                 }
@@ -118,7 +127,7 @@ public class MetadataParserXLSX extends BioParser {
                             Collections.sort(additional_attributes_sorted);
                             
                             for (String metakey: additional_attributes_sorted) {
-                                /** just to retrieve aliquot uuid **/
+                                /** retrieve aliquot uuid **/
                                 HashMap<String, Boolean> additional_attributes_files_tmp = additional_attributes_files.get(metakey);
                                 HashMap<String, Boolean> additional_attributes_cases_tmp = additional_attributes_cases.get(metakey);
                                 additional_attributes_files_tmp.put("cases.samples.portions.analytes.aliquots.aliquot_id", false);
@@ -288,7 +297,7 @@ public class MetadataParserXLSX extends BioParser {
                                                 // create file if it does not exist
                                                 File out_file = new File(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
                                                 if (!out_file.exists()) {
-                                                    FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
+                                                    FileOutputStream fos = new FileOutputStream(out_file);
                                                     PrintStream out = new PrintStream(fos);
 
                                                     // biospecimen
@@ -333,6 +342,12 @@ public class MetadataParserXLSX extends BioParser {
 
                                                     out.close();
                                                     fos.close();
+                                                    
+                                                    if (this.isUpdateTableEnabled()) {
+                                                        MessageDigest md5digest = MessageDigest.getInstance("MD5");                                                        
+                                                        String updatetable_row = aliquot_uuid + "\t" + usi2fileUUID.get(case_usi) + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(md5digest, out_file) + "\t" + String.valueOf(FileUtils.sizeOf(out_file));
+                                                        Files.write((new File(this.getUpdateTablePath())).toPath(), (updatetable_row).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                                    }
                                                 }
                                             }
                                         }

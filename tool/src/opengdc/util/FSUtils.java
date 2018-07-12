@@ -108,6 +108,29 @@ public class FSUtils {
         return sb.toString();
     }
     
+    public static boolean filePrefixExists(String suffixName, String folderPath) {
+        File folder = new File(folderPath);
+        if (folder.exists()) {
+            for (String fileName: folder.list()) {
+                if (fileName.endsWith(suffixName))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public static  void deleteFileWithPrefix(String filePrefix, String dir_path) {
+        File targetFile = null;
+        for (File file: (new File(dir_path)).listFiles()) {
+            if (file.getName().startsWith(filePrefix) && file.getName().toLowerCase().endsWith(".bed")) {
+                targetFile = file;
+                break;
+            }
+        }
+        if (targetFile != null)
+            targetFile.delete();
+    }
+    
     public static void main(String[] args) {
         String test = "clinical__cases__aliquot_id";
         System.err.println("Original String: " + test);

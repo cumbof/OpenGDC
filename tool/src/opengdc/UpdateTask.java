@@ -35,9 +35,11 @@ public class UpdateTask extends TimerTask {
 
     @Override
     public void run() {
+        System.out.println("----------------------------------------");
         System.out.println("Timer task started at: " + new Date());
         updateTask();
         System.out.println("Timer task finished at: " + new Date());
+        System.out.println("----------------------------------------");
     }
 
     private void updateTask() {
@@ -62,7 +64,7 @@ public class UpdateTask extends TimerTask {
                         String query_file_path = GDCQuery.query(tumor, dataType, 0);
                         HashMap<String, HashMap<String, String>> dataMap = GDCQuery.extractInfo(query_file_path);
                         for (String uuid: dataMap.keySet()) {
-                            if (!fileExists(uuid, original_local_data_dir)) {
+                            if (!FSUtils.filePrefixExists(uuid, original_local_data_dir)) {
                                 String aliquot_uuid = getAliquotUUID(uuid, dataType);
 
                                 String current_md5 = dataMap.get(uuid).get("md5sum");
@@ -71,10 +73,10 @@ public class UpdateTask extends TimerTask {
                                 //String current_file_id = dataMap.get(uuid).get("file_id");
                                 String current_file_size = dataMap.get(uuid).get("file_size");
 
-                                if (fileExists(aliquot_uuid, converted_local_data_dir)) {
+                                if (FSUtils.filePrefixExists(aliquot_uuid, converted_local_data_dir)) {
                                     String converted_file_uuid = updatetable_converted.get(aliquot_uuid).get("file_id");
-                                    deleteFile(aliquot_uuid, converted_local_data_dir);
-                                    deleteFile(converted_file_uuid, original_local_data_dir);
+                                    FSUtils.deleteFileWithPrefix(aliquot_uuid, converted_local_data_dir);
+                                    FSUtils.deleteFileWithPrefix(converted_file_uuid, original_local_data_dir);
                                     // create tmp download dir if it does not exist
                                     if (!(new File(downloadTmpDirPath)).exists())
                                         (new File(downloadTmpDirPath)).mkdir();
@@ -149,29 +151,6 @@ public class UpdateTask extends TimerTask {
                 }
             }
         }
-    }
-    
-    private boolean fileExists(String suffixName, String folderPath) {
-        File folder = new File(folderPath);
-        if (folder.exists()) {
-            for (String fileName: folder.list()) {
-                if (fileName.endsWith(suffixName))
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    private void deleteFile(String filePrefix, String dir_path) {
-        File targetFile = null;
-        for (File file: (new File(dir_path)).listFiles()) {
-            if (file.getName().startsWith(filePrefix) && file.getName().toLowerCase().endsWith(".bed")) {
-                targetFile = file;
-                break;
-            }
-        }
-        if (targetFile != null)
-            targetFile.delete();
     }
 
     private String getAliquotUUID(String file_uuid, String dataType) {

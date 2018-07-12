@@ -3,8 +3,12 @@ package opengdc.parser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import opengdc.GUI;
@@ -12,14 +16,13 @@ import opengdc.util.FSUtils;
 import opengdc.util.GDCQuery;
 import opengdc.util.MetadataHandler;
 import opengdc.util.XMLNode;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
  * @author fabio
  */
 public class MetadataParserXML extends BioParser {
-    
-    /** TCGA **/
     
     @Override
     public int convert(String program, String disease, String dataType, String inPath, String outPath) {
@@ -52,6 +55,7 @@ public class MetadataParserXML extends BioParser {
         
         HashMap<String, HashMap<String, String>> clinicalBigMap = new HashMap<>();
         HashMap<String, HashMap<String, String>> biospecimenBigMap = new HashMap<>();
+        HashMap<String, String> aliquotUUID2fileUUID = new HashMap<>();
         
         File[] files = (new File(inPath)).listFiles();
         for (File f: files) {
@@ -60,6 +64,7 @@ public class MetadataParserXML extends BioParser {
             if (f.isFile()) {
                 String extension = FSUtils.getFileExtension(f);
                 if (getAcceptedInputFileFormats().contains(extension)) {
+                    String file_uuid = f.getName().split("_")[0];
                     System.err.println("Processing " + f.getName());
                     GUI.appendLog(this.getLogger(), "Processing " + f.getName() + "\n");
                     
@@ -89,22 +94,24 @@ public class MetadataParserXML extends BioParser {
                         }
                         
                         if (!aliquot2attributes.isEmpty()) {
-                            for (String aliquot_uuid: aliquot2attributes.keySet())
+                            for (String aliquot_uuid: aliquot2attributes.keySet()) {
                                 biospecimenBigMap.put(aliquot_uuid, aliquot2attributes.get(aliquot_uuid));
+                                aliquotUUID2fileUUID.put(aliquot_uuid, file_uuid);
+                            }
                         }
                     }
                 }
             }
         }
         
-        ArrayList<String> skippedAliquots = convertProcedure(program, disease, dataType, outPath, clinicalBigMap, biospecimenBigMap, new ArrayList<>());
+        ArrayList<String> skippedAliquots = convertProcedure(program, disease, dataType, outPath, clinicalBigMap, biospecimenBigMap, new ArrayList<>(), aliquotUUID2fileUUID);
         if (!skippedAliquots.isEmpty())
-            convertProcedure(program, disease, dataType, outPath, clinicalBigMap, biospecimenBigMap, skippedAliquots);
+            convertProcedure(program, disease, dataType, outPath, clinicalBigMap, biospecimenBigMap, skippedAliquots, aliquotUUID2fileUUID);
         
         return 0;
     }
     
-    private ArrayList<String> convertProcedure(String program, String disease, String dataType, String outPath, HashMap<String, HashMap<String, String>> clinicalBigMap, HashMap<String, HashMap<String, String>> biospecimenBigMap, ArrayList<String> skippedAliquots) {
+    private ArrayList<String> convertProcedure(String program, String disease, String dataType, String outPath, HashMap<String, HashMap<String, String>> clinicalBigMap, HashMap<String, HashMap<String, String>> biospecimenBigMap, ArrayList<String> skippedAliquots, HashMap<String, String> aliquotUUID2fileUUID) {
         ArrayList<String> currentSkippedAliquots = new ArrayList<>();
         // merge clinical and biospecimen info (plus additional metadata)
         if (!biospecimenBigMap.isEmpty()) {
@@ -380,7 +387,7 @@ public class MetadataParserXML extends BioParser {
                                             Collections.sort(final_map_attributes_sorted);
                                             
                                             // print all
-                                            FileOutputStream fos = new FileOutputStream(outPath + aliquot_uuid.toLowerCase() + "-" + suffix_id + "." + this.getFormat());
+                                            FileOutputStream fos = new FileOutputStream(out_file);
                                             PrintStream out = new PrintStream(fos);
                                             for (String attr: final_map_attributes_sorted)
                                                 out.println(attr + "\t" + final_map.get(attr));
@@ -394,9 +401,17 @@ public class MetadataParserXML extends BioParser {
                         
                         // check for skipped aliquots
                         boolean aliquotNotFound = true;
-                        for (String aliquotFileName: (new File(outPath)).list()) {
-                            if (aliquotFileName.startsWith(aliquot_uuid))
+                        for (File aliquotFile: (new File(outPath)).listFiles()) {
+                            if (aliquotFile.getName().startsWith(aliquot_uuid)) {
                                 aliquotNotFound = false;
+                                
+                                if (this.isUpdateTableEnabled()) {
+                                    MessageDigest md5digest = MessageDigest.getInstance("MD5");
+                                    String updatetable_row = aliquot_uuid + "\t" + aliquotUUID2fileUUID.get(aliquot_uuid) + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(md5digest, aliquotFile) + "\t" + String.valueOf(FileUtils.sizeOf(aliquotFile));
+                                    Files.write((new File(this.getUpdateTablePath())).toPath(), (updatetable_row).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                                }
+                                break;
+                            }
                         }
                         if (aliquotNotFound)
                             currentSkippedAliquots.add(aliquot_uuid);                            
