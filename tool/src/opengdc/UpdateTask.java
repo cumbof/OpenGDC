@@ -59,9 +59,9 @@ public class UpdateTask extends TimerTask {
                 /*************************************************/
                 for (String dataType: dataTypes) {
                     try {
-                        String original_local_data_dir = ftp_root + "original" + "/" + program.toLowerCase() + "/" + dataType2DirName.get(tumor.toLowerCase()) + "/"; 
+                        String original_local_data_dir = ftp_root + "original" + "/" + program.toLowerCase() + "/" + tumor.toLowerCase() + "/" + dataType2DirName.get(dataType.toLowerCase()) + "/"; 
                         (new File(original_local_data_dir)).mkdirs();
-                        String converted_local_data_dir = ftp_root + "bed" + "/" + program.toLowerCase() + "/" + dataType2DirName.get(tumor.toLowerCase()) + "/"; 
+                        String converted_local_data_dir = ftp_root + "bed" + "/" + program.toLowerCase() + "/" + tumor.toLowerCase() + "/" + dataType2DirName.get(dataType.toLowerCase()) + "/"; 
                         (new File(converted_local_data_dir)).mkdirs();
                         String downloadTmpDirPath = Settings.getTmpDir() + "_download/";
                         (new File(downloadTmpDirPath)).mkdirs();
