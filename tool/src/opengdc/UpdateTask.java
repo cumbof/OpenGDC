@@ -47,7 +47,17 @@ public class UpdateTask extends TimerTask {
         HashMap<String, String> dataType2DirName = GDCData.getGDCData2FTPFolderName();
         for (String program: GDCDataMap.keySet()) {
             for (String tumor: GDCDataMap.get(program).keySet()) {
-                for (String dataType: GDCDataMap.get(program).get(tumor)) {
+                /*************************************************/
+                ArrayList<String> dataTypes = new ArrayList<>(GDCDataMap.get(program).get(tumor));
+                // rename clinical and biospecimen supplements
+                if (dataTypes.contains("Clinical Supplement"))
+                    dataTypes.remove("Clinical Supplement");
+                if (dataTypes.contains("Biospecimen Supplement"))
+                    dataTypes.remove("Biospecimen Supplement");
+                // put clinical and biospecimen supplements at the end of the set
+                dataTypes.add("Clinical and Biospecimen Supplements");
+                /*************************************************/
+                for (String dataType: dataTypes) {
                     try {
                         String original_local_data_dir = ftp_root + "original" + "/" + program.toLowerCase() + "/" + dataType2DirName.get(tumor.toLowerCase()) + "/"; 
                         String converted_local_data_dir = ftp_root + "bed" + "/" + program.toLowerCase() + "/" + dataType2DirName.get(tumor.toLowerCase()) + "/"; 
