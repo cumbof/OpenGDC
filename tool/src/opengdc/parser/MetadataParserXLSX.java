@@ -345,7 +345,7 @@ public class MetadataParserXLSX extends BioParser {
                                                     
                                                     if (this.isUpdateTableEnabled()) {
                                                         MessageDigest md5digest = MessageDigest.getInstance("MD5");                                                        
-                                                        String updatetable_row = aliquot_uuid + "\t" + usi2fileUUID.get(case_usi) + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(md5digest, out_file) + "\t" + String.valueOf(FileUtils.sizeOf(out_file));
+                                                        String updatetable_row = aliquot_uuid + "\t" + usi2fileUUID.get(case_usi) + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(md5digest, out_file) + "\t" + String.valueOf(FileUtils.sizeOf(out_file) + "\n");
                                                         Files.write((new File(this.getUpdateTablePath())).toPath(), (updatetable_row).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                                     }
                                                 }

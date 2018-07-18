@@ -261,7 +261,7 @@ public class MaskedSomaticMutationParser extends BioParser {
                                 break;
                             }
                         }
-                        String updatetable_row = aliquot_uuid + "\t" + file_uuid + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(md5digest, new File(filesPathConverted.get(aliquot_uuid))) + "\t" + String.valueOf(FileUtils.sizeOf(new File(filesPathConverted.get(aliquot_uuid))));
+                        String updatetable_row = aliquot_uuid + "\t" + file_uuid + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(md5digest, new File(filesPathConverted.get(aliquot_uuid))) + "\t" + String.valueOf(FileUtils.sizeOf(new File(filesPathConverted.get(aliquot_uuid))) + "\n");
                         Files.write((new File(this.getUpdateTablePath())).toPath(), (updatetable_row).getBytes("UTF-8"), StandardOpenOption.APPEND);
                     }
                 }

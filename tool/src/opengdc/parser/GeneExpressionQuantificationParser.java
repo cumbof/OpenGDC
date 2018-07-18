@@ -251,7 +251,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                     
                                     if (this.isUpdateTableEnabled()) {
                                         MessageDigest md5digest = MessageDigest.getInstance("MD5");
-                                        String updatetable_row = aliquot_uuid + "\t" + file_uuid + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(md5digest, f) + "\t" + String.valueOf(FileUtils.sizeOf(f));
+                                        String updatetable_row = aliquot_uuid + "\t" + file_uuid + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(md5digest, f) + "\t" + String.valueOf(FileUtils.sizeOf(f) + "\n");
                                         Files.write((new File(this.getUpdateTablePath())).toPath(), (updatetable_row).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                     }
                                 }
