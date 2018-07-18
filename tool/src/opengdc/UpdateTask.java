@@ -142,7 +142,7 @@ public class UpdateTask extends TimerTask {
                         
                         // convert data
                         Action convertAction = new ConvertDataAction();
-                        String[] convert_params = new String[6];
+                        String[] convert_params = new String[8];
                         convert_params[0] = "convert";
                         convert_params[1] = program;
                         convert_params[2] = tumor;
