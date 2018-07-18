@@ -243,7 +243,7 @@ public class GDCQuery {
                     else {
                         if (map.get(k) instanceof String)
                             values.put(k, (String)map.get(k));
-                        if (map.get(k) instanceof Integer)
+                        else if (map.get(k) instanceof Integer)
                             values.put(k, String.valueOf(map.get(k)));
                     }
                 }

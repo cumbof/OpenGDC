@@ -63,8 +63,6 @@ public class UpdateTask extends TimerTask {
                         (new File(original_local_data_dir)).mkdirs();
                         String converted_local_data_dir = ftp_root + "bed" + "/" + program.toLowerCase() + "/" + tumor.toLowerCase() + "/" + dataType2DirName.get(dataType.toLowerCase()) + "/"; 
                         (new File(converted_local_data_dir)).mkdirs();
-                        String downloadTmpDirPath = Settings.getTmpDir() + "_download/";
-                        (new File(downloadTmpDirPath)).mkdirs();
                         String updatetable_original_path = original_local_data_dir + Settings.getUpdateTableName();
                         if (!(new File(updatetable_original_path)).exists())
                             (new File(updatetable_original_path)).createNewFile();
@@ -90,12 +88,9 @@ public class UpdateTask extends TimerTask {
                                     String converted_file_uuid = updatetable_converted.get(aliquot_uuid).get("file_id");
                                     FSUtils.deleteFileWithPrefix(aliquot_uuid, converted_local_data_dir);
                                     FSUtils.deleteFileWithPrefix(converted_file_uuid, original_local_data_dir);
-                                    // create tmp download dir if it does not exist
-                                    if (!(new File(downloadTmpDirPath)).exists())
-                                        (new File(downloadTmpDirPath)).mkdir();
                                     // download new original file
                                     Date file_downloadDate = new Date();
-                                    DownloadDataAction.downloadSingleData(uuid, dataMap, downloadTmpDirPath, true, true);
+                                    DownloadDataAction.downloadSingleData(uuid, dataMap, original_local_data_dir, true, true);
                                     // modify updatetable_original
                                     updatetable_original.remove(current_file_name);
                                     HashMap<String, String> updateInfo = new HashMap<>();
@@ -118,12 +113,9 @@ public class UpdateTask extends TimerTask {
                                     updatetable_converted.remove(aliquot_uuid);
                                 }
                                 else {
-                                    // create tmp download dir if it does not exist
-                                    if (!(new File(downloadTmpDirPath)).exists())
-                                        (new File(downloadTmpDirPath)).mkdir();
                                     // download original file
                                     Date file_downloadDate = new Date();
-                                    DownloadDataAction.downloadSingleData(uuid, dataMap, downloadTmpDirPath, true, true);
+                                    DownloadDataAction.downloadSingleData(uuid, dataMap, original_local_data_dir, true, true);
                                     // modify updatetable
                                     HashMap<String, String> updateInfo = new HashMap<>();
                                     updateInfo.put("md5sum", current_md5);
@@ -151,12 +143,9 @@ public class UpdateTask extends TimerTask {
                         convert_params[5] = "false";
                         convert_params[6] = "true";
                         convert_params[7] = updatetable_converted_path;
-                        Settings.setInputGDCFolder(downloadTmpDirPath);
+                        Settings.setInputGDCFolder(original_local_data_dir);
                         Settings.setOutputConvertedFolder(converted_local_data_dir);
                         convertAction.execute(convert_params);
-                        
-                        // remove _download tmp dir
-                        FSUtils.deleteDir(new File(downloadTmpDirPath));
                     }
                     catch (Exception e) {
                         e.printStackTrace();
