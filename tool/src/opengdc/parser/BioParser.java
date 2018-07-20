@@ -12,6 +12,7 @@ import java.util.HashSet;
 import javax.swing.JTextPane;
 import javax.xml.bind.DatatypeConverter;
 import opengdc.GUI;
+import opengdc.Settings;
 import opengdc.util.FormatUtils;
 
 /**
@@ -19,6 +20,12 @@ import opengdc.util.FormatUtils;
  * @author fabio
  */
 public abstract class BioParser {
+    
+    public ArrayList<String> getSkipFiles() {
+        ArrayList<String> skippedFiles = new ArrayList<>();
+        skippedFiles.add(Settings.getUpdateTableName().toLowerCase());
+        return skippedFiles;
+    }
     
     private boolean updatetable_bool = false;
     

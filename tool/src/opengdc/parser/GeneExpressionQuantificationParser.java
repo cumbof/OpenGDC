@@ -41,7 +41,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
                File last_modified =files_out[0];
                long time = 0;
                for (File file : files_out) {
-                  if (file.getName().endsWith(this.getFormat())) {
+                  if (file.getName().endsWith(this.getFormat()) && !getSkipFiles().contains(file.getName().toLowerCase())) {
                      if (file.lastModified() > time) {  
                         time = file.lastModified();
                         last_modified = file;
@@ -62,7 +62,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
         for (File f: files) {
             if (f.isFile()) {
                 String extension = FSUtils.getFileExtension(f);
-                if (getAcceptedInputFileFormats().contains(extension)) {
+                if (getAcceptedInputFileFormats().contains(extension) && !getSkipFiles().contains(f.getName().toLowerCase())) {
                     String file_uuid = f.getName().split("_")[0];
                     HashSet<String> attributes = new HashSet<>();
                     String aliquot_id_path = "cases.samples.portions.analytes.aliquots.aliquot_id";
@@ -96,7 +96,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
         for (File f: files) {
             String filename = f.getName();
             String extension = FSUtils.getFileExtension(f);
-            if (f.isFile() && getAcceptedInputFileFormats().contains(extension) && !already_processed.contains(filename)) {
+            if (f.isFile() && getAcceptedInputFileFormats().contains(extension) && !already_processed.contains(filename) && !getSkipFiles().contains(f.getName().toLowerCase())) {
                 String file_uuid = filename.split("_")[0];
                 String aliquot_uuid = fileUUID2aliquotUUID.get(file_uuid);
                 if (!aliquot_uuid.trim().equals("")) {

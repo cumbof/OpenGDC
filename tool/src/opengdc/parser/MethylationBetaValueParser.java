@@ -46,7 +46,7 @@ public class MethylationBetaValueParser extends BioParser {
                File last_modified =files_out[0];
                long time = 0;
                for (File file : files_out) {
-                  if (file.getName().endsWith(this.getFormat())) {
+                  if (file.getName().endsWith(this.getFormat()) && !getSkipFiles().contains(file.getName().toLowerCase())) {
                      if (file.lastModified() > time) {  
                         time = file.lastModified();
                         last_modified = file;
@@ -74,7 +74,7 @@ public class MethylationBetaValueParser extends BioParser {
         for (File f: files) {
             if (f.isFile()) {
                 String extension = FSUtils.getFileExtension(f);
-                if (getAcceptedInputFileFormats().contains(extension)) {
+                if (getAcceptedInputFileFormats().contains(extension) && !getSkipFiles().contains(f.getName().toLowerCase())) {
                     System.err.println("Processing " + f.getName());
                     GUI.appendLog(this.getLogger(), "Processing " + f.getName() + "\n");
                     
