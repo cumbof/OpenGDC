@@ -276,7 +276,7 @@ public class MetadataParserXLSX extends BioParser {
                                                 // create a suffix to append to the aliquot id
                                                 String suffix_id = this.getOpenGDCSuffix(manually_curated_data_type, false);
 
-                                                HashMap<String, HashMap<String, Object>> additional_manually_curated = MetadataHandler.getAdditionalManuallyCuratedAttributes(program, disease, dataType, this.getFormat(), aliquot_uuid, aliquot_brc, biospecimenBigMap.get(case_usi), clinicalBigMap.get(case_usi), manually_curated, suffix_id, manually_curated_data_type);
+                                                HashMap<String, HashMap<String, Object>> additional_manually_curated = MetadataHandler.getAdditionalManuallyCuratedAttributes(program, disease, dataType, this.getFormat(), aliquot_uuid, aliquot_brc, biospecimenBigMap.get(case_usi), clinicalBigMap.get(case_usi), manually_curated, suffix_id);
                                                 if (!additional_manually_curated.isEmpty()) {
                                                     for (String attr: additional_manually_curated.keySet()) {
                                                         //String attribute_parsed = FSUtils.stringToValidJavaIdentifier(attr);

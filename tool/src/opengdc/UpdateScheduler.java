@@ -16,8 +16,10 @@ import java.util.concurrent.TimeUnit;
 public class UpdateScheduler {
     
     private static final String FTP_ROOT = "/FTP/ftp-root/opengdc/";
+    private static final String FTP_REPO = "ftp://FTP/ftp-root/opengdc/";
     
     public static void main(String[] args) {
+        Settings.setOpenGDCFTPRepoBase(FTP_REPO);
         Timer timer = new java.util.Timer();
         Calendar date = Calendar.getInstance();
         date.set(Calendar.DAY_OF_WEEK, Calendar.TUESDAY);
