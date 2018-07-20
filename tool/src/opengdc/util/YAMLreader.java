@@ -13,9 +13,9 @@ public class YAMLreader {
 	
     private static HashMap<String, ArrayList<String>> redundantmap = new HashMap<>();
 
-    public static void main(String[]args){
+    /*public static void main(String[]args){
         getMappingAttributes();
-    }
+    }*/
 		
     public static HashMap<String, ArrayList<String>> getMappingAttributes() {
         // The path of your YAML file.
@@ -76,16 +76,16 @@ public class YAMLreader {
                     map.put("gdc__"+kk,val);
             }
         }
-        System.out.println();
-        for (String kk: map.keySet())
-            System.out.println(kk+": \n\t"+map.get(kk));
+        //System.out.println();
+        //for (String kk: map.keySet())
+            //System.out.println(kk+": \n\t"+map.get(kk));
         return map;
     }
 
     private static void maps(Map<String, Object> result, String meta_type) {
         for (String k : result.keySet()) {
             //System.out.println(k);
-            System.out.println(result.get(k).toString());
+            //System.out.println(result.get(k).toString());
             String k_print = "";
             if (k.endsWith("s"))
                 k_print = k.substring(0,k.length()-2) + "es";
@@ -123,7 +123,7 @@ public class YAMLreader {
                 list = redundantmap.get(attribute);
             String val = ((String)object).replaceAll("\\.", "").replaceAll(":", "__").replaceAll("\\|", ""); //.replaceAll("\\[.*\\]", "");
             for (String splitted_val: val.split("\\/")) { //many values are splitted with "/"
-                if (!splitted_val.equals("") && splitted_val!=null)
+                if (!splitted_val.equals("") && splitted_val != null)
                     list.add( meta_type+"__"+splitted_val);
             }
             redundantmap.put(attribute, list);

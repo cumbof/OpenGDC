@@ -43,6 +43,9 @@ public class UpdateTask extends TimerTask {
     }
 
     private void updateTask() {
+        File tmp_download_dir = new File(Settings.getTmpDir() + "_download/");
+        if (!tmp_download_dir.exists())
+            tmp_download_dir.mkdirs();
         HashMap<String, HashMap<String, HashSet<String>>> GDCDataMap = GDCData.getBigGDCDataMap();
         HashMap<String, String> dataType2DirName = GDCData.getGDCData2FTPFolderName();
         for (String program: GDCDataMap.keySet()) {
@@ -58,7 +61,7 @@ public class UpdateTask extends TimerTask {
                 dataTypes.add("Clinical and Biospecimen Supplements");
                 /*************************************************/
                 for (String dataType: dataTypes) {
-                    try {
+                    try {                        
                         String original_local_data_dir = ftp_root + "original" + "/" + program.toLowerCase() + "/" + tumor.toLowerCase() + "/" + dataType2DirName.get(dataType.toLowerCase()) + "/"; 
                         if (!(new File(original_local_data_dir)).exists())
                             (new File(original_local_data_dir)).mkdirs();
@@ -81,23 +84,35 @@ public class UpdateTask extends TimerTask {
                         }
                         else
                             subTypes.add(dataType);
+                                                
                         for (String type: subTypes)
-                            downloadStep(tumor, type, original_local_data_dir, converted_local_data_dir, updatetable_original_path, updatetable_original, updatetable_converted);
+                            downloadStep(tumor, type, original_local_data_dir, converted_local_data_dir, updatetable_original_path, updatetable_original, updatetable_converted_path, updatetable_converted, tmp_download_dir);
                         
-                        // convert data
-                        Action convertAction = new ConvertDataAction();
-                        String[] convert_params = new String[8];
-                        convert_params[0] = "convert";
-                        convert_params[1] = program;
-                        convert_params[2] = tumor;
-                        convert_params[3] = dataType;
-                        convert_params[4] = "bed";
-                        convert_params[5] = "false";
-                        convert_params[6] = "true";
-                        convert_params[7] = updatetable_converted_path;
-                        Settings.setInputGDCFolder(original_local_data_dir);
-                        Settings.setOutputConvertedFolder(converted_local_data_dir);
-                        convertAction.execute(convert_params);
+                        if (tmp_download_dir.list().length > 0) {
+                            // load converted updatetable
+                            updatetable_converted = UpdateGDCData.loadUpdateTable_converted(updatetable_converted_path);
+                            // convert data
+                            Action convertAction = new ConvertDataAction();
+                            String[] convert_params = new String[8];
+                            convert_params[0] = "convert";
+                            convert_params[1] = program;
+                            convert_params[2] = tumor;
+                            convert_params[3] = dataType;
+                            convert_params[4] = "bed";
+                            convert_params[5] = "false";
+                            convert_params[6] = "true";
+                            convert_params[7] = updatetable_converted_path;
+                            Settings.setInputGDCFolder(tmp_download_dir.getAbsolutePath());
+                            Settings.setOutputConvertedFolder(converted_local_data_dir);
+                            convertAction.execute(convert_params);
+                            
+                            // move downloaded files from the tmp dir to the original one
+                            for (int f=0; f<tmp_download_dir.listFiles().length; f++)
+                                tmp_download_dir.listFiles()[f].renameTo(new File( original_local_data_dir + tmp_download_dir.listFiles()[f].getName() ));
+                            // just to be sure that the tmp download dir will be empty before the next data type
+                            if (tmp_download_dir.list().length > 0)
+                                FSUtils.deleteDir(tmp_download_dir);
+                        }
                     }
                     catch (Exception e) {
                         e.printStackTrace();
@@ -105,30 +120,36 @@ public class UpdateTask extends TimerTask {
                 }
             }
         }
-    }
+        FSUtils.deleteDir(tmp_download_dir);
+    }    
     
     private void downloadStep(String tumor, String dataType, String original_local_data_dir, String converted_local_data_dir, 
                               String updatetable_original_path, HashMap<String, HashMap<String, String>> updatetable_original, 
-                              HashMap<String, HashMap<String, String>> updatetable_converted) throws Exception {
+                              String updatetable_converted_path, HashMap<String, HashMap<String, String>> updatetable_converted, File tmp_download_dir) throws Exception {
         String query_file_path = GDCQuery.query(tumor, dataType, 0);
         HashMap<String, HashMap<String, String>> dataMap = GDCQuery.extractInfo(query_file_path);
         for (String uuid: dataMap.keySet()) {
             if (!FSUtils.filePrefixExists(uuid, original_local_data_dir)) {
-                String aliquot_uuid = getAliquotUUID(uuid, dataType);
-
                 String current_md5 = dataMap.get(uuid).get("md5sum");
                 String current_updated_datetime = dataMap.get(uuid).get("updated_datetime");
                 String current_file_name = dataMap.get(uuid).get("file_name");
                 //String current_file_id = dataMap.get(uuid).get("file_id");
                 String current_file_size = dataMap.get(uuid).get("file_size");
-
-                if (FSUtils.filePrefixExists(aliquot_uuid, converted_local_data_dir)) {
-                    String converted_file_uuid = updatetable_converted.get(aliquot_uuid).get("file_id");
-                    FSUtils.deleteFileWithPrefix(aliquot_uuid, converted_local_data_dir);
-                    FSUtils.deleteFileWithPrefix(converted_file_uuid, original_local_data_dir);
+                if (dataType.equals("Clinical Supplement") || dataType.equals("Biospecimen Supplement") || dataType.equals("Masked Somatic Mutation")) {
+                    File originalDir = new File(original_local_data_dir);
+                    FSUtils.deleteDir(originalDir);
+                    originalDir.mkdirs();
+                    (new File(updatetable_original_path)).createNewFile();
+                    updatetable_original = new HashMap<>();
+                    File convertedDir = new File(converted_local_data_dir);
+                    FSUtils.deleteDir(convertedDir);
+                    convertedDir.mkdirs();
+                    (new File(updatetable_converted_path)).createNewFile();
+                    updatetable_converted = new HashMap<>();
+                    
                     // download new original file
                     Date file_downloadDate = new Date();
-                    DownloadDataAction.downloadSingleData(uuid, dataMap, original_local_data_dir, true, true);
+                    DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
                     // modify updatetable_original
                     updatetable_original.remove(current_file_name);
                     HashMap<String, String> updateInfo = new HashMap<>();
@@ -141,35 +162,78 @@ public class UpdateTask extends TimerTask {
                     updatetable_original.put(current_file_name, updateInfo);
                     (new File(updatetable_original_path)).delete();
                     for (String fileName: updatetable_original.keySet()) {
-                        //String fileRow = fileName + "\t" + updatetable.get(fileName).get("file_id") + "\t" + updatetable.get(fileName).get("file_size") + "\t" + updatetable.get(fileName).get("md5sum") + "\t" + updatetable.get(fileName).get("updated_datetime") + "\t" + updatetable.get(fileName).get("downloaded_datetime") + "\n";
                         String fileRow = fileName + "\t" + updatetable_original.get(fileName).get("file_size") + "\t" + updatetable_original.get(fileName).get("md5sum") + "\t" + updatetable_original.get(fileName).get("updated_datetime") + "\t" + updatetable_original.get(fileName).get("downloaded_datetime") + "\n";
                         Files.write((new File(updatetable_original_path)).toPath(), (fileRow).getBytes("UTF-8"), StandardOpenOption.APPEND);
                     }
                     // load updatetable again
                     updatetable_original = UpdateGDCData.loadUpdateTable_original(updatetable_original_path);
-                    // modify updatetable_converted
-                    updatetable_converted.remove(aliquot_uuid);
+                    
                 }
                 else {
-                    // download original file
-                    Date file_downloadDate = new Date();
-                    DownloadDataAction.downloadSingleData(uuid, dataMap, original_local_data_dir, true, true);
-                    // modify updatetable
-                    HashMap<String, String> updateInfo = new HashMap<>();
-                    updateInfo.put("md5sum", current_md5);
-                    updateInfo.put("updated_datetime", current_updated_datetime);
-                    updateInfo.put("file_name", current_file_name);
-                    //updateInfo.put("file_id", current_file_id);
-                    updateInfo.put("file_size", current_file_size);
-                    updateInfo.put("downloaded_datetime", file_downloadDate.toString());
-                    updatetable_original.put(current_file_name, updateInfo);
-                    //String fileRow = current_file_name + "\t" + updatetable.get(current_file_name).get("file_id") + "\t" + updatetable.get(current_file_name).get("file_size") + "\t" + updatetable.get(current_file_name).get("md5sum") + "\t" + updatetable.get(current_file_name).get("updated_datetime") + "\t" + updatetable.get(current_file_name).get("downloaded_datetime") + "\n";
-                    String fileRow = current_file_name + "\t" + updatetable_original.get(current_file_name).get("file_size") + "\t" + updatetable_original.get(current_file_name).get("md5sum") + "\t" + updatetable_original.get(current_file_name).get("updated_datetime") + "\t" + updatetable_original.get(current_file_name).get("downloaded_datetime") + "\n";
+                    String aliquot_uuid = getAliquotUUID(uuid, dataType);
+                    if (FSUtils.filePrefixExists(aliquot_uuid, converted_local_data_dir)) {
+                        String converted_file_uuid = updatetable_converted.get(aliquot_uuid).get("file_id");
+                        FSUtils.deleteFilesWithPrefix(aliquot_uuid, converted_local_data_dir);
+                        FSUtils.deleteFilesWithPrefix(converted_file_uuid, original_local_data_dir);
+                        // download new original file
+                        Date file_downloadDate = new Date();
+                        DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
+                        // modify updatetable_original
+                        updatetable_original.remove(current_file_name);
+                        HashMap<String, String> updateInfo = new HashMap<>();
+                        updateInfo.put("md5sum", current_md5);
+                        updateInfo.put("updated_datetime", current_updated_datetime);
+                        updateInfo.put("file_name", current_file_name);
+                        //updateInfo.put("file_id", current_file_id);
+                        updateInfo.put("file_size", current_file_size);
+                        updateInfo.put("downloaded_datetime", file_downloadDate.toString());
+                        updatetable_original.put(current_file_name, updateInfo);
+                        (new File(updatetable_original_path)).delete();
+                        for (String fileName: updatetable_original.keySet()) {
+                            String fileRow = fileName + "\t" + updatetable_original.get(fileName).get("file_size") + "\t" + updatetable_original.get(fileName).get("md5sum") + "\t" + updatetable_original.get(fileName).get("updated_datetime") + "\t" + updatetable_original.get(fileName).get("downloaded_datetime") + "\n";
+                            Files.write((new File(updatetable_original_path)).toPath(), (fileRow).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                        }
+                        // load updatetable again
+                        updatetable_original = UpdateGDCData.loadUpdateTable_original(updatetable_original_path);
+                        // modify updatetable_converted
+                        updatetable_converted.remove(aliquot_uuid);
+                    }
+                    else {
+                        // download original file
+                        Date file_downloadDate = new Date();
+                        DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
+                        // modify updatetable
+                        HashMap<String, String> updateInfo = new HashMap<>();
+                        updateInfo.put("md5sum", current_md5);
+                        updateInfo.put("updated_datetime", current_updated_datetime);
+                        updateInfo.put("file_name", current_file_name);
+                        //updateInfo.put("file_id", current_file_id);
+                        updateInfo.put("file_size", current_file_size);
+                        updateInfo.put("downloaded_datetime", file_downloadDate.toString());
+                        updatetable_original.put(current_file_name, updateInfo);
+                        //String fileRow = current_file_name + "\t" + updatetable.get(current_file_name).get("file_id") + "\t" + updatetable.get(current_file_name).get("file_size") + "\t" + updatetable.get(current_file_name).get("md5sum") + "\t" + updatetable.get(current_file_name).get("updated_datetime") + "\t" + updatetable.get(current_file_name).get("downloaded_datetime") + "\n";
+                        String fileRow = current_file_name + "\t" + updatetable_original.get(current_file_name).get("file_size") + "\t" + updatetable_original.get(current_file_name).get("md5sum") + "\t" + updatetable_original.get(current_file_name).get("updated_datetime") + "\t" + updatetable_original.get(current_file_name).get("downloaded_datetime") + "\n";
+                        Files.write((new File(updatetable_original_path)).toPath(), (fileRow).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                    }
+                }
+            }
+        }
+        if (!dataType.equals("Clinical Supplement") && !dataType.equals("Biospecimen Supplement") && !dataType.equals("Masked Somatic Mutation")) {
+            // remove old and no more maintainable files
+            HashMap<String, HashMap<String, String>> new_updatetable_original = new HashMap<>();
+            for (String aliquot_uuid: updatetable_original.keySet()) {
+                String file_uuid = updatetable_original.get(aliquot_uuid).get("file_id");
+                if (dataMap.containsKey(file_uuid))
+                    new_updatetable_original.put(aliquot_uuid, updatetable_original.get(aliquot_uuid));
+            }
+            if (new_updatetable_original.size() != updatetable_original.size()) {
+                (new File(updatetable_original_path)).delete();
+                for (String aliquot_uuid: new_updatetable_original.keySet()) {
+                    String fileRow = new_updatetable_original.get(aliquot_uuid).get("file_name") + "\t" + new_updatetable_original.get(aliquot_uuid).get("file_size") + "\t" + new_updatetable_original.get(aliquot_uuid).get("md5sum") + "\t" + new_updatetable_original.get(aliquot_uuid).get("updated_datetime") + "\t" + new_updatetable_original.get(aliquot_uuid).get("downloaded_datetime") + "\n";
                     Files.write((new File(updatetable_original_path)).toPath(), (fileRow).getBytes("UTF-8"), StandardOpenOption.APPEND);
                 }
             }
         }
-        
     }
 
     private String getAliquotUUID(String file_uuid, String dataType) {

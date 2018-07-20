@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -112,29 +113,28 @@ public class FSUtils {
         File folder = new File(folderPath);
         if (folder.exists()) {
             for (String fileName: folder.list()) {
-                if (fileName.endsWith(suffixName))
+                if (fileName.contains(suffixName))
                     return true;
             }
         }
         return false;
     }
 
-    public static  void deleteFileWithPrefix(String filePrefix, String dir_path) {
-        File targetFile = null;
+    public static  void deleteFilesWithPrefix(String filePrefix, String dir_path) {
+        ArrayList<File> targetFiles = new ArrayList<>();
         for (File file: (new File(dir_path)).listFiles()) {
-            if (file.getName().startsWith(filePrefix) && file.getName().toLowerCase().endsWith(".bed")) {
-                targetFile = file;
-                break;
+            if (file.getName().startsWith(filePrefix)) {
+                targetFiles.add(file);
             }
         }
-        if (targetFile != null)
+        for (File targetFile: targetFiles)
             targetFile.delete();
     }
     
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         String test = "clinical__cases__aliquot_id";
         System.err.println("Original String: " + test);
         System.err.println("Valid Java Identifier: " + stringToValidJavaIdentifier(test));
-    }
+    }*/
 
 }
