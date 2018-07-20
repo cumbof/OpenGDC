@@ -88,6 +88,8 @@ public class DownloadDataAction extends Action {
                     for (String exp: experiments_path) {
                         try {
                             File expFile = new File(exp);
+                            if (!gdc_path.endsWith("/"))
+                                gdc_path += "/";
                             File newExpFile = new File(gdc_path + expFile.getName());
                             Files.move(expFile.toPath(), newExpFile.toPath(), REPLACE_EXISTING);
                         }

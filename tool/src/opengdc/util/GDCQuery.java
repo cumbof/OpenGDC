@@ -276,6 +276,8 @@ public class GDCQuery {
             System.err.println(uuid + "\t" + fileName);
             GUI.appendLog(logPane, uuid + "\t" + fileName + "\n");
 
+            if (!outFolderPath.endsWith("/"))
+                outFolderPath += "/";
             File outFile = new File(outFolderPath + fileName);
             if (outFile.exists())
                 outFile.delete();
