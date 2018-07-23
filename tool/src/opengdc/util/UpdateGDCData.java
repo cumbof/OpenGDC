@@ -26,6 +26,8 @@ public class UpdateGDCData {
         String res = "null";
         try {
             String tmp_dir = Settings.getTmpDir();
+            if (!tmp_dir.endsWith("/"))
+                tmp_dir += "/";
             String local_file_path = tmp_dir + program + "_" + tumor + "_" + data_type + "_" + String.valueOf(isOriginal) + "_" + Settings.getUpdateTableName();
             File local_file = new File(local_file_path);
             if (!local_file.exists())

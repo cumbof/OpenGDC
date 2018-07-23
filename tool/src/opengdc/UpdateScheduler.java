@@ -15,19 +15,17 @@ import java.util.concurrent.TimeUnit;
  */
 public class UpdateScheduler {
     
-    //private static final String FTP_ROOT = "/FTP/ftp-root/update_prova/";
-    private static final String FTP_ROOT = "/Users/fabio/Downloads/update_prova/";
+    private static final String FTP_ROOT = "/FTP/ftp-root/update_prova/";
     private static final String FTP_REPO = "ftp://150.146.100.179/update_prova/";
     
     public static void main(String[] args) {
-        Settings.setOpenGDCFTPRepoBase(FTP_REPO);
         Timer timer = new java.util.Timer();
         Calendar date = Calendar.getInstance();
-        date.set(Calendar.DAY_OF_WEEK, Calendar.TUESDAY);
+        /*date.set(Calendar.DAY_OF_WEEK, Calendar.TUESDAY);
         date.set(Calendar.HOUR, 1);
         date.set(Calendar.MINUTE, 0);
-        date.set(Calendar.SECOND, 0);
-        timer.schedule(new UpdateTask(FTP_ROOT), date.getTime(), TimeUnit.DAYS.toMillis(Settings.getUpdateDays()));
+        date.set(Calendar.SECOND, 0);*/
+        timer.schedule(new UpdateTask(FTP_ROOT, FTP_REPO), date.getTime(), TimeUnit.DAYS.toMillis(Settings.getUpdateDays()));
     }
     
 }

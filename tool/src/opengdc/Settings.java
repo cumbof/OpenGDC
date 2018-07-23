@@ -85,6 +85,11 @@ public class Settings {
         return OPEN_GDC_PAGE_URL;
     }
     
+    private static final String STATIC_GDC_FTP_REPO_BASE = "ftp://bioinformatics.iasi.cnr.it/opengdc/";
+    public static String getStaticOpenGDCFTPRepoBase() {
+        return STATIC_GDC_FTP_REPO_BASE;
+    }
+    
     private static String open_gdc_ftp_repo_base = "ftp://bioinformatics.iasi.cnr.it/opengdc/";
     public static String getOpenGDCFTPRepoBase() {
         return open_gdc_ftp_repo_base;
@@ -94,30 +99,34 @@ public class Settings {
     }
     
     private static final String OPEN_GDC_FTP_REPO_ORIGINAL = "original";
-    public static String getOpenGDCFTPRepoOriginal() {
+    public static String getOpenGDCFTPRepoOriginal(boolean static_url) {
+        if (static_url)
+            return getStaticOpenGDCFTPRepoBase()+OPEN_GDC_FTP_REPO_ORIGINAL+"/";
         return getOpenGDCFTPRepoBase()+OPEN_GDC_FTP_REPO_ORIGINAL+"/";
     }
     
     private static final String OPEN_GDC_FTP_REPO_BED_CONVERTED = "bed";
-    public static String getOpenGDCFTPRepoBEDConverted() {
+    public static String getOpenGDCFTPRepoBEDConverted(boolean static_url) {
+        if (static_url)
+            return getStaticOpenGDCFTPRepoBase()+OPEN_GDC_FTP_REPO_BED_CONVERTED+"/";
         return getOpenGDCFTPRepoBase()+OPEN_GDC_FTP_REPO_BED_CONVERTED+"/";
     }
     
     private static final String OPEN_GDC_FTP_REPO_TCGA = "tcga";
     private static final String OPEN_GDC_FTP_REPO_TARGET = "target";
     private static final String OPEN_GDC_FTP_REPO_FM = "fm";
-    public static String getOpenGDCFTPRepoProgram(String program, boolean original) {
+    public static String getOpenGDCFTPRepoProgram(String program, boolean original, boolean static_url) {
         if (program.trim().toLowerCase().contains("tcga")) {
-            if (original) return getOpenGDCFTPRepoOriginal()+OPEN_GDC_FTP_REPO_TCGA+"/";
-            return getOpenGDCFTPRepoBEDConverted()+OPEN_GDC_FTP_REPO_TCGA+"/";
+            if (original) return getOpenGDCFTPRepoOriginal(static_url)+OPEN_GDC_FTP_REPO_TCGA+"/";
+            return getOpenGDCFTPRepoBEDConverted(static_url)+OPEN_GDC_FTP_REPO_TCGA+"/";
         }
         else if (program.trim().toLowerCase().contains("target")) {
-            if (original) return getOpenGDCFTPRepoOriginal()+OPEN_GDC_FTP_REPO_TARGET+"/";
-            return getOpenGDCFTPRepoBEDConverted()+OPEN_GDC_FTP_REPO_TARGET+"/";
+            if (original) return getOpenGDCFTPRepoOriginal(static_url)+OPEN_GDC_FTP_REPO_TARGET+"/";
+            return getOpenGDCFTPRepoBEDConverted(static_url)+OPEN_GDC_FTP_REPO_TARGET+"/";
         }
         else if (program.trim().toLowerCase().contains("fm")) {
-            if (original) return getOpenGDCFTPRepoOriginal()+OPEN_GDC_FTP_REPO_FM+"/";
-            return getOpenGDCFTPRepoBEDConverted()+OPEN_GDC_FTP_REPO_FM+"/";
+            if (original) return getOpenGDCFTPRepoOriginal(static_url)+OPEN_GDC_FTP_REPO_FM+"/";
+            return getOpenGDCFTPRepoBEDConverted(static_url)+OPEN_GDC_FTP_REPO_FM+"/";
         }
         return "";
     }
@@ -182,8 +191,8 @@ public class Settings {
         return UPDATE_TABLE_NAME;
     }
     
-    public static String getUpdateTableURL(String program, String disease, String dataType, boolean original) {
-        return getOpenGDCFTPRepoProgram(program, original) + disease.trim().toLowerCase() + "/" + dataType + "/" + getUpdateTableName();
+    public static String getUpdateTableURL(String program, String disease, String dataType, boolean original, boolean static_url) {
+        return getOpenGDCFTPRepoProgram(program, original, static_url) + disease.trim().toLowerCase() + "/" + dataType + "/" + getUpdateTableName();
     }
     
 }
