@@ -441,7 +441,7 @@ public class MetadataHandler {
     }
 
     // the attributes in this methods are all required 
-    public static HashMap<String, HashMap<String, Object>> getAdditionalManuallyCuratedAttributes(String program, String disease, String dataType, String format, String aliquot_uuid, String aliquot_brc, HashMap<String, String> biospecimen_attributes, HashMap<String, String> clinical_attributes, HashMap<String, String> gdc_attributes, String suffix_id) {
+    public static HashMap<String, HashMap<String, Object>> getAdditionalManuallyCuratedAttributes(String program, String disease, String dataType, String format, String aliquot_uuid, String aliquot_brc, HashMap<String, String> biospecimen_attributes, HashMap<String, String> clinical_attributes, HashMap<String, String> gdc_attributes, String suffix_id, String manually_curated_dataType) {
         String attributes_prefix = "manually_curated";
         String category_separator = "__";
 
@@ -504,9 +504,9 @@ public class MetadataHandler {
         values = new HashMap<>();
         URL filesinfo_url_converted = null;
         try {
-            filesinfo_url_converted = new URL(Settings.getUpdateTableURL(program, disease.toLowerCase(), GDCData.getGDCData2FTPFolderName().get(dataType.toLowerCase()), false));
+            filesinfo_url_converted = new URL(Settings.getUpdateTableURL(program, disease.toLowerCase(), GDCData.getGDCData2FTPFolderName().get(manually_curated_dataType.toLowerCase()), false));
         } catch (Exception e) {}
-        String opengdc_file_size = UpdateGDCData.getUpdateTableAttribute(program.toLowerCase(), disease.toLowerCase(), GDCData.getGDCData2FTPFolderName().get(dataType.toLowerCase()), filesinfo_url_converted, aliquot_uuid.trim().toLowerCase(), "file_size", false);
+        String opengdc_file_size = UpdateGDCData.getUpdateTableAttribute(program.toLowerCase(), disease.toLowerCase(), GDCData.getGDCData2FTPFolderName().get(manually_curated_dataType.toLowerCase()), filesinfo_url_converted, aliquot_uuid.trim().toLowerCase(), "file_size", false);
         values.put("value", opengdc_file_size);
         values.put("required", true);
         additional_attributes.put(attributes_prefix + category_separator + "opengdc_file_size", values);
@@ -535,9 +535,10 @@ public class MetadataHandler {
 
         /**
          * ***** exp_metadata_url ******
+         * manually_curated_dataType should be replaced with dataType
          */
         values = new HashMap<>();
-        values.put("value", Settings.getOpenGDCFTPRepoProgram(program, false) + disease.trim().toLowerCase() + "/" + GDCData.getGDCData2FTPFolderName().get(dataType.trim().toLowerCase()) + "/" + aliquot_uuid.trim().toLowerCase() + "-" + suffix_id + "." + Settings.getOpenGDCFTPConvertedDataFormat() + "." + format);
+        values.put("value", Settings.getOpenGDCFTPRepoProgram(program, false) + disease.trim().toLowerCase() + "/" + GDCData.getGDCData2FTPFolderName().get(manually_curated_dataType.trim().toLowerCase()) + "/" + aliquot_uuid.trim().toLowerCase() + "-" + suffix_id + "." + Settings.getOpenGDCFTPConvertedDataFormat() + "." + format);
         values.put("required", true);
         additional_attributes.put(attributes_prefix + category_separator + "exp_metadata_url", values);
         
@@ -553,12 +554,12 @@ public class MetadataHandler {
          * ***** opengdc_download_date ******
          */
         values = new HashMap<>();
-        String file_uuid = UpdateGDCData.getUpdateTableAttribute(program.toLowerCase(), disease.toLowerCase(), GDCData.getGDCData2FTPFolderName().get(dataType.toLowerCase()), filesinfo_url_converted, aliquot_uuid.trim().toLowerCase(), "file_uuid", false);
+        String file_uuid = UpdateGDCData.getUpdateTableAttribute(program.toLowerCase(), disease.toLowerCase(), GDCData.getGDCData2FTPFolderName().get(manually_curated_dataType.toLowerCase()), filesinfo_url_converted, aliquot_uuid.trim().toLowerCase(), "file_uuid", false);
         URL filesinfo_url_original = null;
         try {
-            filesinfo_url_original = new URL(Settings.getUpdateTableURL(program, disease.toLowerCase(), GDCData.getGDCData2FTPFolderName().get(dataType.toLowerCase()), true));
+            filesinfo_url_original = new URL(Settings.getUpdateTableURL(program, disease.toLowerCase(), GDCData.getGDCData2FTPFolderName().get(manually_curated_dataType.toLowerCase()), true));
         } catch (Exception e) {}
-        String opengdc_download_date = UpdateGDCData.getUpdateTableAttribute(program.toLowerCase(), disease.toLowerCase(), GDCData.getGDCData2FTPFolderName().get(dataType.toLowerCase()), filesinfo_url_original, file_uuid.trim().toLowerCase(), "downloaded_datetime", true);
+        String opengdc_download_date = UpdateGDCData.getUpdateTableAttribute(program.toLowerCase(), disease.toLowerCase(), GDCData.getGDCData2FTPFolderName().get(manually_curated_dataType.toLowerCase()), filesinfo_url_original, file_uuid.trim().toLowerCase(), "downloaded_datetime", true);
         values.put("value", opengdc_download_date);
         values.put("required", true);
         additional_attributes.put(attributes_prefix + category_separator + "opengdc_download_date", values);

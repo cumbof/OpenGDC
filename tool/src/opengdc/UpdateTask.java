@@ -50,73 +50,79 @@ public class UpdateTask extends TimerTask {
         HashMap<String, HashMap<String, HashSet<String>>> GDCDataMap = GDCData.getBigGDCDataMap();
         HashMap<String, String> dataType2DirName = GDCData.getGDCData2FTPFolderName();
         for (String program: GDCDataMap.keySet()) {
-            for (String tumor: GDCDataMap.get(program).keySet()) {
-                /*************************************************/
-                ArrayList<String> dataTypes = new ArrayList<>(GDCDataMap.get(program).get(tumor));
-                // rename clinical and biospecimen supplements
-                if (dataTypes.contains("Clinical Supplement"))
-                    dataTypes.remove("Clinical Supplement");
-                if (dataTypes.contains("Biospecimen Supplement"))
-                    dataTypes.remove("Biospecimen Supplement");
-                // put clinical and biospecimen supplements at the end of the set
-                dataTypes.add("Clinical and Biospecimen Supplements");
-                /*************************************************/
-                for (String dataType: dataTypes) {
-                    try {                        
-                        String original_local_data_dir = ftp_root + "original" + "/" + program.toLowerCase() + "/" + tumor.toLowerCase() + "/" + dataType2DirName.get(dataType.toLowerCase()) + "/"; 
-                        if (!(new File(original_local_data_dir)).exists())
-                            (new File(original_local_data_dir)).mkdirs();
-                        String converted_local_data_dir = ftp_root + "bed" + "/" + program.toLowerCase() + "/" + tumor.toLowerCase() + "/" + dataType2DirName.get(dataType.toLowerCase()) + "/"; 
-                        if (!(new File(converted_local_data_dir)).exists())
-                            (new File(converted_local_data_dir)).mkdirs();
-                        String updatetable_original_path = original_local_data_dir + Settings.getUpdateTableName();
-                        if (!(new File(updatetable_original_path)).exists())
-                            (new File(updatetable_original_path)).createNewFile();
-                        HashMap<String, HashMap<String, String>> updatetable_original = UpdateGDCData.loadUpdateTable_original(updatetable_original_path);
-                        String updatetable_converted_path = converted_local_data_dir + Settings.getUpdateTableName();
-                        if (!(new File(updatetable_converted_path)).exists())
-                            (new File(updatetable_converted_path)).createNewFile();
-                        HashMap<String, HashMap<String, String>> updatetable_converted = UpdateGDCData.loadUpdateTable_converted(updatetable_converted_path);
-                        
-                        ArrayList<String> subTypes = new ArrayList<>();
-                        if (dataType.equals("Clinical and Biospecimen Supplements")) {
-                            subTypes.add("Clinical Supplement");
-                            subTypes.add("Biospecimen Supplement");
-                        }
-                        else
-                            subTypes.add(dataType);
-                                                
-                        for (String type: subTypes)
-                            downloadStep(tumor, type, original_local_data_dir, converted_local_data_dir, updatetable_original_path, updatetable_original, updatetable_converted_path, updatetable_converted, tmp_download_dir);
-                        
-                        if (tmp_download_dir.list().length > 0) {
-                            // convert data
-                            Action convertAction = new ConvertDataAction();
-                            String[] convert_params = new String[8];
-                            convert_params[0] = "convert";
-                            convert_params[1] = program;
-                            convert_params[2] = tumor;
-                            convert_params[3] = dataType;
-                            convert_params[4] = "bed";
-                            convert_params[5] = "false";
-                            convert_params[6] = "true";
-                            convert_params[7] = updatetable_converted_path;
-                            Settings.setInputGDCFolder(tmp_download_dir.getAbsolutePath());
-                            Settings.setOutputConvertedFolder(converted_local_data_dir);
-                            convertAction.execute(convert_params);
-                            // move downloaded files from the tmp dir to the original one
-                            for (File file : tmp_download_dir.listFiles()) {
-                                //tmp_download_dir.listFiles()[f].renameTo(new File( original_local_data_dir + tmp_download_dir.listFiles()[f].getName() ));
-                                //FileUtils.moveFileToDirectory(file, new File(original_local_data_dir), true);
-                                FileUtils.moveFile(file, new File( original_local_data_dir + file.getName() ));
+            if (program.toLowerCase().equals("tcga")) {
+                for (String tumor: GDCDataMap.get(program).keySet()) {
+                    if (tumor.toLowerCase().equals("tcga-ucs")) {
+                        /*************************************************/
+                        ArrayList<String> dataTypes = new ArrayList<>(GDCDataMap.get(program).get(tumor));
+                        // rename clinical and biospecimen supplements
+                        if (dataTypes.contains("Clinical Supplement"))
+                            dataTypes.remove("Clinical Supplement");
+                        if (dataTypes.contains("Biospecimen Supplement"))
+                            dataTypes.remove("Biospecimen Supplement");
+                        // put clinical and biospecimen supplements at the end of the set
+                        dataTypes.add("Clinical and Biospecimen Supplements");
+                        /*************************************************/
+                        for (String dataType: dataTypes) {
+                            if (dataType.toLowerCase().equals("clinical and biospecimen supplements")) {
+                                try {                        
+                                    String original_local_data_dir = ftp_root + "original" + "/" + program.toLowerCase() + "/" + tumor.toLowerCase() + "/" + dataType2DirName.get(dataType.toLowerCase()) + "/"; 
+                                    if (!(new File(original_local_data_dir)).exists())
+                                        (new File(original_local_data_dir)).mkdirs();
+                                    String converted_local_data_dir = ftp_root + "bed" + "/" + program.toLowerCase() + "/" + tumor.toLowerCase() + "/" + dataType2DirName.get(dataType.toLowerCase()) + "/"; 
+                                    if (!(new File(converted_local_data_dir)).exists())
+                                        (new File(converted_local_data_dir)).mkdirs();
+                                    String updatetable_original_path = original_local_data_dir + Settings.getUpdateTableName();
+                                    if (!(new File(updatetable_original_path)).exists())
+                                        (new File(updatetable_original_path)).createNewFile();
+                                    HashMap<String, HashMap<String, String>> updatetable_original = UpdateGDCData.loadUpdateTable_original(updatetable_original_path);
+                                    String updatetable_converted_path = converted_local_data_dir + Settings.getUpdateTableName();
+                                    if (!(new File(updatetable_converted_path)).exists())
+                                        (new File(updatetable_converted_path)).createNewFile();
+                                    HashMap<String, HashMap<String, String>> updatetable_converted = UpdateGDCData.loadUpdateTable_converted(updatetable_converted_path);
+
+                                    ArrayList<String> subTypes = new ArrayList<>();
+                                    if (dataType.equals("Clinical and Biospecimen Supplements")) {
+                                        subTypes.add("Clinical Supplement");
+                                        subTypes.add("Biospecimen Supplement");
+                                    }
+                                    else
+                                        subTypes.add(dataType);
+
+                                    for (String type: subTypes)
+                                        downloadStep(tumor, type, original_local_data_dir, converted_local_data_dir, updatetable_original_path, updatetable_original, updatetable_converted_path, updatetable_converted, tmp_download_dir);
+
+                                    if (tmp_download_dir.list().length > 0) {
+                                        // convert data
+                                        Action convertAction = new ConvertDataAction();
+                                        String[] convert_params = new String[8];
+                                        convert_params[0] = "convert";
+                                        convert_params[1] = program;
+                                        convert_params[2] = tumor;
+                                        convert_params[3] = dataType;
+                                        convert_params[4] = "bed";
+                                        convert_params[5] = "false";
+                                        convert_params[6] = "true";
+                                        convert_params[7] = updatetable_converted_path;
+                                        Settings.setInputGDCFolder(tmp_download_dir.getAbsolutePath());
+                                        Settings.setOutputConvertedFolder(converted_local_data_dir);
+                                        convertAction.execute(convert_params);
+                                        // move downloaded files from the tmp dir to the original one
+                                        for (File file : tmp_download_dir.listFiles()) {
+                                            //tmp_download_dir.listFiles()[f].renameTo(new File( original_local_data_dir + tmp_download_dir.listFiles()[f].getName() ));
+                                            //FileUtils.moveFileToDirectory(file, new File(original_local_data_dir), true);
+                                            FileUtils.moveFile(file, new File( original_local_data_dir + file.getName() ));
+                                        }
+                                        // just to be sure that the tmp download dir will be empty before the next data type
+                                        if (tmp_download_dir.list().length > 0)
+                                            FSUtils.deleteDir(tmp_download_dir);
+                                    }
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
-                            // just to be sure that the tmp download dir will be empty before the next data type
-                            if (tmp_download_dir.list().length > 0)
-                                FSUtils.deleteDir(tmp_download_dir);
                         }
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
             }
