@@ -596,7 +596,7 @@ public class MetadataHandler {
                 BufferedReader br = new BufferedReader(new InputStreamReader(in));
                 String line;
                 while ((line = br.readLine()) != null) {
-                    if (!line.trim().equals("")) {
+                    if (!line.trim().equals("") && !line.trim().startsWith("#")) {
                         String[] line_split = line.split("\t");
                         String in_file_endpoint = line_split[1];
                         if (in_file_endpoint.trim().toLowerCase().equals(endpoint.trim().toLowerCase())) {
@@ -757,7 +757,7 @@ public class MetadataHandler {
         HashMap<String, ArrayList<String>> mapping_file_attribute = YAMLreader.getMappingAttributes();
         for (String attribute_mapping : mapping_file_attribute.keySet()) {
             if(meta_map.containsKey(attribute_mapping)){
-                ArrayList<String> list_attribute_forAllredundantGroup = new ArrayList<String>();
+                ArrayList<String> list_attribute_forAllredundantGroup = new ArrayList<>();
                 ArrayList<String> reduntant_values_mapping = mapping_file_attribute.get(attribute_mapping);
                 list_attribute_forAllredundantGroup.addAll(reduntant_values_mapping);
                 list_attribute_forAllredundantGroup.add(attribute_mapping);
@@ -774,17 +774,16 @@ public class MetadataHandler {
                 for (String attr : attr_list_mapping_fixed.keySet()) {
                     String[] attribute_split_mapping = attr.split("__");
                     String stripped_attribute_mapping = attribute_split_mapping[attribute_split_mapping.length - 1];
-                    String value_attr = "";
 
                     HashMap<String, String> attr_list_mapping = new HashMap<>();
-                    value_attr = attr_list_mapping_fixed.get(attr);
+                    String value_attr = attr_list_mapping_fixed.get(attr);
                     meta_map.remove(attr);
-                    if (redundantValues.containsKey(stripped_attribute_mapping+"-"+value_attr.toLowerCase())) {
-                        attr_list_mapping = redundantValues.get(stripped_attribute_mapping+"-"+value_attr.toLowerCase());
+                    if (redundantValues.containsKey(stripped_attribute_mapping+"_"+value_attr.toLowerCase())) {
+                        attr_list_mapping = redundantValues.get(stripped_attribute_mapping+"_"+value_attr.toLowerCase());
                     }
                     attr_list_mapping.putAll(attr_list_mapping_fixed);
 
-                    redundantValues.put(stripped_attribute_mapping+"-"+value_attr.toLowerCase(), attr_list_mapping);
+                    redundantValues.put(stripped_attribute_mapping+"_"+value_attr.toLowerCase(), attr_list_mapping);
                 }
             }
         }
