@@ -57,12 +57,13 @@ public class UpdateGDCData {
                 if (!line.equals("")) {
                     String[] line_split = line.split("\t");
                     HashMap<String, String> updateInfo = new HashMap<>();
-                    updateInfo.put("file_name", line_split[0]);
-                    updateInfo.put("file_size", line_split[1]);
-                    updateInfo.put("md5sum", line_split[2]);
-                    updateInfo.put("updated_datetime", line_split[3]);
-                    updateInfo.put("downloaded_datetime", line_split[4]);
-                    updatetable.put(line_split[0], updateInfo);
+                    updateInfo.put("file_id", line_split[0]);
+                    updateInfo.put("file_name", line_split[1]);
+                    updateInfo.put("file_size", line_split[2]);
+                    updateInfo.put("md5sum", line_split[3]);
+                    updateInfo.put("updated_datetime", line_split[4]);
+                    updateInfo.put("downloaded_datetime", line_split[5]);
+                    updatetable.put(line_split[1], updateInfo);
                 }
             }
             br.close();

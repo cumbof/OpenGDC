@@ -253,7 +253,6 @@ public class MaskedSomaticMutationParser extends BioParser {
                     Files.write((new File(filesPathConverted.get(aliquot_uuid))).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                     
                     if (this.isUpdateTableEnabled()) {
-                        MessageDigest md5digest = MessageDigest.getInstance("MD5");
                         String file_uuid = null;
                         for (String f_uuid: fileUUID2aliquotUUIDs.keySet()) {
                             if (fileUUID2aliquotUUIDs.get(f_uuid).contains(aliquot_uuid)) {
@@ -261,7 +260,7 @@ public class MaskedSomaticMutationParser extends BioParser {
                                 break;
                             }
                         }
-                        String updatetable_row = aliquot_uuid + "\t" + file_uuid + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(md5digest, new File(filesPathConverted.get(aliquot_uuid))) + "\t" + String.valueOf(FileUtils.sizeOf(new File(filesPathConverted.get(aliquot_uuid))) + "\n");
+                        String updatetable_row = aliquot_uuid + "\t" + file_uuid + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(new File(filesPathConverted.get(aliquot_uuid))) + "\t" + String.valueOf(FileUtils.sizeOf(new File(filesPathConverted.get(aliquot_uuid))) + "\n");
                         Files.write((new File(this.getUpdateTablePath())).toPath(), (updatetable_row).getBytes("UTF-8"), StandardOpenOption.APPEND);
                     }
                 }
