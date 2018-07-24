@@ -20,11 +20,11 @@ public class Settings {
     }
     
     // debug references local
-    private static final String DEBUG_TMP = "/Users/fabio/Downloads/test_gdc_download/tmp/";
-    private static final String DEBUG_APPDATA = "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/";
+    //private static final String DEBUG_TMP = "/Users/fabio/Downloads/test_gdc_download/tmp/";
+    //private static final String DEBUG_APPDATA = "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/";
     // debug references server
-    //private static final String DEBUG_TMP = "/FTP/Software/appdata/tmp/";
-    //private static final String DEBUG_APPDATA = "/FTP/Software/appdata/";
+    private static final String DEBUG_TMP = "/FTP/Software/appdata/tmp/";
+    private static final String DEBUG_APPDATA = "/FTP/Software/appdata/";
     
     // build number
     private static final String BUILD_NUMBER = "0001";

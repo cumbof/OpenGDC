@@ -147,7 +147,7 @@ public class UpdateTask extends TimerTask {
                 String current_md5 = dataMap.get(uuid).get("md5sum");
                 String current_updated_datetime = dataMap.get(uuid).get("updated_datetime");
                 String current_file_name = dataMap.get(uuid).get("file_name");
-                String current_file_id = dataMap.get(uuid).get("file_id");
+                //String current_file_id = dataMap.get(uuid).get("file_id");
                 String current_file_size = dataMap.get(uuid).get("file_size");
                 if (dataType.equals("Clinical Supplement") || dataType.equals("Biospecimen Supplement") || dataType.equals("Masked Somatic Mutation")) {
                     if (first_iter) {
@@ -167,15 +167,15 @@ public class UpdateTask extends TimerTask {
                     Date file_downloadDate = new Date();
                     DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
                     // modify updatetable_original
-                    updatetable_original.remove(current_file_id);
+                    updatetable_original.remove(uuid);
                     HashMap<String, String> updateInfo = new HashMap<>();
                     updateInfo.put("md5sum", current_md5);
                     updateInfo.put("updated_datetime", current_updated_datetime);
                     updateInfo.put("file_name", current_file_name);
-                    updateInfo.put("file_id", current_file_id);
+                    updateInfo.put("file_id", uuid);
                     updateInfo.put("file_size", current_file_size);
                     updateInfo.put("downloaded_datetime", file_downloadDate.toString());
-                    updatetable_original.put(current_file_id, updateInfo);
+                    updatetable_original.put(uuid, updateInfo);
                     if (first_iter) {
                         (new File(updatetable_original_path)).delete();
                         (new File(updatetable_original_path)).createNewFile();
@@ -198,15 +198,15 @@ public class UpdateTask extends TimerTask {
                         Date file_downloadDate = new Date();
                         DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
                         // modify updatetable_original
-                        updatetable_original.remove(current_file_id);
+                        updatetable_original.remove(uuid);
                         HashMap<String, String> updateInfo = new HashMap<>();
                         updateInfo.put("md5sum", current_md5);
                         updateInfo.put("updated_datetime", current_updated_datetime);
                         updateInfo.put("file_name", current_file_name);
-                        updateInfo.put("file_id", current_file_id);
+                        updateInfo.put("file_id", uuid);
                         updateInfo.put("file_size", current_file_size);
                         updateInfo.put("downloaded_datetime", file_downloadDate.toString());
-                        updatetable_original.put(current_file_id, updateInfo);
+                        updatetable_original.put(uuid, updateInfo);
                         (new File(updatetable_original_path)).delete();
                         (new File(updatetable_original_path)).createNewFile();
                         for (String fileId: updatetable_original.keySet()) {
@@ -227,11 +227,11 @@ public class UpdateTask extends TimerTask {
                         updateInfo.put("md5sum", current_md5);
                         updateInfo.put("updated_datetime", current_updated_datetime);
                         updateInfo.put("file_name", current_file_name);
-                        updateInfo.put("file_id", current_file_id);
+                        updateInfo.put("file_id", uuid);
                         updateInfo.put("file_size", current_file_size);
                         updateInfo.put("downloaded_datetime", file_downloadDate.toString());
-                        updatetable_original.put(current_file_id, updateInfo);
-                        String fileRow = current_file_id + "\t" + updatetable_original.get(current_file_id).get("file_name") + "\t" + updatetable_original.get(current_file_id).get("file_size") + "\t" + updatetable_original.get(current_file_id).get("md5sum") + "\t" + updatetable_original.get(current_file_id).get("updated_datetime") + "\t" + updatetable_original.get(current_file_id).get("downloaded_datetime") + "\n";
+                        updatetable_original.put(uuid, updateInfo);
+                        String fileRow = uuid + "\t" + updatetable_original.get(uuid).get("file_name") + "\t" + updatetable_original.get(uuid).get("file_size") + "\t" + updatetable_original.get(uuid).get("md5sum") + "\t" + updatetable_original.get(uuid).get("updated_datetime") + "\t" + updatetable_original.get(uuid).get("downloaded_datetime") + "\n";
                         Files.write((new File(updatetable_original_path)).toPath(), (fileRow).getBytes("UTF-8"), StandardOpenOption.APPEND);
                     }
                 }
