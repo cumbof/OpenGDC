@@ -63,7 +63,7 @@ public class UpdateGDCData {
                     updateInfo.put("md5sum", line_split[3]);
                     updateInfo.put("updated_datetime", line_split[4]);
                     updateInfo.put("downloaded_datetime", line_split[5]);
-                    updatetable.put(line_split[1], updateInfo);
+                    updatetable.put(line_split[0], updateInfo);
                 }
             }
             br.close();

@@ -20,8 +20,8 @@ public class Settings {
     }
     
     // debug references local
-    //private static final String DEBUG_TMP = "/Users/fabio/Downloads/test_gdc_download/tmp/";
-    //private static final String DEBUG_APPDATA = "/Users/fabio/NetBeansProjects/OpenGDC/package/appdata/";
+//    private static final String DEBUG_TMP = "/Users/eleonora/Downloads/test_gdc_download/tmp/";
+//    private static final String DEBUG_APPDATA = "/Users/eleonora/NetBeansProjects/OpenGDC/package/appdata/";
     // debug references server
     private static final String DEBUG_TMP = "/FTP/Software/appdata/tmp/";
     private static final String DEBUG_APPDATA = "/FTP/Software/appdata/";
@@ -186,6 +186,12 @@ public class Settings {
         return CLINICAL_YAML;
     }
     
+    private static final String GDC_YAML = "./appdata/meta/tcga_gdc.yaml";
+    public static String getGDCYAML() {
+        if (DEBUG) return DEBUG_APPDATA+"meta/tcga_gdc.yaml";
+        return GDC_YAML;
+    }
+    
     private static final String UPDATE_TABLE_NAME = "updatetable.txt";
     public static String getUpdateTableName() {
         return UPDATE_TABLE_NAME;
@@ -194,5 +200,5 @@ public class Settings {
     public static String getUpdateTableURL(String program, String disease, String dataType, boolean original, boolean static_url) {
         return getOpenGDCFTPRepoProgram(program, original, static_url) + disease.trim().toLowerCase() + "/" + dataType + "/" + getUpdateTableName();
     }
-    
+	
 }

@@ -6,6 +6,7 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -213,7 +214,9 @@ public class MetadataParserTSV extends BioParser {
                                         fos.close();
                                         
                                         if (this.isUpdateTableEnabled()) {
-                                            String updatetable_row = aliquot_uuid + "\t" + aliquotUUID2fileUUID.get(aliquot_uuid) + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(out_file) + "\t" + String.valueOf(FileUtils.sizeOf(out_file) + "\n");
+                                        	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
+                        					String file_convertedDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2"); 
+                                            String updatetable_row = aliquot_uuid + "\t" + aliquotUUID2fileUUID.get(aliquot_uuid) + "\t" + file_convertedDate + "\t" + FSUtils.getFileChecksum(out_file) + "\t" + String.valueOf(FileUtils.sizeOf(out_file) + "\n");
                                             Files.write((new File(this.getUpdateTablePath())).toPath(), (updatetable_row).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                         }
                                     }

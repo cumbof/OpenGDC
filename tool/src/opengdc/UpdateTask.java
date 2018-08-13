@@ -164,7 +164,8 @@ public class UpdateTask extends TimerTask {
                     }
                     
                     // download new original file
-                    Date file_downloadDate = new Date();
+                    SimpleDateFormat  format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
+					String file_downloadDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");  
                     DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
                     // modify updatetable_original
                     updatetable_original.remove(uuid);
@@ -174,7 +175,7 @@ public class UpdateTask extends TimerTask {
                     updateInfo.put("file_name", current_file_name);
                     updateInfo.put("file_id", uuid);
                     updateInfo.put("file_size", current_file_size);
-                    updateInfo.put("downloaded_datetime", file_downloadDate.toString());
+                    updateInfo.put("downloaded_datetime", file_downloadDate);
                     updatetable_original.put(uuid, updateInfo);
                     if (first_iter) {
                         (new File(updatetable_original_path)).delete();
@@ -195,7 +196,8 @@ public class UpdateTask extends TimerTask {
                         FSUtils.deleteFilesWithPrefix(aliquot_uuid, converted_local_data_dir);
                         FSUtils.deleteFilesWithPrefix(converted_file_uuid, original_local_data_dir);
                         // download new original file
-                        Date file_downloadDate = new Date();
+                        SimpleDateFormat  format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
+						String file_downloadDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");  
                         DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
                         // modify updatetable_original
                         updatetable_original.remove(uuid);
@@ -205,7 +207,7 @@ public class UpdateTask extends TimerTask {
                         updateInfo.put("file_name", current_file_name);
                         updateInfo.put("file_id", uuid);
                         updateInfo.put("file_size", current_file_size);
-                        updateInfo.put("downloaded_datetime", file_downloadDate.toString());
+                        updateInfo.put("downloaded_datetime", file_downloadDate);
                         updatetable_original.put(uuid, updateInfo);
                         (new File(updatetable_original_path)).delete();
                         (new File(updatetable_original_path)).createNewFile();
@@ -220,8 +222,8 @@ public class UpdateTask extends TimerTask {
                     }
                     else {
                         // download original file
-                        Date file_downloadDate = new Date();
-                        DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
+						SimpleDateFormat  format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
+						String file_downloadDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");                          DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
                         // modify updatetable
                         HashMap<String, String> updateInfo = new HashMap<>();
                         updateInfo.put("md5sum", current_md5);
@@ -229,7 +231,7 @@ public class UpdateTask extends TimerTask {
                         updateInfo.put("file_name", current_file_name);
                         updateInfo.put("file_id", uuid);
                         updateInfo.put("file_size", current_file_size);
-                        updateInfo.put("downloaded_datetime", file_downloadDate.toString());
+                        updateInfo.put("downloaded_datetime", file_downloadDate);
                         updatetable_original.put(uuid, updateInfo);
                         String fileRow = uuid + "\t" + updatetable_original.get(uuid).get("file_name") + "\t" + updatetable_original.get(uuid).get("file_size") + "\t" + updatetable_original.get(uuid).get("md5sum") + "\t" + updatetable_original.get(uuid).get("updated_datetime") + "\t" + updatetable_original.get(uuid).get("downloaded_datetime") + "\n";
                         Files.write((new File(updatetable_original_path)).toPath(), (fileRow).getBytes("UTF-8"), StandardOpenOption.APPEND);
@@ -282,5 +284,4 @@ public class UpdateTask extends TimerTask {
         }
         return aliquot_uuid;
     }
-    
 }

@@ -34,6 +34,18 @@ public class YAMLreader {
             }
             biospecimen_map.put(key, values);
         }
+        String tcga_gdc = Settings.getGDCYAML();
+		String gdc_meta_type = "gdc";
+		HashMap<String, ArrayList<String>> gdc_map = readYAML(tcga_gdc, gdc_meta_type);
+		//HashMap<String, ArrayList<String>> metadata_map = new HashMap<String, ArrayList<String>>(biospecimen_map);
+		for (String key: gdc_map.keySet()) {
+			ArrayList<String> values = gdc_map.get(key);
+			if (biospecimen_map.containsKey(key)) {
+				values.addAll(biospecimen_map.get(key));
+				//biospecimen_map.remove(key);
+			}
+			biospecimen_map.put(key, values);
+		}
         return biospecimen_map;
     }
 
