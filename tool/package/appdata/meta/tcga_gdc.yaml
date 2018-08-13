@@ -1,0 +1,6 @@
+case:
+  -
+    properties:
+      disease_type:
+        path: ./cases:project:name|./cases:tissue_source_site:project
+        type: str.lower
