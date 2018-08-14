@@ -197,7 +197,7 @@ public class UpdateTask extends TimerTask {
                         FSUtils.deleteFilesWithPrefix(converted_file_uuid, original_local_data_dir);
                         // download new original file
                         SimpleDateFormat  format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
-						String file_downloadDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");  
+			String file_downloadDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");  
                         DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
                         // modify updatetable_original
                         updatetable_original.remove(uuid);
@@ -222,8 +222,8 @@ public class UpdateTask extends TimerTask {
                     }
                     else {
                         // download original file
-						SimpleDateFormat  format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
-						String file_downloadDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");                          DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
+			SimpleDateFormat  format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
+			String file_downloadDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");                          DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
                         // modify updatetable
                         HashMap<String, String> updateInfo = new HashMap<>();
                         updateInfo.put("md5sum", current_md5);
