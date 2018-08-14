@@ -6,6 +6,7 @@ import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -378,7 +379,6 @@ public class MetadataParserXML extends BioParser {
                                                 bigMap.put(attr, manually_curated.get(attr));
                                             }
                                             //}
-                                            
                                             // remove redundant attributes
                                             HashMap<String, HashMap<String, String>> redundant_map = MetadataHandler.detectRedundantMetadata(bigMap);
                                             HashMap<String, String> final_map = MetadataHandler.filterOutRedundantMetadata(redundant_map, "tcga");
@@ -406,7 +406,9 @@ public class MetadataParserXML extends BioParser {
                                 aliquotNotFound = false;
                                 
                                 if (this.isUpdateTableEnabled()) {
-                                    String updatetable_row = aliquot_uuid + "\t" + aliquotUUID2fileUUID.get(aliquot_uuid) + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(aliquotFile) + "\t" + String.valueOf(FileUtils.sizeOf(aliquotFile) + "\n");
+                                	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
+                					String file_convertedDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");                          				
+                                    String updatetable_row = aliquot_uuid + "\t" + aliquotUUID2fileUUID.get(aliquot_uuid) + "\t" + file_convertedDate + "\t" + FSUtils.getFileChecksum(aliquotFile) + "\t" + String.valueOf(FileUtils.sizeOf(aliquotFile) + "\n");
                                     Files.write((new File(this.getUpdateTablePath())).toPath(), (updatetable_row).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                 }
                                 break;

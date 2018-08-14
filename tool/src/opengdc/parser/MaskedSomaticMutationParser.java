@@ -7,6 +7,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -260,7 +261,9 @@ public class MaskedSomaticMutationParser extends BioParser {
                                 break;
                             }
                         }
-                        String updatetable_row = aliquot_uuid + "\t" + file_uuid + "\t" + (new Date()).toString() + "\t" + FSUtils.getFileChecksum(new File(filesPathConverted.get(aliquot_uuid))) + "\t" + String.valueOf(FileUtils.sizeOf(new File(filesPathConverted.get(aliquot_uuid))) + "\n");
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
+    					String file_convertedDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");
+                        String updatetable_row = aliquot_uuid + "\t" + file_uuid + "\t" + file_convertedDate + "\t" + FSUtils.getFileChecksum(new File(filesPathConverted.get(aliquot_uuid))) + "\t" + String.valueOf(FileUtils.sizeOf(new File(filesPathConverted.get(aliquot_uuid))) + "\n");
                         Files.write((new File(this.getUpdateTablePath())).toPath(), (updatetable_row).getBytes("UTF-8"), StandardOpenOption.APPEND);
                     }
                 }
