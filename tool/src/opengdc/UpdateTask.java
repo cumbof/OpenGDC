@@ -165,7 +165,7 @@ public class UpdateTask extends TimerTask {
                     
                     // download new original file
                     SimpleDateFormat  format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
-					String file_downloadDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");  
+		    String file_downloadDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");  
                     DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
                     // modify updatetable_original
                     updatetable_original.remove(uuid);
