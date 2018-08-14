@@ -897,15 +897,15 @@ public class MetadataHandler {
             //se remaining_attributes è vuota? va nell'else e mi torna attribute = "", quindi lo pongo  a null perchè alla riga 753 controllo se è diverso da null
             String attribute = null;
             if (remaining_attributes.contains("gdc__cases__disease_type"))
-				attribute = "gdc__cases__disease_type";
-			else{
+		attribute = "gdc__cases__disease_type";
+	    else{
             	int attribute_size = 0;
             	for (String attr: remaining_attributes) {
-               		int attr_size = attr.split("__").length;
-                	if (attr_size > attribute_size && !attr.toLowerCase().contains("associated_entities") && !attr.toLowerCase().contains("cases__project")) {
-                   		attribute = attr;
+               	    int attr_size = attr.split("__").length;
+                    if (attr_size > attribute_size && !attr.toLowerCase().contains("associated_entities") && !attr.toLowerCase().contains("cases__project")) {
+                   	attribute = attr;
                     	attribute_size = attr_size;
-                	}
+                    }
             	}
             }
             return attribute;
