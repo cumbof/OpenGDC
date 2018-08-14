@@ -301,10 +301,15 @@ case:
         code: ./shared:tissue_source_site
       projects:
         code: //admin:admin/admin:disease_code
-    # properties:
+    properties:
       # submitter_id:
       #   path: ./shared:bcr_patient_barcode
       #   type: str
+      project:
+        program:
+          name: 
+            path: ./admin:project_code
+            type: str
 
 slide:
   -
