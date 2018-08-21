@@ -149,9 +149,6 @@ public class GDCQuery {
 			results = new HashMap<>();
 			if (current_key == null)
 				current_key = "";
-			if(current_key.contains("access")){
-				System.out.println();
-			}
 			if (current_obj instanceof HashMap) {
 				HashMap<String, Object> hashmap = (HashMap<String, Object>)current_obj;
 				for (String k: hashmap.keySet()) {
@@ -163,9 +160,6 @@ public class GDCQuery {
 					if (keys.contains(curr_key.toLowerCase().trim())) {
 						HashMap<String, Object> reduced_hashmap = new HashMap<>();
 						for (String key: hashmap.keySet()) {
-							if(key.contains("acl")){
-								System.out.println();
-							}
 							if (!(hashmap.get(key) instanceof HashMap) && !(hashmap.get(key) instanceof List)) {
 								if (current_key.trim().equals(""))
 									reduced_hashmap.put(key, hashmap.get(key));
@@ -402,8 +396,6 @@ public class GDCQuery {
 								"\"fields\":\""+fields+"\"" +
 								"}";
 
-						System.err.println(payload);
-
 						String url = BASE_URL+endpoint;
 						URL obj = new URL(url);
 						HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -467,9 +459,6 @@ public class GDCQuery {
 							HashMap<String, ArrayList<Object>> values = searchFor(keys, null, node, null);
 							for (String attr: values.keySet()){
 								System.out.print(values.get(attr));
-								if(attr.contains("acl")){
-									System.out.print(values.get(attr));								
-								}
 								data_node.put(attr, values.get(attr));
 							}
 							info.add(data_node);

@@ -10,42 +10,45 @@ import org.yaml.snakeyaml.Yaml;
 import opengdc.Settings;
 
 public class YAMLreader {
-	
-    private static HashMap<String, ArrayList<String>> redundantmap = new HashMap<>();
 
+    private static HashMap<String, ArrayList<String>> redundantmap = new HashMap<>();
+    private static HashMap<String, ArrayList<String>> biospecimen_map  = new HashMap<>();
     /*public static void main(String[]args){
         getMappingAttributes();
     }*/
-		
+
     public static HashMap<String, ArrayList<String>> getMappingAttributes() {
         // The path of your YAML file.
-	String tcga_biospecimen = Settings.getBiospecimenYAML();
-	String biospecimen_meta_type = "biospecimen";
-        HashMap<String, ArrayList<String>> biospecimen_map = readYAML(tcga_biospecimen, biospecimen_meta_type);
-	String tcga_clinical = Settings.getClinicalYAML();
-	String clinical_meta_type = "clinical";
-        HashMap<String, ArrayList<String>> clinical_map = readYAML(tcga_clinical, clinical_meta_type);
-        //HashMap<String, ArrayList<String>> metadata_map = new HashMap<String, ArrayList<String>>(biospecimen_map);
-        for (String key: clinical_map.keySet()) {
-            ArrayList<String> values = clinical_map.get(key);
-            if (biospecimen_map.containsKey(key)) {
-                values.addAll(biospecimen_map.get(key));
-                //biospecimen_map.remove(key);
+        if(biospecimen_map.isEmpty()){
+            String tcga_biospecimen = Settings.getBiospecimenYAML();
+            String biospecimen_meta_type = "biospecimen";
+            //HashMap<String, ArrayList<String>>
+            biospecimen_map = readYAML(tcga_biospecimen, biospecimen_meta_type);
+            String tcga_clinical = Settings.getClinicalYAML();
+            String clinical_meta_type = "clinical";
+            HashMap<String, ArrayList<String>> clinical_map = readYAML(tcga_clinical, clinical_meta_type);
+            //HashMap<String, ArrayList<String>> metadata_map = new HashMap<String, ArrayList<String>>(biospecimen_map);
+            for (String key: clinical_map.keySet()) {
+                ArrayList<String> values = clinical_map.get(key);
+                if (biospecimen_map.containsKey(key)) {
+                    values.addAll(biospecimen_map.get(key));
+                    //biospecimen_map.remove(key);
+                }
+                biospecimen_map.put(key, values);
             }
-            biospecimen_map.put(key, values);
+            String tcga_gdc = Settings.getGDCYAML();
+            String gdc_meta_type = "gdc";
+            HashMap<String, ArrayList<String>> gdc_map = readYAML(tcga_gdc, gdc_meta_type);
+            //HashMap<String, ArrayList<String>> metadata_map = new HashMap<String, ArrayList<String>>(biospecimen_map);
+            for (String key: gdc_map.keySet()) {
+                ArrayList<String> values = gdc_map.get(key);
+                if (biospecimen_map.containsKey(key)) {
+                    values.addAll(biospecimen_map.get(key));
+                    //biospecimen_map.remove(key);
+                }
+                biospecimen_map.put(key, values);
+            }
         }
-        String tcga_gdc = Settings.getGDCYAML();
-		String gdc_meta_type = "gdc";
-		HashMap<String, ArrayList<String>> gdc_map = readYAML(tcga_gdc, gdc_meta_type);
-		//HashMap<String, ArrayList<String>> metadata_map = new HashMap<String, ArrayList<String>>(biospecimen_map);
-		for (String key: gdc_map.keySet()) {
-			ArrayList<String> values = gdc_map.get(key);
-			if (biospecimen_map.containsKey(key)) {
-				values.addAll(biospecimen_map.get(key));
-				//biospecimen_map.remove(key);
-			}
-			biospecimen_map.put(key, values);
-		}
         return biospecimen_map;
     }
 
@@ -88,9 +91,11 @@ public class YAMLreader {
                     map.put("gdc__"+kk,val);
             }
         }
+        //svuotare redundantmap?
+        //redundantmap.clear();
         //System.out.println();
         //for (String kk: map.keySet())
-            //System.out.println(kk+": \n\t"+map.get(kk));
+        //System.out.println(kk+": \n\t"+map.get(kk));
         return map;
     }
 
@@ -109,7 +114,7 @@ public class YAMLreader {
                 //System.out.println(s);
                 //HashMap<String,Object> h = (HashMap<String,Object>)s;
                 //for (String p: h.keySet()) {
-                //	System.out.println(p);
+                //  System.out.println(p);
                 //}
                 if (s instanceof HashMap) {
                     HashMap<String,Object> h = (HashMap<String,Object>)s;
@@ -117,13 +122,13 @@ public class YAMLreader {
                         //System.out.println(k+"s."+p);
                         if (!p.equals("edge_properties") && !p.equals("edges") && !p.equals("edge_datetime_properties") && !p.equals("root") && !p.equals("generated_id")) {
                             //recursiveRecognition(k+"_"+p, h.get(p), meta_type);
-                            //else 							
+                            //else                          
                             recursiveRecognition(k_print+"__"+p, h.get(p), meta_type);
                         }
                     }
                 }
             }
-        }		
+        }       
     }
 
     private static void recursiveRecognition(String attribute, Object object, String meta_type) {
@@ -156,5 +161,5 @@ public class YAMLreader {
             }
         }
     }
-    
+
 }
