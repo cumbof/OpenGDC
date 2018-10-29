@@ -7,12 +7,12 @@ associated_entities
 
 ### ridondanze:
 
-api - biospecimen/clinical —> file di mapping (yaml per clinical e per biospecimen). Teniamo gli attributi provenienti dalle api ("gdc" attributes)
-biospecimen - clinical —> biospecimen.
-case - case.project —> case
-analytes - analytes.aliquots —> analytes.aliquots, ridondanza che non verifica nessuna delle regole decise, consideriamo analytes.aliquots che è l'attributo più specifico.
-biospecimen__admin__project_code - gdc__program__name —> gdc__program__name (aggiunto nel file biospecimen.yaml)
-gdc__disease_type - gdc__project__name - gdc__tissue_source_site__project —> gdc__disease_type (seconda scelta l'attributo più lungo). In questo caso abbiamo creato il file gdc.yaml per queta ridondanza tra attributi di tipo "gdc"
+* api - biospecimen/clinical —> file di mapping (yaml per clinical e per biospecimen). Teniamo gli attributi provenienti dalle api ("gdc" attributes)
+* biospecimen - clinical —> biospecimen
+* case - case.project —> case
+* analytes - analytes.aliquots —> analytes.aliquots, ridondanza che non verifica nessuna delle regole decise, consideriamo analytes.aliquots che è l'attributo più specifico.
+* biospecimen__admin__project_code - gdc__program__name —> gdc__program__name (aggiunto nel file biospecimen.yaml)
+* gdc__disease_type - gdc__project__name - gdc__tissue_source_site__project —> gdc__disease_type (seconda scelta l'attributo più lungo). In questo caso abbiamo creato il file gdc.yaml per queta ridondanza tra attributi di tipo "gdc"
 
 datetime —> teniamo solo:
 * gdc__cases__samples__portions__analytes__aliquots__updated_datetime
