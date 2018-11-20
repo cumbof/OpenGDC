@@ -5,6 +5,7 @@ import opengdc.Settings;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,6 +22,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import javax.swing.JTextPane;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -112,7 +118,7 @@ public class GDCQuery {
 
 			Date now = new Date();
 			SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
-			String query_file_name = "query_"+ft.format(now)+".json";
+			String query_file_name = "query_"+ft.format(now)+"_"+disease+".json";
 
 			File outFile = new File(Settings.getTmpDir() + query_file_name);
 			if (outFile.exists())
@@ -144,80 +150,86 @@ public class GDCQuery {
 		return null;
 	}
 
-	public static HashMap<String, ArrayList<Object>> searchFor(HashSet<String> keys, String current_key, Object current_obj, HashMap<String, ArrayList<Object>> results) {
-		if (results == null)
-			results = new HashMap<>();
-			if (current_key == null)
-				current_key = "";
-			if (current_obj instanceof HashMap) {
-				HashMap<String, Object> hashmap = (HashMap<String, Object>)current_obj;
-				for (String k: hashmap.keySet()) {
-					String curr_key = "";
-					if (current_key.trim().equals(""))
-						curr_key = k;
-					else
-						curr_key = current_key+"."+k;
-					if (keys.contains(curr_key.toLowerCase().trim())) {
-						HashMap<String, Object> reduced_hashmap = new HashMap<>();
-						for (String key: hashmap.keySet()) {
-							if (!(hashmap.get(key) instanceof HashMap) && !(hashmap.get(key) instanceof List)) {
-								if (current_key.trim().equals(""))
-									reduced_hashmap.put(key, hashmap.get(key));
-								else
-									reduced_hashmap.put(current_key+"."+key, hashmap.get(key));
-							}
-							else if (hashmap.get(key) instanceof List) {
-								ArrayList<Object> list_obj = (ArrayList<Object>)hashmap.get(key);
-								boolean is_string = false;
-								for (Object o: list_obj){
-									if (o instanceof String) {
-										is_string = true;
-										break;
-									}
-								}
-								if (is_string) {
-//									if (current_key.trim().equals(""))
-//										results.putAll(searchFor(keys, key, hashmap.get(key), results));
-//									else
-//										results.putAll(searchFor(keys, current_key+"."+key, hashmap.get(key), results));
-									if (current_key.trim().equals(""))
-										reduced_hashmap.put(key, list_obj.get(0));
-									else
-										reduced_hashmap.put(current_key+"."+key, list_obj.get(0));
-								}
-							}
-						}
-						ArrayList<Object> val = new ArrayList<>();
-						if (results.containsKey(curr_key.toLowerCase().trim()))
-							val = results.get(curr_key.toLowerCase().trim());
-						val.add(reduced_hashmap);
-						results.put(curr_key.toLowerCase().trim(), val);
-					}
-					else {
-						if ((hashmap.get(k) instanceof HashMap) || (hashmap.get(k) instanceof List)) {
-							if (current_key.trim().equals(""))
-								results.putAll(searchFor(keys, k, hashmap.get(k), results));
-							else
-								results.putAll(searchFor(keys, current_key+"."+k, hashmap.get(k), results));
-						}
-					}
+	//	public static HashMap<String, ArrayList<Object>> searchFor(HashSet<String> keys, String current_key, Object current_obj, HashMap<String, ArrayList<Object>> results) {
+	//		if (results == null)
+	//			results = new HashMap<>();
+	//
+	//			if (current_key == null)
+	//				current_key = "";
+	//
+	//			if (current_obj instanceof HashMap) {
+	//				HashMap<String, Object> hashmap = (HashMap<String, Object>)current_obj;
+	//				
+	//				for (String k: hashmap.keySet()) {
+	//
+	//					String curr_key = "";
+	//					if (current_key.trim().equals(""))
+	//						curr_key = k;
+	//					else
+	//						curr_key = current_key+"."+k;
+	//					if (keys.contains(curr_key.toLowerCase().trim())) {
+	//						HashMap<String, Object> reduced_hashmap = new HashMap<>();
+	//						for (String key: hashmap.keySet()) {
+	//							if (!(hashmap.get(key) instanceof HashMap) && !(hashmap.get(key) instanceof List)) {
+	//								if (current_key.trim().equals(""))
+	//									reduced_hashmap.put(key, hashmap.get(key));
+	//								else
+	//									reduced_hashmap.put(current_key+"."+key, hashmap.get(key));
+	//							}
+	//							else if (hashmap.get(key) instanceof List) {
+	//								ArrayList<Object> list_obj = (ArrayList<Object>)hashmap.get(key);
+	//								boolean is_string = false;
+	//								for (Object o: list_obj){
+	//									if (o instanceof String) {
+	//										is_string = true;
+	//										break;
+	//									}
+	//								}
+	//								if (is_string) {
+	//									//									if (current_key.trim().equals(""))
+	//									//										results.putAll(searchFor(keys, key, hashmap.get(key), results));
+	//									//									else
+	//									//										results.putAll(searchFor(keys, current_key+"."+key, hashmap.get(key), results));
+	//									if (current_key.trim().equals(""))
+	//										reduced_hashmap.put(key, list_obj.get(0));
+	//									else
+	//										reduced_hashmap.put(current_key+"."+key, list_obj.get(0));
+	//								}
+	//							}
+	//						}
+	//						ArrayList<Object> val = new ArrayList<>();
+	//						if (results.containsKey(curr_key.toLowerCase().trim()))
+	//							val = results.get(curr_key.toLowerCase().trim());
+	//						val.add(reduced_hashmap);
+	//						results.put(curr_key.toLowerCase().trim(), val);
+	//					}
+	//					else {
+	//						if ((hashmap.get(k) instanceof HashMap) || (hashmap.get(k) instanceof List)) {
+	//							if (current_key.trim().equals(""))
+	//								results.putAll(searchFor(keys, k, hashmap.get(k), results));
+	//							else
+	//								results.putAll(searchFor(keys, current_key+"."+k, hashmap.get(k), results));
+	//						}
+	//					}
+	//
+	//				}
+	//			}
+	//			else if (current_obj instanceof List) {
+	//				ArrayList<Object> list = (ArrayList<Object>)current_obj;
+	//				for (Object o: list) {
+	//					if ((o instanceof HashMap) || (o instanceof List))
+	//						results.putAll(searchFor(keys, current_key, o, results));
+	//				}
+	//			}
+	//			else if (current_obj instanceof String) {
+	//				ArrayList<Object> list_string = new ArrayList<>();
+	//				list_string.add((String)current_obj);
+	//				results.put(current_key, list_string);
+	//			}
+	//			return results;
+	//	}
 
-				}
-			}
-			else if (current_obj instanceof List) {
-				ArrayList<Object> list = (ArrayList<Object>)current_obj;
-				for (Object o: list) {
-					if ((o instanceof HashMap) || (o instanceof List))
-						results.putAll(searchFor(keys, current_key, o, results));
-				}
-			}
-			else if (current_obj instanceof String) {
-				ArrayList<Object> list_string = new ArrayList<>();
-				list_string.add((String)current_obj);
-				results.put(current_key, list_string);
-			}
-			return results;
-	}
+	
 
 	public static HashMap<String, HashMap<String, String>> extractInfo(String last_query_file_tmp_path) {
 		//aliquot = "";
@@ -320,7 +332,7 @@ public class GDCQuery {
 						out.println(line);
 					else
 						out.print(line); //remove last newline char
-						line = nextLine;
+					line = nextLine;
 				}
 				reader.close();
 				out.close();
@@ -345,7 +357,7 @@ public class GDCQuery {
 	public static ArrayList<HashMap<String, ArrayList<Object>>> retrieveExpInfoFromAttribute(String endpoint, String field_aliquot, String value_aliquot, HashSet<String> dataTypes, HashSet<String> attributes, int recursive_iteration, int from, ArrayList<HashMap<String, ArrayList<Object>>> info) {
 		Date now = new Date();
 		SimpleDateFormat ft = new SimpleDateFormat("yyyyMMddHHmmss");
-		String query_file_name = "query_"+ft.format(now)+".json";
+		String query_file_name = "query_"+ft.format(now)+"_"+value_aliquot+".json";
 		String query_file_path = Settings.getTmpDir() + query_file_name;
 		if (attributes!=null) {
 			if (!attributes.isEmpty()) {
@@ -431,40 +443,57 @@ public class GDCQuery {
 						fos.close();
 
 						con.disconnect();
+//////////////////////////
+						InputStream fis = new FileInputStream(query_file_path);
+						JsonReader jsonReader = Json.createReader(fis);
+						JsonObject jsonObject = jsonReader.readObject();
+						jsonReader.close();
+						
+						JsonObject pagination = jsonObject.getJsonObject("data").getJsonObject("pagination");
+						int total = pagination.getInt("total");
+						JsonArray hits = jsonObject.getJsonObject("data").getJsonArray("hits");
+				        for (int hits_index=0; hits_index<hits.size(); hits_index++) {
+				                JsonObject hit = hits.getJsonObject(hits_index);
+								info.add(JSONUtils.searchFor(hit, attributes, value_aliquot, dataTypes));
 
-						File jsonFile = new File(query_file_path);
-						URI uri = jsonFile.toURI();
-						InputStream in = uri.toURL().openStream();
-						JSONTokener tokener = new JSONTokener(in);
-						JSONObject root = new JSONObject(tokener);
-						HashMap<String, Object> json_data = new HashMap<>(JSONUtils.jsonToMap(root));
+				           }
+////////////////////////
+//						File jsonFile = new File(query_file_path);
+//						URI uri = jsonFile.toURI();
+//						InputStream in = uri.toURL().openStream();
+//						JSONTokener tokener = new JSONTokener(in);
+//						JSONObject root = new JSONObject(tokener);
+//						HashMap<String, Object> json_data = new HashMap<>(JSONUtils.jsonToMap(root));
+//
+//						Object data_node_obj = json_data.get("data");
+//						HashMap<String, Object> root_node = (HashMap<String, Object>)data_node_obj;
+//						ArrayList<Object> hits_node = (ArrayList<Object>)root_node.get("hits");
+//
+//						HashMap<String, Object> pagination_node = (HashMap<String, Object>)root_node.get("pagination");
+//						int total = (int)pagination_node.get("total");
+//						//System.err.println("pagination.total: "+total);
 
-						Object data_node_obj = json_data.get("data");
-						HashMap<String, Object> root_node = (HashMap<String, Object>)data_node_obj;
-						ArrayList<Object> hits_node = (ArrayList<Object>)root_node.get("hits");
+						//						for (Object node: hits_node) {
+						//							HashMap<String, ArrayList<Object>> data_node = new HashMap<>();
+						//							HashSet<String> keys = new HashSet<>();
+						//							for (String attribute: attributes) {
+						//								/*String[] attribute_split = attribute.split("\\.");
+						//                            String searchForKey = attribute_split[attribute_split.length-1];
+						//                            keys.add(searchForKey);*/
+						//								keys.add(attribute);
+						//							}
+						//							HashMap<String, ArrayList<Object>> values = searchFor(keys, null, node, null);
+						//							for (String attr: values.keySet()){
+						//								System.out.print(values.get(attr));
+						//								data_node.put(attr, values.get(attr));
+						//							}
+						//							info.add(data_node);
+						//						}
 
-						HashMap<String, Object> pagination_node = (HashMap<String, Object>)root_node.get("pagination");
-						int total = (int)pagination_node.get("total");
-						//System.err.println("pagination.total: "+total);
 
-						for (Object node: hits_node) {
-							HashMap<String, ArrayList<Object>> data_node = new HashMap<>();
-							HashSet<String> keys = new HashSet<>();
-							for (String attribute: attributes) {
-								/*String[] attribute_split = attribute.split("\\.");
-                            String searchForKey = attribute_split[attribute_split.length-1];
-                            keys.add(searchForKey);*/
-								keys.add(attribute);
-							}
-							HashMap<String, ArrayList<Object>> values = searchFor(keys, null, node, null);
-							for (String attr: values.keySet()){
-								System.out.print(values.get(attr));
-								data_node.put(attr, values.get(attr));
-							}
-							info.add(data_node);
-						}
+					//	info.add(JSONObjTest.searchFor(query_file_path, attributes));
 
-						in.close();
+					//	in.close();
 						//jsonFile.delete();
 
 						if ((total - ((recursive_iteration+1)*SIZE_LIMIT)) > 0) {
