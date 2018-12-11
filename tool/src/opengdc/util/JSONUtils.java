@@ -125,65 +125,74 @@ public class JSONUtils {
         String hitDataType = hit.getString("data_type");
         if (dataTypes.contains(hitDataType)) {
 
-            JsonArray cases = hit.getJsonArray("cases");
-            for (int cases_index=0; cases_index<cases.size(); cases_index++) {
-                String case_prefix = "cases.";
-                JsonObject caseobj = cases.getJsonObject(cases_index);
+            if(cases != null){
+                for (int cases_index=0; cases_index<cases.size(); cases_index++) {
+                    String case_prefix = "cases.";
+                    JsonObject caseobj = cases.getJsonObject(cases_index);
 
-                JsonArray samples = caseobj.getJsonArray("samples");
-                for (int samples_index=0; samples_index<samples.size(); samples_index++) {
-                    String sample_prefix = case_prefix + "samples.";
-                    JsonObject sample = samples.getJsonObject(samples_index);
+                    JsonArray samples = caseobj.getJsonArray("samples");
+                    if(samples != null){
+                        for (int samples_index=0; samples_index<samples.size(); samples_index++) {
+                            String sample_prefix = case_prefix + "samples.";
+                            JsonObject sample = samples.getJsonObject(samples_index);
 
-                    JsonArray portions = sample.getJsonArray("portions");
-                    for (int portions_index=0; portions_index<portions.size(); portions_index++) {
-                        String portion_prefix = sample_prefix + "portions.";
-                        JsonObject portion = portions.getJsonObject(portions_index);
+                            JsonArray portions = sample.getJsonArray("portions");
+                            if(portions != null){
+                                for (int portions_index=0; portions_index<portions.size(); portions_index++) {
+                                    String portion_prefix = sample_prefix + "portions.";
+                                    JsonObject portion = portions.getJsonObject(portions_index);
 
-                        JsonArray analytes = portion.getJsonArray("analytes");
-                        for (int analytes_index=0; analytes_index<analytes.size(); analytes_index++) {
-                            String analyte_prefix = portion_prefix + "analytes.";
-                            JsonObject analyte = analytes.getJsonObject(analytes_index);
+                                    JsonArray analytes = portion.getJsonArray("analytes");
+                                    if(analytes != null){
+                                        for (int analytes_index=0; analytes_index<analytes.size(); analytes_index++) {
+                                            String analyte_prefix = portion_prefix + "analytes.";
+                                            JsonObject analyte = analytes.getJsonObject(analytes_index);
 
-                            JsonArray aliquots = analyte.getJsonArray("aliquots");
-                            for (int aliquots_index=0; aliquots_index<aliquots.size(); aliquots_index++) {
-                                String aliquot_prefix = analyte_prefix + "aliquots.";
-                                JsonObject aliquot = aliquots.getJsonObject(aliquots_index);
+                                            JsonArray aliquots = analyte.getJsonArray("aliquots");
+                                            if(aliquots != null){
+                                                for (int aliquots_index=0; aliquots_index<aliquots.size(); aliquots_index++) {
+                                                    String aliquot_prefix = analyte_prefix + "aliquots.";
+                                                    JsonObject aliquot = aliquots.getJsonObject(aliquots_index);
 
-                                String current_aliquot = aliquot.getString("aliquot_id").toLowerCase();
-                                // aliquot
-                                if (current_aliquot.trim().equals(aliquot_id)) {
-                                    aliquot_found = true;
-                                    result = searchFor(aliquot, aliquot_prefix, result, attributes);
-                                    break;
-                                }  
+                                                    String current_aliquot = aliquot.getString("aliquot_id").toLowerCase();
+                                                    // aliquot
+                                                    if (current_aliquot.trim().equals(aliquot_id)) {
+                                                        aliquot_found = true;
+                                                        result = searchFor(aliquot, aliquot_prefix, result, attributes);
+                                                        break;
+                                                    }  
+                                                }
+                                            }
+                                            // analyte
+                                            if (aliquot_found) {
+                                                JsonObject analyte_copy = cloneObj(analyte, "aliquots");
+                                                result = searchFor(analyte_copy, analyte_prefix, result, attributes);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    // portion
+                                    if (aliquot_found) {
+                                        JsonObject portion_copy = cloneObj(portion, "analytes");
+                                        result = searchFor(portion_copy, portion_prefix, result, attributes);
+                                        break;
+                                    }
+                                }
                             }
-                            // analyte
+                            // sample
                             if (aliquot_found) {
-                                JsonObject analyte_copy = cloneObj(analyte, "aliquots");
-                                result = searchFor(analyte_copy, analyte_prefix, result, attributes);
+                                JsonObject sample_copy = cloneObj(sample, "portions");
+                                result = searchFor(sample_copy, sample_prefix, result, attributes);
                                 break;
                             }
                         }
-                        // portion
-                        if (aliquot_found) {
-                            JsonObject portion_copy = cloneObj(portion, "analytes");
-                            result = searchFor(portion_copy, portion_prefix, result, attributes);
-                            break;
-                        }
                     }
-                    // sample
+                    // case
                     if (aliquot_found) {
-                        JsonObject sample_copy = cloneObj(sample, "portions");
-                        result = searchFor(sample_copy, sample_prefix, result, attributes);
+                        JsonObject caseobj_copy = cloneObj(caseobj, "samples");
+                        result = searchFor(caseobj_copy, case_prefix, result, attributes);
                         break;
                     }
-                }
-                // case
-                if (aliquot_found) {
-                    JsonObject caseobj_copy = cloneObj(caseobj, "samples");
-                    result = searchFor(caseobj_copy, case_prefix, result, attributes);
-                    break;
                 }
             }
             // hit
@@ -191,6 +200,7 @@ public class JSONUtils {
                 JsonObject hit_copy = cloneObj(hit, "cases");
                 result = searchFor(hit_copy, "", result, attributes);
             }
+
         }
 
         return result;

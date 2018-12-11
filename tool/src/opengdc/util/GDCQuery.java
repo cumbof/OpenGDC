@@ -505,11 +505,11 @@ public class GDCQuery {
 						else return info;
 				}
 				catch (Exception e) {
+					e.printStackTrace();
 					recursive_iteration++;
 					if (recursive_iteration < RECURSIVE_LIMIT)
 						return retrieveExpInfoFromAttribute(endpoint, field_aliquot, value_aliquot, dataTypes, attributes, recursive_iteration, from, info);
 					else {
-						e.printStackTrace();
 						return new ArrayList<>();
 					}
 				}
