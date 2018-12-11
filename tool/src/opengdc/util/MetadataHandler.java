@@ -54,26 +54,28 @@ public class MetadataHandler {
         }
         HashMap<String, Object> tmpMap = new HashMap<>();
         try {
-            int childs = source.getChildNodes().getLength();
-            if (childs == 0) {
-                if (source.getTextContent().trim().equals("")) {
-                    return "NA";
-                }
-                return source.getTextContent();
-            } else {
-                HashMap<String, Object> dataTmp = new HashMap<>();
-                for (int i = 0; i < childs; i++) {
-                    Node child = source.getChildNodes().item(i);
-                    Object child_data = createMap(child, false);
-                    if (child.getNodeName().toLowerCase().trim().contains("#text") && childs <= 1) {
-                        return ((String) child_data).replaceAll("\t", " ");
-                    } else if (!child.getNodeName().toLowerCase().trim().contains("#text")) {
-                        dataTmp.put(keyPrefixCounterForUniqueness + "_" + child.getNodeName(), child_data);
-                        keyPrefixCounterForUniqueness++;
+            if(!source.getNodeName().contains("additional_studies")){
+                int childs = source.getChildNodes().getLength();
+                if (childs == 0) {
+                    if (source.getTextContent().trim().equals("")) {
+                        return "NA";
                     }
+                    return source.getTextContent();
+                } else {
+                    HashMap<String, Object> dataTmp = new HashMap<>();
+                    for (int i = 0; i < childs; i++) {
+                        Node child = source.getChildNodes().item(i);
+                        Object child_data = createMap(child, false);
+                        if (child.getNodeName().toLowerCase().trim().contains("#text") && childs <= 1) {
+                            return ((String) child_data).replaceAll("\t", " ");
+                        } else if (!child.getNodeName().toLowerCase().trim().contains("#text")) {
+                            dataTmp.put(keyPrefixCounterForUniqueness + "_" + child.getNodeName(), child_data);
+                            keyPrefixCounterForUniqueness++;
+                        }
+                    }
+                    tmpMap.put(keyPrefixCounterForUniqueness + "_" + source.getNodeName(), dataTmp);
+                    keyPrefixCounterForUniqueness++;
                 }
-                tmpMap.put(keyPrefixCounterForUniqueness + "_" + source.getNodeName(), dataTmp);
-                keyPrefixCounterForUniqueness++;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -85,7 +87,7 @@ public class MetadataHandler {
         String level_tab = "";
         for (int i=0; i<level; i++)
             level_tab += "\t";
-        
+
         HashMap<String, Object> hash_map = (HashMap<String, Object>)map;
         for (String k: hash_map.keySet()) {
             if (hash_map.get(k) instanceof HashMap) {
@@ -247,7 +249,7 @@ public class MetadataHandler {
                                         try {
                                             prefix_header = header.get(cell_index + cell_iter);
                                         } catch (Exception e) {
-                                            /* first line - prefix_header does not yet exist */ };
+                                        /* first line - prefix_header does not yet exist */ };
                                         String suffix_header = cellValue;
 
                                         String header_str = "";
@@ -511,6 +513,19 @@ public class MetadataHandler {
         values.put("required", true);
         additional_attributes.put(attributes_prefix + category_separator + "opengdc_file_size", values);
 
+
+        /**
+         * ***** manually_curated__opengdc_file_md5 ******
+         */
+        values = new HashMap<>();
+
+        String opengdc_file_md5 = UpdateGDCData.getUpdateTableAttribute(program.toLowerCase(), disease.toLowerCase(), GDCData.getGDCData2FTPFolderName().get(manually_curated_dataType.toLowerCase()), filesinfo_url_converted, aliquot_uuid.trim().toLowerCase(), "md5sum", false);
+        values.put("value", opengdc_file_md5);
+        values.put("required", true);
+        additional_attributes.put(attributes_prefix + category_separator + "opengdc_file_md5", values);
+
+
+
         /**
          * ***** opengdc_id ******
          */
@@ -541,7 +556,7 @@ public class MetadataHandler {
         values.put("value", Settings.getOpenGDCFTPRepoProgram(program, false, true) + disease.trim().toLowerCase() + "/" + GDCData.getGDCData2FTPFolderName().get(manually_curated_dataType.trim().toLowerCase()) + "/" + aliquot_uuid.trim().toLowerCase() + "-" + suffix_id + "." + Settings.getOpenGDCFTPConvertedDataFormat() + "." + format);
         values.put("required", true);
         additional_attributes.put(attributes_prefix + category_separator + "exp_metadata_url", values);
-        
+
         /**
          * ***** genome_built ******
          */
@@ -549,7 +564,7 @@ public class MetadataHandler {
         values.put("value", "GRCh38");
         values.put("required", true);
         additional_attributes.put(attributes_prefix + category_separator + "genome_built", values);
-        
+
         /**
          * ***** opengdc_download_date ******
          */
@@ -753,7 +768,7 @@ public class MetadataHandler {
 
     public static HashMap<String, HashMap<String, String>> detectRedundantMetadata(HashMap<String, String> meta_map) {
         HashMap<String, HashMap<String, String>> redundantValues = new HashMap<>();
-        
+
         HashMap<String, ArrayList<String>> mapping_file_attribute = YAMLreader.getMappingAttributes();
         for (String attribute_mapping : mapping_file_attribute.keySet()) {
             if(meta_map.containsKey(attribute_mapping)){
@@ -829,7 +844,7 @@ public class MetadataHandler {
                     else if (attribute_path.toLowerCase().startsWith("manually_curated"))
                         manually_curated_attrs.add(attribute_path);
                 }
-                
+
                 if (manually_curated_attrs.size() > 0) { // if manually_curated -> no redundancy
                     String selectedAttribute = selectAttribute(manually_curated_attrs);
                     metadata.put(selectedAttribute, redundant_map.get(last_attr).get(selectedAttribute));
@@ -858,7 +873,7 @@ public class MetadataHandler {
         }
         return metadata;
     }
-        
+
     public static String selectAttribute(ArrayList<String> attributes) {
         ArrayList<String> remaining_attributes = new ArrayList<>();
         for (String attr: attributes) {
@@ -897,16 +912,16 @@ public class MetadataHandler {
             //se remaining_attributes è vuota? va nell'else e mi torna attribute = "", quindi lo pongo  a null perchè alla riga 753 controllo se è diverso da null
             String attribute = null;
             if (remaining_attributes.contains("gdc__cases__disease_type"))
-		attribute = "gdc__cases__disease_type";
-	    else{
-            	int attribute_size = 0;
-            	for (String attr: remaining_attributes) {
-               	    int attr_size = attr.split("__").length;
+                attribute = "gdc__cases__disease_type";
+            else{
+                int attribute_size = 0;
+                for (String attr: remaining_attributes) {
+                    int attr_size = attr.split("__").length;
                     if (attr_size > attribute_size && !attr.toLowerCase().contains("associated_entities") && !attr.toLowerCase().contains("cases__project")) {
-                   	attribute = attr;
-                    	attribute_size = attr_size;
+                        attribute = attr;
+                        attribute_size = attr_size;
                     }
-            	}
+                }
             }
             return attribute;
         }
@@ -948,7 +963,7 @@ public class MetadataHandler {
         }
         return map;
     }
-    
+
     /*public static void main(String[] args) {
         System.err.println("Biospecimen sample");
         String biospecimen_xml_path = "/Users/fabio/Downloads/test_gdc_download/ACC-biospecimen/nationwidechildrens.org_biospecimen.TCGA-OR-A5J1.xml";
@@ -957,9 +972,9 @@ public class MetadataHandler {
         System.err.println("XML Data size: " + xml_biospecimen_data.size());
         System.err.println("Data size: " + biospecimen_data.size()+"\n");
         printMap(biospecimen_data, 0);
-        
+
         System.err.println("\n#################################################\n");
-        
+
         System.err.println("Clinical sample");
         String clinical_xml_path = "/Users/fabio/Downloads/test_gdc_download/ACC-clinical/nationwidechildrens.org_clinical.TCGA-OR-A5J1.xml";
         HashMap<String, Object> xml_clinical_data = getXMLMap(clinical_xml_path);

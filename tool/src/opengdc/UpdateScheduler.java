@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class UpdateScheduler {
     
-    private static final String FTP_ROOT = "/FTP/ftp-root/update_prova/";
-    private static final String FTP_REPO = "ftp://150.146.100.179/update_prova/";
+    private static final String FTP_ROOT = "/FTP/ftp-root/opengdc/";
+    private static final String FTP_REPO = "ftp://150.146.100.179/opengdc/";
     
     public static void main(String[] args) {
         Timer timer = new java.util.Timer();
