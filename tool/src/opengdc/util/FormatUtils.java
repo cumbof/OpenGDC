@@ -23,6 +23,7 @@ public class FormatUtils {
         formats.add("GTF");
         formats.add("CSV");
         formats.add("JSON");
+        formats.add("XML");
     }
     
     public static HashSet<String> getFormatsList() {
