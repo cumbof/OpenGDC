@@ -111,7 +111,7 @@ public abstract class BioParser {
         return value;
     }
     
-    public void printData(Path outFilePath, HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMap, String format, String[] header) {
+    public void printData(Path outFilePath, HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMap, String format, String[] header, String[] attributesType) {
         if (!dataMap.isEmpty()) {
             boolean firstRow = true;
             ArrayList<Integer> chrs = new ArrayList<>(dataMap.keySet());
@@ -126,7 +126,7 @@ public abstract class BioParser {
                     ArrayList<ArrayList<String>> dataArray = dataList.get(start);
                     for (ArrayList<String> data: dataArray) {
                         try {
-                            Files.write(outFilePath, (FormatUtils.createEntry(format, data, header, firstRow)).getBytes("UTF-8"), StandardOpenOption.APPEND);
+                            Files.write(outFilePath, (FormatUtils.createEntry(format, data, header, attributesType, firstRow)).getBytes("UTF-8"), StandardOpenOption.APPEND);
                             firstRow = false;
                         }
                         catch (Exception e) {

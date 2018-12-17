@@ -245,7 +245,7 @@ public class GeneExpressionQuantificationParser extends BioParser {
                                         }
                                     }
                                     // sort genomic coordinates and print data
-                                    this.printData((new File(filePath)).toPath(), dataMapChr, this.getFormat(), getHeader());
+                                    this.printData((new File(filePath)).toPath(), dataMapChr, this.getFormat(), getHeader(), getAttributesType());
 
                                     Files.write((new File(filePath)).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                                     filesPathConverted.add(filePath);

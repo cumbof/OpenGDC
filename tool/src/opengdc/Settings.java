@@ -9,7 +9,7 @@ import java.io.File;
 public class Settings {
     
     // debug flag
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     public static boolean isDebug() {
         return DEBUG;
     }

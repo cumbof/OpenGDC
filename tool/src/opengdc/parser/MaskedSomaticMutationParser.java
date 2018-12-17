@@ -250,7 +250,7 @@ public class MaskedSomaticMutationParser extends BioParser {
                 try {
                     // sort genomic coordinates and print data
                     HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>> dataMapChr = (HashMap<Integer, HashMap<Integer, ArrayList<ArrayList<String>>>>)uuid_dataMap.get(aliquot_uuid);
-                    this.printData((new File(filesPathConverted.get(aliquot_uuid))).toPath(), dataMapChr, this.getFormat(), getHeader());
+                    this.printData((new File(filesPathConverted.get(aliquot_uuid))).toPath(), dataMapChr, this.getFormat(), getHeader(), getAttributesType());
                     Files.write((new File(filesPathConverted.get(aliquot_uuid))).toPath(), (FormatUtils.endDocument(this.getFormat())).getBytes("UTF-8"), StandardOpenOption.APPEND);
                     
                     if (this.isUpdateTableEnabled()) {
