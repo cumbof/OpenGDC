@@ -82,8 +82,8 @@ The information needed for this operation are the program, disease, and
 the data type of the data that will be converted.
 Before clicking the "Convert" button, it is necessary to specify the
 folders containing clinical and genomic data of the considered disease,
-the experiment type, and the desired output format (BED, CSV, GTF, or 
-JSON).
+the experiment type, and the desired output format (BED, CSV, GTF, JSON,
+or XML).
 After the selection of the folder in which the specified data set will 
 be converted, the user can start the data conversion process by clicking
 the "Convert" button.
