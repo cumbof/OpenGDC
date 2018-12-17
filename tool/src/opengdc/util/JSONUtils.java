@@ -124,7 +124,8 @@ public class JSONUtils {
 
         String hitDataType = hit.getString("data_type");
         if (dataTypes.contains(hitDataType)) {
-
+            
+            JsonArray cases = hit.getJsonArray("cases");
             if(cases != null){
                 for (int cases_index=0; cases_index<cases.size(); cases_index++) {
                     String case_prefix = "cases.";

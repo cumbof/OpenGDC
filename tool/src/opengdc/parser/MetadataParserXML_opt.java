@@ -24,7 +24,7 @@ import org.apache.commons.io.FileUtils;
  *
  * @author fabio
  */
-public class MetadataParserXML extends BioParser {
+public class MetadataParserXML_opt extends BioParser {
 
 
 

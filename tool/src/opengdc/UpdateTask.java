@@ -8,6 +8,7 @@ package opengdc;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -223,7 +224,8 @@ public class UpdateTask extends TimerTask {
                     else {
                         // download original file
 			SimpleDateFormat  format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSZ");
-			String file_downloadDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");                          DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
+			String file_downloadDate = format.format(new Date()).replaceAll("(.*)(\\d\\d)$", "$1:$2");
+                        DownloadDataAction.downloadSingleData(uuid, dataMap, tmp_download_dir.getAbsolutePath(), true, true);
                         // modify updatetable
                         HashMap<String, String> updateInfo = new HashMap<>();
                         updateInfo.put("md5sum", current_md5);
