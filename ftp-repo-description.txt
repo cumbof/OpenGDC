@@ -1,4 +1,4 @@
-TCGA2BED repository
+OpenGDC repository
 -------------------
 
 The open access FTP repository (ftp://bioinformatics.iasi.cnr.it/opengdc/) contains the original TCGA datasets
