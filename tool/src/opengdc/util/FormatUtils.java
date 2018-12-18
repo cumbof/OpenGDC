@@ -75,13 +75,13 @@ public class FormatUtils {
     
     /*-------------------------------------------------------*/
     
-    public static String createEntry(String formatExt, ArrayList<String> values, String[] doc_header, boolean firstRow) {
+    public static String createEntry(String formatExt, ArrayList<String> values, String[] doc_header, String[] attributesType, boolean firstRow) {
         if (formatExt.toLowerCase().equals("bed"))
             return strBED(values, firstRow);
         else if (formatExt.toLowerCase().equals("csv"))
             return strCSV(values, firstRow);
         else if (formatExt.toLowerCase().equals("json"))
-            return strJSON(values, doc_header);
+            return strJSON(values, doc_header, attributesType);
         else if (formatExt.toLowerCase().equals("xml"))
             return strXML(values, doc_header);
         else if (formatExt.toLowerCase().equals("gtf"))
@@ -107,8 +107,8 @@ public class FormatUtils {
         if (!values.isEmpty()) {
             String line = "";
             for (int i=0; i<values.size()-1; i++)
-                line = line + values.get(i) + CSV_SEPARATOR;
-            line = line + values.get(values.size()-1);
+                line = line + "\"" + values.get(i) + "\"" + CSV_SEPARATOR;
+            line = line + "\"" + values.get(values.size()-1) + "\"";
             if (firstRow)
                 return line;
             return END_OF_LINE + line;
@@ -117,12 +117,15 @@ public class FormatUtils {
         return "";
     }
     
-    private static String strJSON(ArrayList<String> values, String[] doc_header) {
+    private static String strJSON(ArrayList<String> values, String[] doc_header, String[] attributesType) {
         String str = "\t\t\t{" + END_OF_LINE;
         int index = 0;
         for (int i=0; i<values.size(); i++) {
             String header = doc_header[index];
-            str = str + "\t\t\t\t\""+header+"\": \""+values.get(i)+"\"";
+            if (attributesType[index].toLowerCase().equals("long") || attributesType[index].toLowerCase().equals("double"))
+                str = str + "\t\t\t\t\""+header+"\": "+values.get(i);
+            else str = str + "\t\t\t\t\""+header+"\": \""+values.get(i)+"\"";
+            
             if ((i+1)>=values.size())
                 str = str + END_OF_LINE;
             else

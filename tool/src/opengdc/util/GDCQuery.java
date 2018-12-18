@@ -453,10 +453,11 @@ public class GDCQuery {
 						int total = pagination.getInt("total");
 						JsonArray hits = jsonObject.getJsonObject("data").getJsonArray("hits");
 				        for (int hits_index=0; hits_index<hits.size(); hits_index++) {
-				                JsonObject hit = hits.getJsonObject(hits_index);
-								info.add(JSONUtils.searchFor(hit, attributes, value_aliquot, dataTypes));
-
-				           }
+				            JsonObject hit = hits.getJsonObject(hits_index);
+							if (field_aliquot.equals("files.file_id"))
+				                info.add(JSONUtils.searchForExperiment(hit, attributes, value_aliquot, dataTypes));
+				            else info.add(JSONUtils.searchFor(hit, attributes, value_aliquot, dataTypes));
+				        }
 ////////////////////////
 //						File jsonFile = new File(query_file_path);
 //						URI uri = jsonFile.toURI();

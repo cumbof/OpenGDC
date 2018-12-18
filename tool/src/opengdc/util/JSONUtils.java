@@ -25,7 +25,7 @@ import org.json.JSONObject;
  * @source http://stackoverflow.com/questions/21720759/convert-a-json-string-to-a-hashmap
  */
 public class JSONUtils {
-    
+
     public static Map<String, Object> jsonToMap(JSONObject json) throws JSONException {
         Map<String, Object> retMap = new HashMap<>();
 
@@ -70,8 +70,8 @@ public class JSONUtils {
         }
         return list;
     }
-    
-    
+
+
     public static HashMap<String, ArrayList<Object>> searchFor(JsonObject node, String prefix, HashMap<String, ArrayList<Object>> intermediateRes, HashSet<String> attributes) {
         ArrayList<Object> values = new ArrayList<>();
         HashMap<String, Object> hm_values = new HashMap<>();
@@ -116,7 +116,7 @@ public class JSONUtils {
     }
 
     public static HashMap<String, ArrayList<Object>> searchFor(JsonObject hit, HashSet<String> attributes, String aliquot_id, HashSet<String> dataTypes) {
-    
+
         boolean aliquot_found = false;
 
         HashMap<String, ArrayList<Object>> result = new HashMap<>();
@@ -124,7 +124,7 @@ public class JSONUtils {
 
         String hitDataType = hit.getString("data_type");
         if (dataTypes.contains(hitDataType)) {
-            
+
             JsonArray cases = hit.getJsonArray("cases");
             if(cases != null){
                 for (int cases_index=0; cases_index<cases.size(); cases_index++) {
@@ -207,6 +207,88 @@ public class JSONUtils {
         return result;
     }
 
+    public static HashMap<String, ArrayList<Object>> searchForExperiment(JsonObject hit, HashSet<String> attributes, String value_aliquot, HashSet<String> dataTypes) {
+        boolean aliquot_found = false;
+
+        HashMap<String, ArrayList<Object>> result = new HashMap<>();
+
+        JsonArray cases = hit.getJsonArray("cases");
+        if(cases != null){
+            for (int cases_index=0; cases_index<cases.size(); cases_index++) {
+                String case_prefix = "cases.";
+                JsonObject caseobj = cases.getJsonObject(cases_index);
+
+                JsonArray samples = caseobj.getJsonArray("samples");
+                if(samples != null){
+                    for (int samples_index=0; samples_index<samples.size(); samples_index++) {
+                        String sample_prefix = case_prefix + "samples.";
+                        JsonObject sample = samples.getJsonObject(samples_index);
+
+                        JsonArray portions = sample.getJsonArray("portions");
+                        if(portions != null){
+                            for (int portions_index=0; portions_index<portions.size(); portions_index++) {
+                                String portion_prefix = sample_prefix + "portions.";
+                                JsonObject portion = portions.getJsonObject(portions_index);
+
+                                JsonArray analytes = portion.getJsonArray("analytes");
+                                if(analytes != null){
+                                    for (int analytes_index=0; analytes_index<analytes.size(); analytes_index++) {
+                                        String analyte_prefix = portion_prefix + "analytes.";
+                                        JsonObject analyte = analytes.getJsonObject(analytes_index);
+
+                                        JsonArray aliquots = analyte.getJsonArray("aliquots");
+                                        if(aliquots != null){
+                                            for (int aliquots_index=0; aliquots_index<aliquots.size(); aliquots_index++) {
+                                                String aliquot_prefix = analyte_prefix + "aliquots.";
+                                                JsonObject aliquot = aliquots.getJsonObject(aliquots_index);
+
+                                                // aliquot
+                                                aliquot_found = true;
+                                                result = searchFor(aliquot, aliquot_prefix, result, attributes);
+                                                break;                                                   
+                                            }
+                                        }
+                                        // analyte
+                                        if (aliquot_found) {
+                                            JsonObject analyte_copy = cloneObj(analyte, "aliquots");
+                                            result = searchFor(analyte_copy, analyte_prefix, result, attributes);
+                                            break;
+                                        }
+                                    }
+                                }
+                                // portion
+                                if (aliquot_found) {
+                                    JsonObject portion_copy = cloneObj(portion, "analytes");
+                                    result = searchFor(portion_copy, portion_prefix, result, attributes);
+                                    break;
+                                }
+                            }
+                        }
+                        // sample
+                        if (aliquot_found) {
+                            JsonObject sample_copy = cloneObj(sample, "portions");
+                            result = searchFor(sample_copy, sample_prefix, result, attributes);
+                            break;
+                        }
+                    }
+                }
+                // case
+                if (aliquot_found) {
+                    JsonObject caseobj_copy = cloneObj(caseobj, "samples");
+                    result = searchFor(caseobj_copy, case_prefix, result, attributes);
+                    break;
+                }
+            }
+        }
+        // hit
+        if (aliquot_found) {
+            JsonObject hit_copy = cloneObj(hit, "cases");
+            result = searchFor(hit_copy, "", result, attributes);
+        }
+
+        return result;
+    }
+
     public static JsonObject cloneObj(JsonObject obj, String exclude) {       
         JsonObjectBuilder builder = Json.createObjectBuilder();
         for (Entry<String, JsonValue> entry: obj.entrySet()) {
@@ -215,5 +297,6 @@ public class JSONUtils {
         }
         return builder.build();
     }
-    
+
+
 }

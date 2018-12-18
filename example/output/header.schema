@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gmqlSchemaCollection xmlns="http://genomic.elet.polimi.it/entities" name="GLOBAL_SCHEMAS">
+	<gmqlSchema type="tab" coordinate_system="1-based">
+		<field type="STRING">chrom</field>
+		<field type="LONG">start</field>
+		<field type="LONG">end</field>
+		<field type="CHAR">strand</field>
+		<field type="STRING">genome_version</field>
+		<field type="STRING">mirna_id</field>
+		<field type="LONG">read_count</field>
+		<field type="DOUBLE">reads_per_million_mirna_mapped</field>
+		<field type="STRING">cross_mapped</field>
+		<field type="STRING">mirna_region</field>
+		<field type="STRING">entrez_gene_id</field>
+		<field type="STRING">gene_symbol</field>
+	</gmqlSchema>
+</gmqlSchemaCollection>
