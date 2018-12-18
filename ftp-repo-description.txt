@@ -1,0 +1,82 @@
+TCGA2BED repository
+-------------------
+
+The open access FTP repository (ftp://bioinformatics.iasi.cnr.it/opengdc/) contains the original TCGA datasets
+processed by OpenGDC and the corresponding data converted into the BED format.
+
+The repository is composed of two main folders: "bed" and "original".
+Both the directories have the same subdirectory organisation. They contain a set of folders named with the program tag (e.g.: "tcga").
+Each program contains a set of folders named with the tumor tag and, for each of them, a subdirectory for each data type.
+Each tumor folder includes a set of directories, each for a specific data type and accordingly named, containing all the
+available genomic and clinical data, i.e.:
+
+ (i)     clinical_and_biospecimen_supplements
+ (ii)    copy_number_segment
+ (iii)   gene_expression_quantification
+ (iv)    isoform_expression_quantification
+ (v)     masked_copy_number_segment
+ (vi)    masked_somatic_mutation
+ (vii)   methylation_beta_value
+ (viii)  mirna_expression_quantification
+
+
+The following tree directory structure represents the organisation of the OpenGDC repository:
+
+ftp://bioinformatics.iasi.cnr.it/opengdc/
+|
+|-- original/bed
+    |
+    |-- tcga
+        |
+        |-- tcga-acc
+        |   |
+        |   |-- clinical_and_biospecimen_supplements
+        |   |-- copy_number_segment
+        |   |-- gene_expression_quantification
+        |   |-- isoform_expression_quantification
+        |   |-- masked_copy_number_segment
+        |   |-- masked_somatic_mutation
+        |   |-- methylation_beta_value
+        |   |-- mirna_expression_quantification
+        |
+        |-- tcga-blca
+        |   |
+        |   |- ...
+        |
+        |-- tcga-brca
+        |   |
+        |   |- ...
+        |    
+        |-- ...
+
+
+The "original" folder contains all the public available genomic and clinical data about 33 different tumors retrieved
+from the Genomic Data Commons repository.
+
+On the other hand, the "bed" folder contains the same data stored in the "original" directory converted in BED format
+with regard to the genomic experiments, and META format for the clinical and biospecimen supplements.
+It additionally includes a comma separated values (CSV) file containing the occurrences of all the meta data attributes related
+to the tumor type ("meta2disease_table.csv") for the specific program.
+Each tumor folder includes:
+ 
+ (i)    a text file including the meta data dictionary of the tumor ("meta_dictionary_[tumor-tag].txt")
+ (ii)   a CSV file containing the occurrence counts of each meta data attribute related to the tumor ("meta2dataType_table.csv")
+ (iii)  a CSV file containing a table with a list of all meta data attributes concatenated with all possible values on the rows 
+        and the list of all available data types for the considered tumor; a generic cell of this table contains the occurrences 
+        of the pair attribute|value in a specific data type ("meta_values2dataType.csv")
+ (iv)   a tab separated values (TSV) file containing a list of all meta data attributes concatenated with all possible 
+        values followed by the occurrences of this pair(attribute|value) in all data types for the considered tumor 
+        ("meta_values2sample.tsv")
+
+
+Finally, each experiment folder contains:
+
+ (i)    a set of files in BED format (one for each aliquot) with the corresponding META files that
+        includes the clinical and biospecimen information about the related sample
+ (ii)   the header.schema file that defines the structure of the .bed files
+ (iii)  the meta_dictionary.txt file with all the clinical and biospecimen attributes and values related to the experiment
+ (iv)   the text file exp_info.tsv that reports the patient, sample and aliquot counts
+ (v)    the md5checksum.txt with the results of the MD5 hash function applied to all the BED and META files to guarantee their 
+        integrity
+
+Please refer also to OpenGDC_format_definition.pdf available at http://bioinf.iasi.cnr.it/opengdc/
