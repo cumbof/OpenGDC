@@ -1,9 +1,9 @@
 ### eliminare:
 
-annotations
-state
-file_state
-associated_entities
+* annotations
+* state
+* file_state
+* associated_entities
 
 ### ridondanze:
 
