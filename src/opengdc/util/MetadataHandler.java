@@ -846,25 +846,27 @@ public class MetadataHandler {
                 }
 
                 if (manually_curated_attrs.size() > 0) { // if manually_curated -> no redundancy
-                    String selectedAttribute = selectAttribute(manually_curated_attrs);
-                    metadata.put(selectedAttribute, redundant_map.get(last_attr).get(selectedAttribute));
+                    ArrayList<String> selectedAttributes = selectAttributes(manually_curated_attrs);
+                    for (String attr : selectedAttributes)
+                        metadata.put(attr, redundant_map.get(last_attr).get(attr));
                 }
                 else {
-                    String selectedAttribute = null;
+                    ArrayList<String> selectedAttributes = null;
                     if (biospecimen_attrs.size()>0 && clinical_attrs.isEmpty() && gdc_attrs.isEmpty()) // biospecimen only
-                        selectedAttribute = selectAttribute(biospecimen_attrs);
+                        selectedAttributes = selectAttributes(biospecimen_attrs);
                     else if (biospecimen_attrs.isEmpty() && clinical_attrs.size()>0 && gdc_attrs.isEmpty()) // clinical only
-                        selectedAttribute = selectAttribute(clinical_attrs);
+                        selectedAttributes = selectAttributes(clinical_attrs);
                     else if (biospecimen_attrs.isEmpty() && clinical_attrs.isEmpty() && gdc_attrs.size()>0) // gdc only
-                        selectedAttribute = selectAttribute(gdc_attrs);                        
+                        selectedAttributes = selectAttributes(gdc_attrs);                        
                     else if (biospecimen_attrs.size()>0 && clinical_attrs.size()>0 && gdc_attrs.isEmpty())
-                        selectedAttribute = selectAttribute(biospecimen_attrs);
+                        selectedAttributes = selectAttributes(biospecimen_attrs);
                     else if (biospecimen_attrs.size()>0 && clinical_attrs.size()>0 && gdc_attrs.size()>0)
-                        selectedAttribute = selectAttribute(gdc_attrs);
+                        selectedAttributes = selectAttributes(gdc_attrs);
                     else if ((biospecimen_attrs.size()>0 && clinical_attrs.isEmpty() && gdc_attrs.size()>0) || (biospecimen_attrs.isEmpty() && clinical_attrs.size()>0 && gdc_attrs.size()>0)) // (biospecimen and gdc) or (clinical and gdc)
-                        selectedAttribute = selectAttribute(gdc_attrs);
-                    if (selectedAttribute != null)
-                        metadata.put(selectedAttribute, redundant_map.get(last_attr).get(selectedAttribute));
+                        selectedAttributes = selectAttributes(gdc_attrs);
+                    if (selectedAttributes != null)
+                        for (String attr : selectedAttributes)
+                            metadata.put(attr, redundant_map.get(last_attr).get(attr));
                 }
             }
         }
@@ -874,7 +876,7 @@ public class MetadataHandler {
         return metadata;
     }
 
-    public static String selectAttribute(ArrayList<String> attributes) {
+    public static ArrayList<String> selectAttributes(ArrayList<String> attributes) {
         ArrayList<String> remaining_attributes = new ArrayList<>();
         for (String attr: attributes) {
             //state e annotation sempre eliminati
@@ -900,7 +902,8 @@ public class MetadataHandler {
             gdc__cases__project__program__name
          * */
         if (remaining_attributes.size() == 1)
-            return remaining_attributes.get(0);
+            //return remaining_attributes.get(0);
+            return remaining_attributes;
         else { //3) se non sono elementi singoli della lista allora andiamo a considerare l'altro. ES: 
             /*ORIGINAL attributes
                 gdc__cases__project__disease_type
@@ -910,20 +913,23 @@ public class MetadataHandler {
              * */
 
             //se remaining_attributes è vuota? va nell'else e mi torna attribute = "", quindi lo pongo  a null perchè alla riga 753 controllo se è diverso da null
+            ArrayList<String> final_attributes = new ArrayList<>();
             String attribute = null;
-            if (remaining_attributes.contains("gdc__cases__disease_type"))
+            if (remaining_attributes.contains("gdc__cases__disease_type")) {
                 attribute = "gdc__cases__disease_type";
+                final_attributes.add(attribute);
+            }
             else{
-                int attribute_size = 0;
                 for (String attr: remaining_attributes) {
-                    int attr_size = attr.split("__").length;
-                    if (attr_size > attribute_size && !attr.toLowerCase().contains("associated_entities") && !attr.toLowerCase().contains("cases__project")) {
-                        attribute = attr;
-                        attribute_size = attr_size;
+                    //int attr_size = attr.split("__").length;
+                    if (!attr.toLowerCase().contains("associated_entities") && !attr.toLowerCase().contains("cases__project")) {
+                        //attribute = attr;
+                        final_attributes.add(attr);
                     }
                 }
             }
-            return attribute;
+            //return attribute;
+            return final_attributes;
         }
     }
 
