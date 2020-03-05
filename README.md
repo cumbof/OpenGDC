@@ -5,5 +5,5 @@ OpenGDC is an open-source Java tool for the automatic extraction, extension, and
 Everyone is welcome to contribute to the software development. Simply reply to the issue [#46](https://github.com/fabio-cumbo/OpenGDC/issues/46) and you will receive an invitation email.
 
 ## Links
-- Software web-page: [http://bioinf.iasi.cnr.it/opengdc/](http://bioinf.iasi.cnr.it/opengdc/)
-- Public data repository: [ftp://bioinformatics.iasi.cnr.it/opengdc/](ftp://bioinformatics.iasi.cnr.it/opengdc/)
+- Software web-page: [http://geco.deib.polimi.it/opengdc/](http://geco.deib.polimi.it/opengdc/)
+- Public data repository: [fttp://geco.deib.polimi.it/opengdc/](fttp://geco.deib.polimi.it/opengdc/)
