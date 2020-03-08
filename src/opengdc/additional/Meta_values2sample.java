@@ -129,7 +129,7 @@ public class Meta_values2sample {
 		//listFilesForFolder(folder); //used with pig
 		File[] listOfFiles = folder.listFiles();
 		//mappa nome esperimento, mappa attributo valore
-		FileWriter fileWriter = new FileWriter(input+"/meta_values2sample.tsv") ;
+		FileWriter fileWriter = new FileWriter(input+"/meta_values2sample_list.tsv") ;
 		//lista di "attributo|valore"
 		ArrayList<String> listaAll = new ArrayList<String>();
 		TreeMap<String,Integer> attributevalue2count = new TreeMap<String,Integer>();
