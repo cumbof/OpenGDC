@@ -128,7 +128,7 @@ public class Meta_values2dataTypes {
 		File[] listOfFiles = folder.listFiles();
 		//mappa nome esperimento, mappa attributo valore
 		TreeMap<String, HashMap<String, String>> map = new TreeMap<String, HashMap<String, String>>();
-		FileWriter fileWriter = new FileWriter(input+"/meta_values2dataTypes.csv") ;
+		FileWriter fileWriter = new FileWriter(input+"/meta_values2dataTypes_table.csv") ;
 		TreeMap<String , String> attribute_value_init = new TreeMap<String , String>();
 		for (File file : listOfFiles) {
 			if(file.getName().contains("txt")){
