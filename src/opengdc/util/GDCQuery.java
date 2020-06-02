@@ -56,42 +56,52 @@ public class GDCQuery {
 
 	public static String query(String disease, String dataType, int recursive_iteration) {
 		try {
+			String created_datetime = Settings.getCreatedDatetime()
 			String payload = "{" +
-					"\"filters\":{" +
-					"\"op\":\"and\"," +
-					"\"content\":[" +
-					"{" +
-					"\"op\":\"=\"," +
-					"\"content\":{" +
-					"\"field\":\"cases.project.project_id\"," +
-					"\"value\":[" +
-					"\""+disease+"\"" +
-					"]" + 
-					"}" +
-					"}," +
-					"{" +
-					"\"op\":\"=\"," +
-					"\"content\":{" +
-					"\"field\":\"files.data_type\"," +
-					"\"value\":[" +
-					"\""+dataType+"\"" +
-					"]" + 
-					"}" +
-					"}," +
-					"{" +
-					"\"op\":\"=\"," +
-					"\"content\":{" +
-					"\"field\":\"access\"," +
-					"\"value\":[" +
-					"\"open\"" +
-					"]" + 
-					"}" +
-					"}" +
-					"]" +
-					"}," +
-					"\"format\":\"json\"," +
-					"\"size\":\""+SIZE_LIMIT+"\"," +
-					"\"pretty\":\"true\"" +
+						"\"filters\":{" +
+							"\"op\":\"and\"," +
+							"\"content\":[" +
+								"{" +
+									"\"op\":\"=\"," +
+									"\"content\":{" +
+										"\"field\":\"cases.project.project_id\"," +
+										"\"value\":[" +
+											"\""+disease+"\"" +
+										"]" + 
+									"}" +
+								"}," +
+								"{" +
+									"\"op\":\"=\"," +
+									"\"content\":{" +
+										"\"field\":\"files.data_type\"," +
+										"\"value\":[" +
+											"\""+dataType+"\"" +
+										"]" + 
+									"}" +
+								"}," +
+								"{" +
+									"\"op\":\"=\"," +
+									"\"content\":{" +
+										"\"field\":\"files.access\"," +
+										"\"value\":[" +
+											"\"open\"" +
+										"]" + 
+									"}" +
+								"}" +
+								"{" +
+									"\"op\":\">=\"," +
+									"\"content\":{" +
+										"\"field\":\"files.created_datetime\"," +
+										"\"value\":[" +
+											"\""+created_datetime+"\"" +
+										"]" + 
+									"}" +
+								"}" +
+							"]" +
+						"}," +
+						"\"format\":\"json\"," +
+						"\"size\":\""+SIZE_LIMIT+"\"," +
+						"\"pretty\":\"true\"" +
 					"}";
 
 			String url = BASE_SEARCH_URL;
