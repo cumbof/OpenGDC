@@ -19,7 +19,8 @@ public class Settings {
         return UPDATE_DAYS;
     }
 	
-    private static final String UPDATE_DATETIME = "2010-01-01";
+    // A combination od date and time of day in the form [-]CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm]
+    private static final String UPDATE_DATETIME = "1989-12-30";
     public static String getUpdateDatetime() {
 	return UPDATE_DATETIME;
     }
