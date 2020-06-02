@@ -18,6 +18,11 @@ public class Settings {
     public static int getUpdateDays() {
         return UPDATE_DAYS;
     }
+	
+    private static final String UPDATE_DATETIME = "2010-01-01";
+    public static String getUpdateDatetime() {
+	return UPDATE_DATETIME;
+    }
     
     // debug references local
 //    private static final String DEBUG_TMP = "/Users/eleonora/Downloads/test_gdc_download/tmp/";
