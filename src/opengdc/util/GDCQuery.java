@@ -56,7 +56,7 @@ public class GDCQuery {
 
 	public static String query(String disease, String dataType, int recursive_iteration) {
 		try {
-			String created_datetime = Settings.getCreatedDatetime()
+			String files_datetime = Settings.getFilesDatetime()
 			String payload_top = "{" +
 						"\"filters\":{" +
 							"\"op\":\"and\"," +
@@ -93,7 +93,7 @@ public class GDCQuery {
 									"\"content\":{" +
 										"\"field\":\"files.created_datetime\"," +
 										"\"value\":[" +
-											"\""+created_datetime+"\"" +
+											"\""+files_datetime+"\"" +
 										"]" + 
 									"}" +
 								"}";
@@ -112,7 +112,7 @@ public class GDCQuery {
 							"\"content\":{" +
 								"\"field\":\"files.updated_datetime\"," +
 								"\"value\":[" +
-									"\""+created_datetime+"\"" +
+									"\""+files_datetime+"\"" +
 								"]" + 
 							"}" +
 						  "}";
