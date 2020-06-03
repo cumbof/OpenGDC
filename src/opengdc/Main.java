@@ -44,7 +44,10 @@ public class Main {
         //String inputProgram = "TCGA";
         //String inputDiseaseAbbreviation = "ACC";
         //String inputDisease = (inputProgram+"-"+inputDiseaseAbbreviation).toLowerCase();
+        runMain();
+    }
         
+    public static void runMain() {
         initSkipDiseases();
         initSkipDataTypes();
         
