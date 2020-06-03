@@ -87,8 +87,23 @@ public class GDCQuery {
 											"\"open\"" +
 										"]" + 
 									"}" +
-								"}" +
-								"{" +
+								"}";
+			
+			payload_datetime = ",{" +
+						"\"op\":\">=\"," +
+						"\"content\":{" +
+							"\"field\":\"files.created_datetime\"," +
+							"\"value\":[" +
+								"\""+files_datetime+"\"" +
+							"]" + 
+						"}" +
+					   "}";
+
+			if (dataType.toLowerCase().contains("clinical") || dataType.toLowerCase().contains("biospecimen")) {
+				payload_datetime = ",{" +
+							"\"op\":\"or\"," +
+							"\"content\":[" +
+								  "{" +
 									"\"op\":\">=\"," +
 									"\"content\":{" +
 										"\"field\":\"files.created_datetime\"," +
@@ -96,7 +111,19 @@ public class GDCQuery {
 											"\""+files_datetime+"\"" +
 										"]" + 
 									"}" +
-								"}";
+								   "}," +
+								   "{" +
+									"\"op\":\">=\"," +
+									"\"content\":{" +
+										"\"field\":\"files.updated_datetime\"," +
+										"\"value\":[" +
+											"\""+files_datetime+"\"" +
+										"]" + 
+									"}" +
+								   "}" +
+							"]" +
+						    "}"
+			}
 			
 			payload_bottom = "]" +
 				"}," +
@@ -104,21 +131,8 @@ public class GDCQuery {
 				"\"size\":\""+SIZE_LIMIT+"\"," +
 				"\"pretty\":\"true\"" +
 			"}";
-
-			payload_clinical = ""
-			if (dataType.toLowerCase().contains("clinical") || dataType.toLowerCase().contains("biospecimen")) {
-				payload_clinical = "{" +
-							"\"op\":\">=\"," +
-							"\"content\":{" +
-								"\"field\":\"files.updated_datetime\"," +
-								"\"value\":[" +
-									"\""+files_datetime+"\"" +
-								"]" + 
-							"}" +
-						  "}";
-			}
 			
-			payload = payload_top + payload_clinical + payload_bottom;
+			payload = payload_top + payload_datetime + payload_bottom;
 			
 			String url = BASE_SEARCH_URL;
 			URL obj = new URL(url);
