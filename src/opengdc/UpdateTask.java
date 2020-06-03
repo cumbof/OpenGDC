@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TimerTask;
+import opengdc.Main;
 import opengdc.action.Action;
 import opengdc.action.ConvertDataAction;
 import opengdc.action.DownloadDataAction;
@@ -41,11 +42,14 @@ public class UpdateTask extends TimerTask {
     public void run() {
         System.out.println("----------------------------------------");
         System.out.println("Timer task started at: " + new Date());
-        updateTask();
+        //updateTask();
+	Main.runMain();
         System.out.println("Timer task finished at: " + new Date());
         System.out.println("----------------------------------------");
     }
 
+    // deprecated
+    // use Main class and set the CREATED_DATETIME variable under Settings
     private void updateTask() {
         Settings.setOpenGDCFTPRepoBase(ftp_repo);
         File tmp_download_dir = new File(Settings.getTmpDir() + "_download/");
