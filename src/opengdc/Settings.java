@@ -20,9 +20,12 @@ public class Settings {
     }
 	
     // A combination od date and time of day in the form [-]CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm]
-    private static final String CREATED_DATETIME = "1989-12-30";
-    public static String getCreatedDatetime() {
-	return CREATED_DATETIME;
+    private static String FILES_DATETIME = "1989-12-30";
+    public static String getFilesDatetime() {
+	return FILES_DATETIME;
+    }
+    public static void setFilesDatetime(String files_datetime) {
+        FILES_DATETIME = files_datetime;
     }
     
     // debug references local
