@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TimerTask;
-import opengdc.Main;
 import opengdc.action.Action;
 import opengdc.action.ConvertDataAction;
 import opengdc.action.DownloadDataAction;
@@ -32,10 +31,12 @@ public class UpdateTask extends TimerTask {
     
     private static String ftp_root;
     private static String ftp_repo;
+    private static String files_datetime;
     
-    public UpdateTask(String ftp_root_arg, String ftp_repo_arg) {
+    public UpdateTask(String ftp_root_arg, String ftp_repo_arg, String files_datetime_arg) {
         ftp_root = ftp_root_arg;
         ftp_repo = ftp_repo_arg;
+	files_datetime = files_datetime_arg;
     }
 
     @Override
@@ -43,6 +44,7 @@ public class UpdateTask extends TimerTask {
         System.out.println("----------------------------------------");
         System.out.println("Timer task started at: " + new Date());
         //updateTask();
+	Settings.setFilesDatetime(files_datetime)
 	Main.runMain();
         System.out.println("Timer task finished at: " + new Date());
         System.out.println("----------------------------------------");
