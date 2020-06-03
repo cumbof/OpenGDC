@@ -57,7 +57,7 @@ public class GDCQuery {
 	public static String query(String disease, String dataType, int recursive_iteration) {
 		try {
 			String created_datetime = Settings.getCreatedDatetime()
-			String payload = "{" +
+			String payload_top = "{" +
 						"\"filters\":{" +
 							"\"op\":\"and\"," +
 							"\"content\":[" +
@@ -96,14 +96,30 @@ public class GDCQuery {
 											"\""+created_datetime+"\"" +
 										"]" + 
 									"}" +
-								"}" +
-							"]" +
-						"}," +
-						"\"format\":\"json\"," +
-						"\"size\":\""+SIZE_LIMIT+"\"," +
-						"\"pretty\":\"true\"" +
-					"}";
+								"}";
+			
+			payload_bottom = "]" +
+				"}," +
+				"\"format\":\"json\"," +
+				"\"size\":\""+SIZE_LIMIT+"\"," +
+				"\"pretty\":\"true\"" +
+			"}";
 
+			payload_clinical = ""
+			if (dataType.toLowerCase().contains("clinical") || dataType.toLowerCase().contains("biospecimen")) {
+				payload_clinical = "{" +
+							"\"op\":\">=\"," +
+							"\"content\":{" +
+								"\"field\":\"files.updated_datetime\"," +
+								"\"value\":[" +
+									"\""+created_datetime+"\"" +
+								"]" + 
+							"}" +
+						  "}";
+			}
+			
+			payload = payload_top + payload_clinical + payload_bottom;
+			
 			String url = BASE_SEARCH_URL;
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
