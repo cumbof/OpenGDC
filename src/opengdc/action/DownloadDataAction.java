@@ -55,11 +55,17 @@ public class DownloadDataAction extends Action {
         HashMap<String, HashMap<String, String>> dataMap = GDCQuery.extractInfo(query_file_path);
         GUI.appendLog(logPane, "Data Amount: " + dataMap.size() + " files" + "\n\n");
         
-        // TODO activate progress bar
+        // activate progress bar
+        GUI.initProgressBar( dataMap.size() );
         
         /* DOWNLOAD (AND EXTRACT (AND REMOVE)) FILE BY FILE */
-        for (String uuid: dataMap.keySet())
+        int progress_counter = 1;
+        for (String uuid: dataMap.keySet()) {
             downloadSingleData(uuid, dataMap, gdc_path, autoextract, autoremove);
+            GUI.setProgressBar( progress_counter );
+            progress_counter++;
+        }
+        GUI.setProgressBar( 0 );
     }
     
     public static void downloadSingleData(String uuid, HashMap<String, HashMap<String, String>> dataMap, String gdc_path, boolean autoextract, boolean autoremove) {
