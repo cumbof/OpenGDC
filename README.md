@@ -30,4 +30,6 @@ Everyone is welcome to contribute to the software development. Simply reply to t
 - Public data repository: [fttp://geco.deib.polimi.it/opengdc/](fttp://geco.deib.polimi.it/opengdc/)
 
 ### Credits
-Paper under review. Stay tuned!
+Please credit OpenGDC in your manuscript by citing:
+
+> Eleonora Cappelli, Fabio Cumbo, Anna Bernasconi, Arif Canakoglu, Stefano Ceri, Marco Masseroli, and Emanuel Weitschek. "OpenGDC: unifying, modeling, integrating cancer genomic data and clinical metadata" Appl. Sci. 2020, 10(18), 6367. [https://doi.org/10.3390/app10186367](https://doi.org/10.3390/app10186367)
