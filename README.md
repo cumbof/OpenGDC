@@ -22,9 +22,6 @@ date +\%Y-\%m-\%d >> opengdc-history.txt
 
 This script exploit an external TXT file `opengdc-history.txt` which take trace of the last day on which the execution of the software has been performed. We recommend to initialise the `opengdc-history.txt` file with just a single line containing a date as far as possible from the start up of the GDC program to initially build the repo with all the public available data.
 
-### Notes for contributors
-Everyone is welcome to contribute to the software development. Simply reply to the issue [#46](https://github.com/fabio-cumbo/OpenGDC/issues/46) and you will receive an invitation email.
-
 ### Links
 - Software web-page: [http://geco.deib.polimi.it/opengdc/](http://geco.deib.polimi.it/opengdc/)
 - Public data repository: [fttp://geco.deib.polimi.it/opengdc/](fttp://geco.deib.polimi.it/opengdc/)
